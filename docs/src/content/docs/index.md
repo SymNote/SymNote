@@ -10,13 +10,13 @@ Welcome to the **SymNote** technical hub. This space is dedicated to the clear, 
 ### 🏛️ Core Architecture
 Understanding how SymNote processes information is the first step to mastering it.
 
-* **[Language Logic](/logic/principles)**: The fundamental "why" behind the design and how the engine interprets notes.
+* **[Language Principles](/logic/principles)**: The fundamental "why" behind the design and how the engine interprets notes.
 * **[The Rule System](/logic/rules)**: A deep dive into the constraints and permissions that govern the language.
 
 ### 📝 Syntax Specification
 A comprehensive breakdown of the building blocks. No guessing required.
 
-* **[Keywords & Tokens](/reference/syntax)**: Every reserved word and its specific function.
+* **[Syntax](/reference/syntax)**: Every reserved word and its specific function.
 * **[Data Structures](/reference/structures)**: How SymNote organizes and stores data internally.
 
 ---
