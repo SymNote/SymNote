@@ -113,9 +113,9 @@ grid (1/16) {
     // The Kick here plays immediately after the '~' above.
     Kick - Snare -
     
-    // 3. Polyphony (Multiple hits in the exact same millisecond)
+    // Polyphony (Multiple hits in the exact same millisecond)
     [C4, E4, G4] - - -
 
-    // 4. Per-note volume override
+    // Per-note volume override
     Kick.vol(1.0) Kick.vol(0.5) C4.vol(my_variable) -
 }
