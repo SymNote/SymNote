@@ -6,22 +6,26 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Main {
     public static void main(String[] args) {
         try {
-            // 1. Wczytaj plik test.sn
-            CharStream input = CharStreams.fromFileName("test.sn");
-            // 2. Analiza (Lexer i Parser)
+            if (args.length == 0) {
+                System.err.println("Please provide a file path as an argument.");
+                return;
+            }
+            // 1. Load file from argument
+            CharStream input = CharStreams.fromFileName(args[0]);
+            // 2. Lexer and Parser Analysis
             SymNoteLexer lexer = new SymNoteLexer(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             SymNoteParser parser = new SymNoteParser(tokens);
 
-            // 3. Zbuduj drzewo
+            // 3. Build AST tree
             ParseTree tree = parser.program();
 
-            // 4. Uruchom swojego Visitora
+            // 4. Run Visitor
             MySymNoteVisitor visitor = new MySymNoteVisitor();
             visitor.visit(tree);
 
         } catch (Exception e) {
-            System.err.println("Błąd: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
         }
     }
 }

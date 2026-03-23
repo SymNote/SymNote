@@ -11,9 +11,12 @@ This document serves as the "dictionary" of SymNote. It outlines all reserved ke
 You cannot use these words as variable names. They are structurally bound to the engine's core logic.
 
 ### Data Types & Values
-* `int`, `float`, `bool` - Standard primitives.
+* `int`, `float`, `bool`, `string` - Standard primitives.
 * `note`, `synth`, `sample` - Audio domain objects.
 * `true`, `false` - Boolean literal values.
+
+> **Warning: Reserved Note Literals**
+> Variables cannot be named like musical notes (e.g., `A4`, `C#3`, or `Bb2`). These patterns are strictly reserved as `NOTE` literals by the lexer and cannot be used as identifiers (`ID`).
 
 ### Control Flow & Structure
 * `track` - Defines a Level 2 musical blueprint.

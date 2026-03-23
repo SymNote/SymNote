@@ -6,5 +6,4 @@ out/
 .idea/
 
 # ANTLR generated files
-*.interp
-*.tokens
+src/gen/
