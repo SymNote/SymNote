@@ -1,4 +1,4 @@
-// Generated from SymNote.g4 by ANTLR 4.9.2
+// Generated from SymNote.g4 by ANTLR 4.13.2
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue", "this-escape"})
 public class SymNoteParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.9.2", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.13.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -107,6 +107,8 @@ public class SymNoteParser extends Parser {
 		super(input);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
+
+	@SuppressWarnings("CheckReturnValue")
 	public static class ProgramContext extends ParserRuleContext {
 		public TerminalNode EOF() { return getToken(SymNoteParser.EOF, 0); }
 		public List<TopLevelElementContext> topLevelElement() {
@@ -126,14 +128,6 @@ public class SymNoteParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_program; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterProgram(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitProgram(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitProgram(this);
 			else return visitor.visitChildren(this);
@@ -150,7 +144,7 @@ public class SymNoteParser extends Parser {
 			setState(34);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__1) | (1L << T__4) | (1L << T__5) | (1L << T__8) | (1L << T__9) | (1L << T__13) | (1L << T__14) | (1L << T__16) | (1L << T__22) | (1L << T__25) | (1L << T__26) | (1L << T__27) | (1L << T__28) | (1L << T__29) | (1L << T__30) | (1L << T__31) | (1L << BOOL) | (1L << INT) | (1L << FLOAT) | (1L << STRING) | (1L << ID))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 1090724066149990L) != 0)) {
 				{
 				setState(32);
 				_errHandler.sync(this);
@@ -210,6 +204,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class TopLevelElementContext extends ParserRuleContext {
 		public RoutineDeclContext routineDecl() {
 			return getRuleContext(RoutineDeclContext.class,0);
@@ -221,14 +216,6 @@ public class SymNoteParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_topLevelElement; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterTopLevelElement(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitTopLevelElement(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitTopLevelElement(this);
@@ -272,6 +259,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class StatementContext extends ParserRuleContext {
 		public StatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -283,6 +271,7 @@ public class SymNoteParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class LoopStmtContext extends StatementContext {
 		public ExpressionContext e1;
 		public ExpressionContext e2;
@@ -301,38 +290,24 @@ public class SymNoteParser extends Parser {
 		}
 		public LoopStmtContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterLoopStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitLoopStmt(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitLoopStmt(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ExprStmtContext extends StatementContext {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
 		public ExprStmtContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterExprStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitExprStmt(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitExprStmt(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class WhileStmtContext extends StatementContext {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
@@ -342,19 +317,12 @@ public class SymNoteParser extends Parser {
 		}
 		public WhileStmtContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterWhileStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitWhileStmt(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitWhileStmt(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class IfStmtContext extends StatementContext {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
@@ -367,38 +335,24 @@ public class SymNoteParser extends Parser {
 		}
 		public IfStmtContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterIfStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitIfStmt(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitIfStmt(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class BlockStmtContext extends StatementContext {
 		public BlockLVL1Context blockLVL1() {
 			return getRuleContext(BlockLVL1Context.class,0);
 		}
 		public BlockStmtContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterBlockStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitBlockStmt(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitBlockStmt(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class DeclAssignStmtContext extends StatementContext {
 		public TypeContext type() {
 			return getRuleContext(TypeContext.class,0);
@@ -409,19 +363,12 @@ public class SymNoteParser extends Parser {
 		}
 		public DeclAssignStmtContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterDeclAssignStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitDeclAssignStmt(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitDeclAssignStmt(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class AssignStmtContext extends StatementContext {
 		public TerminalNode ID() { return getToken(SymNoteParser.ID, 0); }
 		public ExpressionContext expression() {
@@ -429,19 +376,12 @@ public class SymNoteParser extends Parser {
 		}
 		public AssignStmtContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterAssignStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitAssignStmt(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitAssignStmt(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ParallelStmtContext extends StatementContext {
 		public List<StatementContext> statement() {
 			return getRuleContexts(StatementContext.class);
@@ -451,32 +391,17 @@ public class SymNoteParser extends Parser {
 		}
 		public ParallelStmtContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterParallelStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitParallelStmt(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitParallelStmt(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ReturnStmtContext extends StatementContext {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
 		public ReturnStmtContext(StatementContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterReturnStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitReturnStmt(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitReturnStmt(this);
@@ -581,7 +506,7 @@ public class SymNoteParser extends Parser {
 				setState(75);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__1) | (1L << T__4) | (1L << T__5) | (1L << T__8) | (1L << T__9) | (1L << T__13) | (1L << T__22) | (1L << T__25) | (1L << T__26) | (1L << T__27) | (1L << T__28) | (1L << T__29) | (1L << T__30) | (1L << T__31) | (1L << BOOL) | (1L << INT) | (1L << FLOAT) | (1L << STRING) | (1L << ID))) != 0)) {
+				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 1090724065986150L) != 0)) {
 					{
 					{
 					setState(72);
@@ -643,7 +568,7 @@ public class SymNoteParser extends Parser {
 				setState(94);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__1) | (1L << T__22) | (1L << BOOL) | (1L << INT) | (1L << FLOAT) | (1L << STRING) | (1L << ID))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 1090715543142404L) != 0)) {
 					{
 					setState(93);
 					expression(0);
@@ -677,6 +602,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class RoutineDeclContext extends ParserRuleContext {
 		public TerminalNode ID() { return getToken(SymNoteParser.ID, 0); }
 		public TypeContext type() {
@@ -692,14 +618,6 @@ public class SymNoteParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_routineDecl; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterRoutineDecl(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitRoutineDecl(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitRoutineDecl(this);
@@ -723,7 +641,7 @@ public class SymNoteParser extends Parser {
 			setState(106);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__25) | (1L << T__26) | (1L << T__27) | (1L << T__28) | (1L << T__29) | (1L << T__30) | (1L << T__31))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 8522825728L) != 0)) {
 				{
 				setState(105);
 				parameters();
@@ -751,6 +669,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class TrackDeclContext extends ParserRuleContext {
 		public TerminalNode ID() { return getToken(SymNoteParser.ID, 0); }
 		public BlockLVL2Context blockLVL2() {
@@ -763,14 +682,6 @@ public class SymNoteParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_trackDecl; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterTrackDecl(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitTrackDecl(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitTrackDecl(this);
@@ -794,7 +705,7 @@ public class SymNoteParser extends Parser {
 			setState(117);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__25) | (1L << T__26) | (1L << T__27) | (1L << T__28) | (1L << T__29) | (1L << T__30) | (1L << T__31))) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 8522825728L) != 0)) {
 				{
 				setState(116);
 				parameters();
@@ -818,6 +729,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ParametersContext extends ParserRuleContext {
 		public List<ParamContext> param() {
 			return getRuleContexts(ParamContext.class);
@@ -829,14 +741,6 @@ public class SymNoteParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_parameters; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterParameters(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitParameters(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitParameters(this);
@@ -882,6 +786,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ParamContext extends ParserRuleContext {
 		public TypeContext type() {
 			return getRuleContext(TypeContext.class,0);
@@ -891,14 +796,6 @@ public class SymNoteParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_param; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterParam(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitParam(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitParam(this);
@@ -929,6 +826,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ArgumentsContext extends ParserRuleContext {
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
@@ -940,14 +838,6 @@ public class SymNoteParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arguments; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterArguments(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitArguments(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitArguments(this);
@@ -993,6 +883,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class BlockLVL1Context extends ParserRuleContext {
 		public List<StatementContext> statement() {
 			return getRuleContexts(StatementContext.class);
@@ -1004,14 +895,6 @@ public class SymNoteParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_blockLVL1; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterBlockLVL1(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitBlockLVL1(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitBlockLVL1(this);
@@ -1031,7 +914,7 @@ public class SymNoteParser extends Parser {
 			setState(145);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__1) | (1L << T__4) | (1L << T__5) | (1L << T__8) | (1L << T__9) | (1L << T__13) | (1L << T__22) | (1L << T__25) | (1L << T__26) | (1L << T__27) | (1L << T__28) | (1L << T__29) | (1L << T__30) | (1L << T__31) | (1L << BOOL) | (1L << INT) | (1L << FLOAT) | (1L << STRING) | (1L << ID))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 1090724065986150L) != 0)) {
 				{
 				{
 				setState(142);
@@ -1057,6 +940,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class BlockLVL2Context extends ParserRuleContext {
 		public List<StatementContext> statement() {
 			return getRuleContexts(StatementContext.class);
@@ -1074,14 +958,6 @@ public class SymNoteParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_blockLVL2; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterBlockLVL2(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitBlockLVL2(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitBlockLVL2(this);
@@ -1101,7 +977,7 @@ public class SymNoteParser extends Parser {
 			setState(155);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__1) | (1L << T__4) | (1L << T__5) | (1L << T__8) | (1L << T__9) | (1L << T__13) | (1L << T__18) | (1L << T__22) | (1L << T__25) | (1L << T__26) | (1L << T__27) | (1L << T__28) | (1L << T__29) | (1L << T__30) | (1L << T__31) | (1L << BOOL) | (1L << INT) | (1L << FLOAT) | (1L << STRING) | (1L << ID))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 1090724066510438L) != 0)) {
 				{
 				setState(153);
 				_errHandler.sync(this);
@@ -1160,6 +1036,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class GridStmtContext extends ParserRuleContext {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
@@ -1174,14 +1051,6 @@ public class SymNoteParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_gridStmt; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterGridStmt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitGridStmt(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitGridStmt(this);
@@ -1209,7 +1078,7 @@ public class SymNoteParser extends Parser {
 			setState(168);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__19) | (1L << T__20) | (1L << SUB) | (1L << NOTE) | (1L << ID))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 580679581564928L) != 0)) {
 				{
 				{
 				setState(165);
@@ -1235,6 +1104,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class GridContentContext extends ParserRuleContext {
 		public GridContentContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1246,6 +1116,7 @@ public class SymNoteParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class GridChordContext extends GridContentContext {
 		public List<NoteElementContext> noteElement() {
 			return getRuleContexts(NoteElementContext.class);
@@ -1255,65 +1126,36 @@ public class SymNoteParser extends Parser {
 		}
 		public GridChordContext(GridContentContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterGridChord(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitGridChord(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitGridChord(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class GridNoteContext extends GridContentContext {
 		public NoteElementContext noteElement() {
 			return getRuleContext(NoteElementContext.class,0);
 		}
 		public GridNoteContext(GridContentContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterGridNote(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitGridNote(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitGridNote(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class GridHoldContext extends GridContentContext {
 		public GridHoldContext(GridContentContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterGridHold(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitGridHold(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitGridHold(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class GridRestContext extends GridContentContext {
 		public TerminalNode SUB() { return getToken(SymNoteParser.SUB, 0); }
 		public GridRestContext(GridContentContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterGridRest(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitGridRest(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitGridRest(this);
@@ -1397,6 +1239,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class NoteElementContext extends ParserRuleContext {
 		public TerminalNode NOTE() { return getToken(SymNoteParser.NOTE, 0); }
 		public TerminalNode ID() { return getToken(SymNoteParser.ID, 0); }
@@ -1407,14 +1250,6 @@ public class SymNoteParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_noteElement; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterNoteElement(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitNoteElement(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitNoteElement(this);
@@ -1466,6 +1301,7 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ExpressionContext extends ParserRuleContext {
 		public ExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1477,42 +1313,29 @@ public class SymNoteParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class OpNotContext extends ExpressionContext {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
 		public OpNotContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterOpNot(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitOpNot(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitOpNot(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class AtomIntContext extends ExpressionContext {
 		public TerminalNode INT() { return getToken(SymNoteParser.INT, 0); }
 		public AtomIntContext(ExpressionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterAtomInt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitAtomInt(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitAtomInt(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class OpMulDivModContext extends ExpressionContext {
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
@@ -1525,19 +1348,12 @@ public class SymNoteParser extends Parser {
 		public TerminalNode MOD() { return getToken(SymNoteParser.MOD, 0); }
 		public OpMulDivModContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterOpMulDivMod(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitOpMulDivMod(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitOpMulDivMod(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class OpAndContext extends ExpressionContext {
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
@@ -1547,19 +1363,12 @@ public class SymNoteParser extends Parser {
 		}
 		public OpAndContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterOpAnd(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitOpAnd(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitOpAnd(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class FuncCallExprContext extends ExpressionContext {
 		public TerminalNode ID() { return getToken(SymNoteParser.ID, 0); }
 		public ArgumentsContext arguments() {
@@ -1567,19 +1376,12 @@ public class SymNoteParser extends Parser {
 		}
 		public FuncCallExprContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterFuncCallExpr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitFuncCallExpr(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitFuncCallExpr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class OpCompareContext extends ExpressionContext {
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
@@ -1595,55 +1397,34 @@ public class SymNoteParser extends Parser {
 		public TerminalNode NE() { return getToken(SymNoteParser.NE, 0); }
 		public OpCompareContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterOpCompare(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitOpCompare(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitOpCompare(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ParenExprContext extends ExpressionContext {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
 		public ParenExprContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterParenExpr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitParenExpr(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitParenExpr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class AtomIdContext extends ExpressionContext {
 		public TerminalNode ID() { return getToken(SymNoteParser.ID, 0); }
 		public AtomIdContext(ExpressionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterAtomId(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitAtomId(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitAtomId(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class OpOrContext extends ExpressionContext {
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
@@ -1653,36 +1434,22 @@ public class SymNoteParser extends Parser {
 		}
 		public OpOrContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterOpOr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitOpOr(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitOpOr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class AtomBoolContext extends ExpressionContext {
 		public TerminalNode BOOL() { return getToken(SymNoteParser.BOOL, 0); }
 		public AtomBoolContext(ExpressionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterAtomBool(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitAtomBool(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitAtomBool(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class OpAddSubContext extends ExpressionContext {
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
@@ -1694,47 +1461,25 @@ public class SymNoteParser extends Parser {
 		public TerminalNode SUB() { return getToken(SymNoteParser.SUB, 0); }
 		public OpAddSubContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterOpAddSub(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitOpAddSub(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitOpAddSub(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class AtomStringContext extends ExpressionContext {
 		public TerminalNode STRING() { return getToken(SymNoteParser.STRING, 0); }
 		public AtomStringContext(ExpressionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterAtomString(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitAtomString(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitAtomString(this);
 			else return visitor.visitChildren(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class AtomFloatContext extends ExpressionContext {
 		public TerminalNode FLOAT() { return getToken(SymNoteParser.FLOAT, 0); }
 		public AtomFloatContext(ExpressionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterAtomFloat(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitAtomFloat(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitAtomFloat(this);
@@ -1798,7 +1543,7 @@ public class SymNoteParser extends Parser {
 				setState(206);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__1) | (1L << T__22) | (1L << BOOL) | (1L << INT) | (1L << FLOAT) | (1L << STRING) | (1L << ID))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 1090715543142404L) != 0)) {
 					{
 					setState(205);
 					arguments();
@@ -1875,7 +1620,7 @@ public class SymNoteParser extends Parser {
 						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
 						setState(217);
 						_la = _input.LA(1);
-						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << MUL) | (1L << DIV) | (1L << MOD))) != 0)) ) {
+						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 60129542144L) != 0)) ) {
 						_errHandler.recoverInline(this);
 						}
 						else {
@@ -1915,7 +1660,7 @@ public class SymNoteParser extends Parser {
 						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
 						setState(223);
 						_la = _input.LA(1);
-						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << GT) | (1L << LT) | (1L << GE) | (1L << LE) | (1L << EQ) | (1L << NE))) != 0)) ) {
+						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 17317308137472L) != 0)) ) {
 						_errHandler.recoverInline(this);
 						}
 						else {
@@ -1971,19 +1716,12 @@ public class SymNoteParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class TypeContext extends ParserRuleContext {
 		public TypeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_type; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).enterType(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SymNoteListener ) ((SymNoteListener)listener).exitType(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SymNoteVisitor ) return ((SymNoteVisitor<? extends T>)visitor).visitType(this);
@@ -2000,7 +1738,7 @@ public class SymNoteParser extends Parser {
 			{
 			setState(236);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__25) | (1L << T__26) | (1L << T__27) | (1L << T__28) | (1L << T__29) | (1L << T__30) | (1L << T__31))) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 8522825728L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -2045,86 +1783,157 @@ public class SymNoteParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\65\u00f1\4\2\t\2"+
-		"\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13"+
-		"\t\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\3\2\3\2\7\2#\n\2\f"+
-		"\2\16\2&\13\2\3\2\3\2\3\3\3\3\5\3,\n\3\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4"+
-		"\5\4\66\n\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3"+
-		"\4\3\4\3\4\3\4\3\4\3\4\7\4L\n\4\f\4\16\4O\13\4\3\4\3\4\3\4\3\4\3\4\5\4"+
-		"V\n\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\5\4a\n\4\3\4\3\4\3\4\3\4\5\4"+
-		"g\n\4\3\5\3\5\3\5\3\5\5\5m\n\5\3\5\3\5\3\5\3\5\3\5\3\6\3\6\3\6\3\6\5\6"+
-		"x\n\6\3\6\3\6\3\6\3\7\3\7\3\7\7\7\u0080\n\7\f\7\16\7\u0083\13\7\3\b\3"+
-		"\b\3\b\3\t\3\t\3\t\7\t\u008b\n\t\f\t\16\t\u008e\13\t\3\n\3\n\7\n\u0092"+
-		"\n\n\f\n\16\n\u0095\13\n\3\n\3\n\3\13\3\13\3\13\7\13\u009c\n\13\f\13\16"+
-		"\13\u009f\13\13\3\13\3\13\3\f\3\f\3\f\3\f\3\f\3\f\7\f\u00a9\n\f\f\f\16"+
-		"\f\u00ac\13\f\3\f\3\f\3\r\3\r\3\r\3\r\3\r\3\r\3\r\7\r\u00b7\n\r\f\r\16"+
-		"\r\u00ba\13\r\3\r\3\r\5\r\u00be\n\r\3\16\3\16\3\16\3\16\3\16\5\16\u00c5"+
-		"\n\16\3\17\3\17\3\17\3\17\3\17\3\17\3\17\3\17\3\17\3\17\5\17\u00d1\n\17"+
-		"\3\17\3\17\3\17\3\17\3\17\3\17\5\17\u00d9\n\17\3\17\3\17\3\17\3\17\3\17"+
-		"\3\17\3\17\3\17\3\17\3\17\3\17\3\17\3\17\3\17\3\17\7\17\u00ea\n\17\f\17"+
-		"\16\17\u00ed\13\17\3\20\3\20\3\20\2\3\34\21\2\4\6\b\n\f\16\20\22\24\26"+
-		"\30\32\34\36\2\7\4\2..\63\63\3\2#%\3\2&\'\3\2(-\3\2\34\"\2\u010a\2$\3"+
-		"\2\2\2\4+\3\2\2\2\6f\3\2\2\2\bh\3\2\2\2\ns\3\2\2\2\f|\3\2\2\2\16\u0084"+
-		"\3\2\2\2\20\u0087\3\2\2\2\22\u008f\3\2\2\2\24\u0098\3\2\2\2\26\u00a2\3"+
-		"\2\2\2\30\u00bd\3\2\2\2\32\u00bf\3\2\2\2\34\u00d8\3\2\2\2\36\u00ee\3\2"+
-		"\2\2 #\5\4\3\2!#\5\6\4\2\" \3\2\2\2\"!\3\2\2\2#&\3\2\2\2$\"\3\2\2\2$%"+
-		"\3\2\2\2%\'\3\2\2\2&$\3\2\2\2\'(\7\2\2\3(\3\3\2\2\2),\5\b\5\2*,\5\n\6"+
-		"\2+)\3\2\2\2+*\3\2\2\2,\5\3\2\2\2-g\5\22\n\2./\7\3\2\2/\60\7\4\2\2\60"+
-		"\61\5\34\17\2\61\62\7\5\2\2\62\65\5\6\4\2\63\64\7\6\2\2\64\66\5\6\4\2"+
-		"\65\63\3\2\2\2\65\66\3\2\2\2\66g\3\2\2\2\678\7\7\2\289\7\4\2\29:\5\34"+
-		"\17\2:;\7\5\2\2;<\5\6\4\2<g\3\2\2\2=>\7\b\2\2>?\7\4\2\2?@\5\36\20\2@A"+
-		"\7\63\2\2AB\7\t\2\2BC\5\34\17\2CD\7\n\2\2DE\5\34\17\2EF\7\5\2\2FG\5\6"+
-		"\4\2Gg\3\2\2\2HI\7\13\2\2IM\7\f\2\2JL\5\6\4\2KJ\3\2\2\2LO\3\2\2\2MK\3"+
-		"\2\2\2MN\3\2\2\2NP\3\2\2\2OM\3\2\2\2Pg\7\r\2\2QR\5\36\20\2RU\7\63\2\2"+
-		"ST\7\16\2\2TV\5\34\17\2US\3\2\2\2UV\3\2\2\2VW\3\2\2\2WX\7\17\2\2Xg\3\2"+
-		"\2\2YZ\7\63\2\2Z[\7\16\2\2[\\\5\34\17\2\\]\7\17\2\2]g\3\2\2\2^`\7\20\2"+
-		"\2_a\5\34\17\2`_\3\2\2\2`a\3\2\2\2ab\3\2\2\2bg\7\17\2\2cd\5\34\17\2de"+
-		"\7\17\2\2eg\3\2\2\2f-\3\2\2\2f.\3\2\2\2f\67\3\2\2\2f=\3\2\2\2fH\3\2\2"+
-		"\2fQ\3\2\2\2fY\3\2\2\2f^\3\2\2\2fc\3\2\2\2g\7\3\2\2\2hi\7\21\2\2ij\7\63"+
-		"\2\2jl\7\4\2\2km\5\f\7\2lk\3\2\2\2lm\3\2\2\2mn\3\2\2\2no\7\5\2\2op\7\22"+
-		"\2\2pq\5\36\20\2qr\5\22\n\2r\t\3\2\2\2st\7\23\2\2tu\7\63\2\2uw\7\4\2\2"+
-		"vx\5\f\7\2wv\3\2\2\2wx\3\2\2\2xy\3\2\2\2yz\7\5\2\2z{\5\24\13\2{\13\3\2"+
-		"\2\2|\u0081\5\16\b\2}~\7\24\2\2~\u0080\5\16\b\2\177}\3\2\2\2\u0080\u0083"+
-		"\3\2\2\2\u0081\177\3\2\2\2\u0081\u0082\3\2\2\2\u0082\r\3\2\2\2\u0083\u0081"+
-		"\3\2\2\2\u0084\u0085\5\36\20\2\u0085\u0086\7\63\2\2\u0086\17\3\2\2\2\u0087"+
-		"\u008c\5\34\17\2\u0088\u0089\7\24\2\2\u0089\u008b\5\34\17\2\u008a\u0088"+
-		"\3\2\2\2\u008b\u008e\3\2\2\2\u008c\u008a\3\2\2\2\u008c\u008d\3\2\2\2\u008d"+
-		"\21\3\2\2\2\u008e\u008c\3\2\2\2\u008f\u0093\7\f\2\2\u0090\u0092\5\6\4"+
-		"\2\u0091\u0090\3\2\2\2\u0092\u0095\3\2\2\2\u0093\u0091\3\2\2\2\u0093\u0094"+
-		"\3\2\2\2\u0094\u0096\3\2\2\2\u0095\u0093\3\2\2\2\u0096\u0097\7\r\2\2\u0097"+
-		"\23\3\2\2\2\u0098\u009d\7\f\2\2\u0099\u009c\5\6\4\2\u009a\u009c\5\26\f"+
-		"\2\u009b\u0099\3\2\2\2\u009b\u009a\3\2\2\2\u009c\u009f\3\2\2\2\u009d\u009b"+
-		"\3\2\2\2\u009d\u009e\3\2\2\2\u009e\u00a0\3\2\2\2\u009f\u009d\3\2\2\2\u00a0"+
-		"\u00a1\7\r\2\2\u00a1\25\3\2\2\2\u00a2\u00a3\7\25\2\2\u00a3\u00a4\7\4\2"+
-		"\2\u00a4\u00a5\5\34\17\2\u00a5\u00a6\7\5\2\2\u00a6\u00aa\7\f\2\2\u00a7"+
-		"\u00a9\5\30\r\2\u00a8\u00a7\3\2\2\2\u00a9\u00ac\3\2\2\2\u00aa\u00a8\3"+
-		"\2\2\2\u00aa\u00ab\3\2\2\2\u00ab\u00ad\3\2\2\2\u00ac\u00aa\3\2\2\2\u00ad"+
-		"\u00ae\7\r\2\2\u00ae\27\3\2\2\2\u00af\u00be\5\32\16\2\u00b0\u00be\7\'"+
-		"\2\2\u00b1\u00be\7\26\2\2\u00b2\u00b3\7\27\2\2\u00b3\u00b8\5\32\16\2\u00b4"+
-		"\u00b5\7\24\2\2\u00b5\u00b7\5\32\16\2\u00b6\u00b4\3\2\2\2\u00b7\u00ba"+
-		"\3\2\2\2\u00b8\u00b6\3\2\2\2\u00b8\u00b9\3\2\2\2\u00b9\u00bb\3\2\2\2\u00ba"+
-		"\u00b8\3\2\2\2\u00bb\u00bc\7\30\2\2\u00bc\u00be\3\2\2\2\u00bd\u00af\3"+
-		"\2\2\2\u00bd\u00b0\3\2\2\2\u00bd\u00b1\3\2\2\2\u00bd\u00b2\3\2\2\2\u00be"+
-		"\31\3\2\2\2\u00bf\u00c4\t\2\2\2\u00c0\u00c1\7\4\2\2\u00c1\u00c2\5\34\17"+
-		"\2\u00c2\u00c3\7\5\2\2\u00c3\u00c5\3\2\2\2\u00c4\u00c0\3\2\2\2\u00c4\u00c5"+
-		"\3\2\2\2\u00c5\33\3\2\2\2\u00c6\u00c7\b\17\1\2\u00c7\u00c8\7\4\2\2\u00c8"+
-		"\u00c9\5\34\17\2\u00c9\u00ca\7\5\2\2\u00ca\u00d9\3\2\2\2\u00cb\u00cc\7"+
-		"\31\2\2\u00cc\u00d9\5\34\17\16\u00cd\u00ce\7\63\2\2\u00ce\u00d0\7\4\2"+
-		"\2\u00cf\u00d1\5\20\t\2\u00d0\u00cf\3\2\2\2\u00d0\u00d1\3\2\2\2\u00d1"+
-		"\u00d2\3\2\2\2\u00d2\u00d9\7\5\2\2\u00d3\u00d9\7\63\2\2\u00d4\u00d9\7"+
-		"\60\2\2\u00d5\u00d9\7\61\2\2\u00d6\u00d9\7/\2\2\u00d7\u00d9\7\62\2\2\u00d8"+
-		"\u00c6\3\2\2\2\u00d8\u00cb\3\2\2\2\u00d8\u00cd\3\2\2\2\u00d8\u00d3\3\2"+
-		"\2\2\u00d8\u00d4\3\2\2\2\u00d8\u00d5\3\2\2\2\u00d8\u00d6\3\2\2\2\u00d8"+
-		"\u00d7\3\2\2\2\u00d9\u00eb\3\2\2\2\u00da\u00db\f\f\2\2\u00db\u00dc\t\3"+
-		"\2\2\u00dc\u00ea\5\34\17\r\u00dd\u00de\f\13\2\2\u00de\u00df\t\4\2\2\u00df"+
-		"\u00ea\5\34\17\f\u00e0\u00e1\f\n\2\2\u00e1\u00e2\t\5\2\2\u00e2\u00ea\5"+
-		"\34\17\13\u00e3\u00e4\f\t\2\2\u00e4\u00e5\7\32\2\2\u00e5\u00ea\5\34\17"+
-		"\n\u00e6\u00e7\f\b\2\2\u00e7\u00e8\7\33\2\2\u00e8\u00ea\5\34\17\t\u00e9"+
-		"\u00da\3\2\2\2\u00e9\u00dd\3\2\2\2\u00e9\u00e0\3\2\2\2\u00e9\u00e3\3\2"+
-		"\2\2\u00e9\u00e6\3\2\2\2\u00ea\u00ed\3\2\2\2\u00eb\u00e9\3\2\2\2\u00eb"+
-		"\u00ec\3\2\2\2\u00ec\35\3\2\2\2\u00ed\u00eb\3\2\2\2\u00ee\u00ef\t\6\2"+
-		"\2\u00ef\37\3\2\2\2\31\"$+\65MU`flw\u0081\u008c\u0093\u009b\u009d\u00aa"+
-		"\u00b8\u00bd\u00c4\u00d0\u00d8\u00e9\u00eb";
+		"\u0004\u00013\u00ef\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
+		"\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002"+
+		"\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002"+
+		"\f\u0007\f\u0002\r\u0007\r\u0002\u000e\u0007\u000e\u0001\u0000\u0001\u0000"+
+		"\u0005\u0000!\b\u0000\n\u0000\f\u0000$\t\u0000\u0001\u0000\u0001\u0000"+
+		"\u0001\u0001\u0001\u0001\u0003\u0001*\b\u0001\u0001\u0002\u0001\u0002"+
+		"\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002"+
+		"\u0003\u00024\b\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002"+
+		"\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002"+
+		"\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002"+
+		"\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0005\u0002J\b\u0002"+
+		"\n\u0002\f\u0002M\t\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002"+
+		"\u0001\u0002\u0003\u0002T\b\u0002\u0001\u0002\u0001\u0002\u0001\u0002"+
+		"\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002"+
+		"\u0003\u0002_\b\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002"+
+		"\u0003\u0002e\b\u0002\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003"+
+		"\u0003\u0003k\b\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003"+
+		"\u0001\u0003\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0003\u0004"+
+		"v\b\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0005\u0001\u0005"+
+		"\u0001\u0005\u0005\u0005~\b\u0005\n\u0005\f\u0005\u0081\t\u0005\u0001"+
+		"\u0006\u0001\u0006\u0001\u0006\u0001\u0007\u0001\u0007\u0001\u0007\u0005"+
+		"\u0007\u0089\b\u0007\n\u0007\f\u0007\u008c\t\u0007\u0001\b\u0001\b\u0005"+
+		"\b\u0090\b\b\n\b\f\b\u0093\t\b\u0001\b\u0001\b\u0001\t\u0001\t\u0001\t"+
+		"\u0005\t\u009a\b\t\n\t\f\t\u009d\t\t\u0001\t\u0001\t\u0001\n\u0001\n\u0001"+
+		"\n\u0001\n\u0001\n\u0001\n\u0005\n\u00a7\b\n\n\n\f\n\u00aa\t\n\u0001\n"+
+		"\u0001\n\u0001\u000b\u0001\u000b\u0001\u000b\u0001\u000b\u0001\u000b\u0001"+
+		"\u000b\u0001\u000b\u0005\u000b\u00b5\b\u000b\n\u000b\f\u000b\u00b8\t\u000b"+
+		"\u0001\u000b\u0001\u000b\u0003\u000b\u00bc\b\u000b\u0001\f\u0001\f\u0001"+
+		"\f\u0001\f\u0001\f\u0003\f\u00c3\b\f\u0001\r\u0001\r\u0001\r\u0001\r\u0001"+
+		"\r\u0001\r\u0001\r\u0001\r\u0001\r\u0001\r\u0003\r\u00cf\b\r\u0001\r\u0001"+
+		"\r\u0001\r\u0001\r\u0001\r\u0001\r\u0003\r\u00d7\b\r\u0001\r\u0001\r\u0001"+
+		"\r\u0001\r\u0001\r\u0001\r\u0001\r\u0001\r\u0001\r\u0001\r\u0001\r\u0001"+
+		"\r\u0001\r\u0001\r\u0001\r\u0005\r\u00e8\b\r\n\r\f\r\u00eb\t\r\u0001\u000e"+
+		"\u0001\u000e\u0001\u000e\u0000\u0001\u001a\u000f\u0000\u0002\u0004\u0006"+
+		"\b\n\f\u000e\u0010\u0012\u0014\u0016\u0018\u001a\u001c\u0000\u0005\u0002"+
+		"\u0000,,11\u0001\u0000!#\u0001\u0000$%\u0001\u0000&+\u0001\u0000\u001a"+
+		" \u0108\u0000\"\u0001\u0000\u0000\u0000\u0002)\u0001\u0000\u0000\u0000"+
+		"\u0004d\u0001\u0000\u0000\u0000\u0006f\u0001\u0000\u0000\u0000\bq\u0001"+
+		"\u0000\u0000\u0000\nz\u0001\u0000\u0000\u0000\f\u0082\u0001\u0000\u0000"+
+		"\u0000\u000e\u0085\u0001\u0000\u0000\u0000\u0010\u008d\u0001\u0000\u0000"+
+		"\u0000\u0012\u0096\u0001\u0000\u0000\u0000\u0014\u00a0\u0001\u0000\u0000"+
+		"\u0000\u0016\u00bb\u0001\u0000\u0000\u0000\u0018\u00bd\u0001\u0000\u0000"+
+		"\u0000\u001a\u00d6\u0001\u0000\u0000\u0000\u001c\u00ec\u0001\u0000\u0000"+
+		"\u0000\u001e!\u0003\u0002\u0001\u0000\u001f!\u0003\u0004\u0002\u0000 "+
+		"\u001e\u0001\u0000\u0000\u0000 \u001f\u0001\u0000\u0000\u0000!$\u0001"+
+		"\u0000\u0000\u0000\" \u0001\u0000\u0000\u0000\"#\u0001\u0000\u0000\u0000"+
+		"#%\u0001\u0000\u0000\u0000$\"\u0001\u0000\u0000\u0000%&\u0005\u0000\u0000"+
+		"\u0001&\u0001\u0001\u0000\u0000\u0000\'*\u0003\u0006\u0003\u0000(*\u0003"+
+		"\b\u0004\u0000)\'\u0001\u0000\u0000\u0000)(\u0001\u0000\u0000\u0000*\u0003"+
+		"\u0001\u0000\u0000\u0000+e\u0003\u0010\b\u0000,-\u0005\u0001\u0000\u0000"+
+		"-.\u0005\u0002\u0000\u0000./\u0003\u001a\r\u0000/0\u0005\u0003\u0000\u0000"+
+		"03\u0003\u0004\u0002\u000012\u0005\u0004\u0000\u000024\u0003\u0004\u0002"+
+		"\u000031\u0001\u0000\u0000\u000034\u0001\u0000\u0000\u00004e\u0001\u0000"+
+		"\u0000\u000056\u0005\u0005\u0000\u000067\u0005\u0002\u0000\u000078\u0003"+
+		"\u001a\r\u000089\u0005\u0003\u0000\u00009:\u0003\u0004\u0002\u0000:e\u0001"+
+		"\u0000\u0000\u0000;<\u0005\u0006\u0000\u0000<=\u0005\u0002\u0000\u0000"+
+		"=>\u0003\u001c\u000e\u0000>?\u00051\u0000\u0000?@\u0005\u0007\u0000\u0000"+
+		"@A\u0003\u001a\r\u0000AB\u0005\b\u0000\u0000BC\u0003\u001a\r\u0000CD\u0005"+
+		"\u0003\u0000\u0000DE\u0003\u0004\u0002\u0000Ee\u0001\u0000\u0000\u0000"+
+		"FG\u0005\t\u0000\u0000GK\u0005\n\u0000\u0000HJ\u0003\u0004\u0002\u0000"+
+		"IH\u0001\u0000\u0000\u0000JM\u0001\u0000\u0000\u0000KI\u0001\u0000\u0000"+
+		"\u0000KL\u0001\u0000\u0000\u0000LN\u0001\u0000\u0000\u0000MK\u0001\u0000"+
+		"\u0000\u0000Ne\u0005\u000b\u0000\u0000OP\u0003\u001c\u000e\u0000PS\u0005"+
+		"1\u0000\u0000QR\u0005\f\u0000\u0000RT\u0003\u001a\r\u0000SQ\u0001\u0000"+
+		"\u0000\u0000ST\u0001\u0000\u0000\u0000TU\u0001\u0000\u0000\u0000UV\u0005"+
+		"\r\u0000\u0000Ve\u0001\u0000\u0000\u0000WX\u00051\u0000\u0000XY\u0005"+
+		"\f\u0000\u0000YZ\u0003\u001a\r\u0000Z[\u0005\r\u0000\u0000[e\u0001\u0000"+
+		"\u0000\u0000\\^\u0005\u000e\u0000\u0000]_\u0003\u001a\r\u0000^]\u0001"+
+		"\u0000\u0000\u0000^_\u0001\u0000\u0000\u0000_`\u0001\u0000\u0000\u0000"+
+		"`e\u0005\r\u0000\u0000ab\u0003\u001a\r\u0000bc\u0005\r\u0000\u0000ce\u0001"+
+		"\u0000\u0000\u0000d+\u0001\u0000\u0000\u0000d,\u0001\u0000\u0000\u0000"+
+		"d5\u0001\u0000\u0000\u0000d;\u0001\u0000\u0000\u0000dF\u0001\u0000\u0000"+
+		"\u0000dO\u0001\u0000\u0000\u0000dW\u0001\u0000\u0000\u0000d\\\u0001\u0000"+
+		"\u0000\u0000da\u0001\u0000\u0000\u0000e\u0005\u0001\u0000\u0000\u0000"+
+		"fg\u0005\u000f\u0000\u0000gh\u00051\u0000\u0000hj\u0005\u0002\u0000\u0000"+
+		"ik\u0003\n\u0005\u0000ji\u0001\u0000\u0000\u0000jk\u0001\u0000\u0000\u0000"+
+		"kl\u0001\u0000\u0000\u0000lm\u0005\u0003\u0000\u0000mn\u0005\u0010\u0000"+
+		"\u0000no\u0003\u001c\u000e\u0000op\u0003\u0010\b\u0000p\u0007\u0001\u0000"+
+		"\u0000\u0000qr\u0005\u0011\u0000\u0000rs\u00051\u0000\u0000su\u0005\u0002"+
+		"\u0000\u0000tv\u0003\n\u0005\u0000ut\u0001\u0000\u0000\u0000uv\u0001\u0000"+
+		"\u0000\u0000vw\u0001\u0000\u0000\u0000wx\u0005\u0003\u0000\u0000xy\u0003"+
+		"\u0012\t\u0000y\t\u0001\u0000\u0000\u0000z\u007f\u0003\f\u0006\u0000{"+
+		"|\u0005\u0012\u0000\u0000|~\u0003\f\u0006\u0000}{\u0001\u0000\u0000\u0000"+
+		"~\u0081\u0001\u0000\u0000\u0000\u007f}\u0001\u0000\u0000\u0000\u007f\u0080"+
+		"\u0001\u0000\u0000\u0000\u0080\u000b\u0001\u0000\u0000\u0000\u0081\u007f"+
+		"\u0001\u0000\u0000\u0000\u0082\u0083\u0003\u001c\u000e\u0000\u0083\u0084"+
+		"\u00051\u0000\u0000\u0084\r\u0001\u0000\u0000\u0000\u0085\u008a\u0003"+
+		"\u001a\r\u0000\u0086\u0087\u0005\u0012\u0000\u0000\u0087\u0089\u0003\u001a"+
+		"\r\u0000\u0088\u0086\u0001\u0000\u0000\u0000\u0089\u008c\u0001\u0000\u0000"+
+		"\u0000\u008a\u0088\u0001\u0000\u0000\u0000\u008a\u008b\u0001\u0000\u0000"+
+		"\u0000\u008b\u000f\u0001\u0000\u0000\u0000\u008c\u008a\u0001\u0000\u0000"+
+		"\u0000\u008d\u0091\u0005\n\u0000\u0000\u008e\u0090\u0003\u0004\u0002\u0000"+
+		"\u008f\u008e\u0001\u0000\u0000\u0000\u0090\u0093\u0001\u0000\u0000\u0000"+
+		"\u0091\u008f\u0001\u0000\u0000\u0000\u0091\u0092\u0001\u0000\u0000\u0000"+
+		"\u0092\u0094\u0001\u0000\u0000\u0000\u0093\u0091\u0001\u0000\u0000\u0000"+
+		"\u0094\u0095\u0005\u000b\u0000\u0000\u0095\u0011\u0001\u0000\u0000\u0000"+
+		"\u0096\u009b\u0005\n\u0000\u0000\u0097\u009a\u0003\u0004\u0002\u0000\u0098"+
+		"\u009a\u0003\u0014\n\u0000\u0099\u0097\u0001\u0000\u0000\u0000\u0099\u0098"+
+		"\u0001\u0000\u0000\u0000\u009a\u009d\u0001\u0000\u0000\u0000\u009b\u0099"+
+		"\u0001\u0000\u0000\u0000\u009b\u009c\u0001\u0000\u0000\u0000\u009c\u009e"+
+		"\u0001\u0000\u0000\u0000\u009d\u009b\u0001\u0000\u0000\u0000\u009e\u009f"+
+		"\u0005\u000b\u0000\u0000\u009f\u0013\u0001\u0000\u0000\u0000\u00a0\u00a1"+
+		"\u0005\u0013\u0000\u0000\u00a1\u00a2\u0005\u0002\u0000\u0000\u00a2\u00a3"+
+		"\u0003\u001a\r\u0000\u00a3\u00a4\u0005\u0003\u0000\u0000\u00a4\u00a8\u0005"+
+		"\n\u0000\u0000\u00a5\u00a7\u0003\u0016\u000b\u0000\u00a6\u00a5\u0001\u0000"+
+		"\u0000\u0000\u00a7\u00aa\u0001\u0000\u0000\u0000\u00a8\u00a6\u0001\u0000"+
+		"\u0000\u0000\u00a8\u00a9\u0001\u0000\u0000\u0000\u00a9\u00ab\u0001\u0000"+
+		"\u0000\u0000\u00aa\u00a8\u0001\u0000\u0000\u0000\u00ab\u00ac\u0005\u000b"+
+		"\u0000\u0000\u00ac\u0015\u0001\u0000\u0000\u0000\u00ad\u00bc\u0003\u0018"+
+		"\f\u0000\u00ae\u00bc\u0005%\u0000\u0000\u00af\u00bc\u0005\u0014\u0000"+
+		"\u0000\u00b0\u00b1\u0005\u0015\u0000\u0000\u00b1\u00b6\u0003\u0018\f\u0000"+
+		"\u00b2\u00b3\u0005\u0012\u0000\u0000\u00b3\u00b5\u0003\u0018\f\u0000\u00b4"+
+		"\u00b2\u0001\u0000\u0000\u0000\u00b5\u00b8\u0001\u0000\u0000\u0000\u00b6"+
+		"\u00b4\u0001\u0000\u0000\u0000\u00b6\u00b7\u0001\u0000\u0000\u0000\u00b7"+
+		"\u00b9\u0001\u0000\u0000\u0000\u00b8\u00b6\u0001\u0000\u0000\u0000\u00b9"+
+		"\u00ba\u0005\u0016\u0000\u0000\u00ba\u00bc\u0001\u0000\u0000\u0000\u00bb"+
+		"\u00ad\u0001\u0000\u0000\u0000\u00bb\u00ae\u0001\u0000\u0000\u0000\u00bb"+
+		"\u00af\u0001\u0000\u0000\u0000\u00bb\u00b0\u0001\u0000\u0000\u0000\u00bc"+
+		"\u0017\u0001\u0000\u0000\u0000\u00bd\u00c2\u0007\u0000\u0000\u0000\u00be"+
+		"\u00bf\u0005\u0002\u0000\u0000\u00bf\u00c0\u0003\u001a\r\u0000\u00c0\u00c1"+
+		"\u0005\u0003\u0000\u0000\u00c1\u00c3\u0001\u0000\u0000\u0000\u00c2\u00be"+
+		"\u0001\u0000\u0000\u0000\u00c2\u00c3\u0001\u0000\u0000\u0000\u00c3\u0019"+
+		"\u0001\u0000\u0000\u0000\u00c4\u00c5\u0006\r\uffff\uffff\u0000\u00c5\u00c6"+
+		"\u0005\u0002\u0000\u0000\u00c6\u00c7\u0003\u001a\r\u0000\u00c7\u00c8\u0005"+
+		"\u0003\u0000\u0000\u00c8\u00d7\u0001\u0000\u0000\u0000\u00c9\u00ca\u0005"+
+		"\u0017\u0000\u0000\u00ca\u00d7\u0003\u001a\r\f\u00cb\u00cc\u00051\u0000"+
+		"\u0000\u00cc\u00ce\u0005\u0002\u0000\u0000\u00cd\u00cf\u0003\u000e\u0007"+
+		"\u0000\u00ce\u00cd\u0001\u0000\u0000\u0000\u00ce\u00cf\u0001\u0000\u0000"+
+		"\u0000\u00cf\u00d0\u0001\u0000\u0000\u0000\u00d0\u00d7\u0005\u0003\u0000"+
+		"\u0000\u00d1\u00d7\u00051\u0000\u0000\u00d2\u00d7\u0005.\u0000\u0000\u00d3"+
+		"\u00d7\u0005/\u0000\u0000\u00d4\u00d7\u0005-\u0000\u0000\u00d5\u00d7\u0005"+
+		"0\u0000\u0000\u00d6\u00c4\u0001\u0000\u0000\u0000\u00d6\u00c9\u0001\u0000"+
+		"\u0000\u0000\u00d6\u00cb\u0001\u0000\u0000\u0000\u00d6\u00d1\u0001\u0000"+
+		"\u0000\u0000\u00d6\u00d2\u0001\u0000\u0000\u0000\u00d6\u00d3\u0001\u0000"+
+		"\u0000\u0000\u00d6\u00d4\u0001\u0000\u0000\u0000\u00d6\u00d5\u0001\u0000"+
+		"\u0000\u0000\u00d7\u00e9\u0001\u0000\u0000\u0000\u00d8\u00d9\n\n\u0000"+
+		"\u0000\u00d9\u00da\u0007\u0001\u0000\u0000\u00da\u00e8\u0003\u001a\r\u000b"+
+		"\u00db\u00dc\n\t\u0000\u0000\u00dc\u00dd\u0007\u0002\u0000\u0000\u00dd"+
+		"\u00e8\u0003\u001a\r\n\u00de\u00df\n\b\u0000\u0000\u00df\u00e0\u0007\u0003"+
+		"\u0000\u0000\u00e0\u00e8\u0003\u001a\r\t\u00e1\u00e2\n\u0007\u0000\u0000"+
+		"\u00e2\u00e3\u0005\u0018\u0000\u0000\u00e3\u00e8\u0003\u001a\r\b\u00e4"+
+		"\u00e5\n\u0006\u0000\u0000\u00e5\u00e6\u0005\u0019\u0000\u0000\u00e6\u00e8"+
+		"\u0003\u001a\r\u0007\u00e7\u00d8\u0001\u0000\u0000\u0000\u00e7\u00db\u0001"+
+		"\u0000\u0000\u0000\u00e7\u00de\u0001\u0000\u0000\u0000\u00e7\u00e1\u0001"+
+		"\u0000\u0000\u0000\u00e7\u00e4\u0001\u0000\u0000\u0000\u00e8\u00eb\u0001"+
+		"\u0000\u0000\u0000\u00e9\u00e7\u0001\u0000\u0000\u0000\u00e9\u00ea\u0001"+
+		"\u0000\u0000\u0000\u00ea\u001b\u0001\u0000\u0000\u0000\u00eb\u00e9\u0001"+
+		"\u0000\u0000\u0000\u00ec\u00ed\u0007\u0004\u0000\u0000\u00ed\u001d\u0001"+
+		"\u0000\u0000\u0000\u0017 \")3KS^dju\u007f\u008a\u0091\u0099\u009b\u00a8"+
+		"\u00b6\u00bb\u00c2\u00ce\u00d6\u00e7\u00e9";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
