@@ -10,17 +10,14 @@ public class Main {
                 System.err.println("Please provide a file path as an argument.");
                 return;
             }
-            // 1. Load file from argument
             CharStream input = CharStreams.fromFileName(args[0]);
-            // 2. Lexer and Parser Analysis
+
             SymNoteLexer lexer = new SymNoteLexer(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             SymNoteParser parser = new SymNoteParser(tokens);
 
-            // 3. Build AST tree
             ParseTree tree = parser.program();
 
-            // 4. Run Visitor
             MySymNoteVisitor visitor = new MySymNoteVisitor();
             visitor.visit(tree);
 

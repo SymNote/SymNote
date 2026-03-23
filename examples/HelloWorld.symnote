@@ -1,0 +1,22 @@
+// A simple SymNote program with bars
+
+// Global settings
+int tempo = 120;
+set_bpm(tempo);
+
+// Define a track that loops for a specific number of bars
+track MainTrack(int bars) {
+    loop (int i from 1 to bars) {
+        // Grid block with resolution of 4 units per beat
+        grid(1/4) {
+            // Trigger a C4 note, sustain (~), rest (-), then E4 note
+            C4 ~ - E4
+        }
+    }
+}
+
+// Execute tracks in parallel
+parallel {
+    // Call the track and run it for 4 bars
+    MainTrack(4);
+}

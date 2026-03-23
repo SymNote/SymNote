@@ -116,6 +116,6 @@ grid (1/16) {
     // Polyphony (Multiple hits in the exact same millisecond)
     [C4, E4, G4] - - -
 
-    // Per-note volume override
-    Kick.vol(1.0) Kick.vol(0.5) C4.vol(my_variable) -
+    // Per-hit / chord volume override
+    Kick.vol(1.0) Kick.vol(0.5) C4.vol(my_variable) [C4, E4].vol(0.7)
 }
