@@ -18,8 +18,8 @@ public class Main {
 
             ParseTree tree = parser.program();
 
-            MySymNoteVisitor visitor = new MySymNoteVisitor();
-            visitor.visit(tree);
+            SymNoteInterpreter interpreter = new SymNoteInterpreter();
+            interpreter.visit(tree);
 
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());

@@ -10,7 +10,7 @@ JAR_PATH="lib/antlr-4.13.2-complete.jar"
 
 echo "Compiling java files..."
 mkdir -p out
-javac -cp "$JAR_PATH:src:src/gen" src/gen/*.java src/*.java -d out/
+javac -cp "$JAR_PATH:src:src/gen" src/gen/*.java src/audio/*.java src/environment/*.java src/*.java -d out/
 if [ $? -ne 0 ]; then
     echo "Compilation failed!"
     exit 1
