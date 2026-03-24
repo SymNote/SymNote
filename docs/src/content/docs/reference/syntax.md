@@ -11,9 +11,12 @@ This document serves as the "dictionary" of SymNote. It outlines all reserved ke
 You cannot use these words as variable names. They are structurally bound to the engine's core logic.
 
 ### Data Types & Values
-* `int`, `float`, `bool` - Standard primitives.
+* `int`, `float`, `bool`, `string` - Standard primitives.
 * `note`, `synth`, `sample` - Audio domain objects.
 * `true`, `false` - Boolean literal values.
+
+> **Warning: Reserved Note Literals**
+> Variables cannot be named like musical notes (e.g., `A4`, `C#3`, or `Bb2`). These patterns are strictly reserved as `NOTE` literals by the lexer and cannot be used as identifiers (`ID`).
 
 ### Control Flow & Structure
 * `track` - Defines a Level 2 musical blueprint.
@@ -38,8 +41,9 @@ SymNote enforces strict mathematical order of operations during AST evaluation.
 
 ### Arithmetic Operators
 Evaluated mathematically.
-1. `*`, `/`, `%` (Multiplication, Division, Modulo) - *Highest priority*
-2. `+`, `-` (Addition, Subtraction)
+1. `-` (Unary Minus) - *Highest priority, creates a negative value (e.g., `-5`, `-x`)*
+2. `*`, `/`, `%` (Multiplication, Division, Modulo)
+3. `+`, `-` (Addition, Subtraction)
 
 ### Relational Operators
 Used to compare values. These always return a `bool`.
@@ -67,7 +71,10 @@ These tokens hold special meaning **only** inside a `grid {}` block.
 * `~` (Sustain) - Holds the previous note/sample for an additional resolution unit.
 * `[ ... ]` (Chord brackets) - Groups multiple notes or samples to be triggered in the exact same millisecond.
 * `,` (Comma) - Separates elements within a chord bracket.
-* `.vol(...)` - A special method call applied directly to a hit to override its volume.
+* `.vol(...)` - A special method call applied directly to a Note/Sample hit or a **closed chord** to override volume.
+	* Valid: `C4.vol(0.8)`, `Kick.vol(level)`, `[C4, E4].vol(1)`
+	* Invalid: `[C4.vol(0.5), E4.vol(0.5)]`
+	* `...` accepts only a single `INT`, `FLOAT`, or `ID` token (no inline arithmetic expressions).
 
 ---
 

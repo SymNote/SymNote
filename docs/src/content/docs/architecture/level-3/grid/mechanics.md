@@ -40,7 +40,7 @@ To ensure the Java audio engine receives valid instructions, the ANTLR4 parser e
 
 ### The Sustain (`~`) Rules
 The sustain symbol extends a sound, which means a sound must already be playing.
-* **Rule 1:** A grid **cannot** begin with `~` unless a previous grid in the same loop left a note ringing. If it's the very first symbol of a track, it is a compilation error.
+* **Rule 1:** A grid **cannot** begin with `~`. The first token in a `grid {}` must be a Note/Sample hit or a Rest.
 * **Rule 2:** You **cannot** place a `~` immediately after a rest (`-`). You cannot sustain silence.
 * **Valid:** `C4 ~ ~ -`
 * **Invalid:** `~ C4 -` or `C4 - ~`
@@ -53,9 +53,10 @@ The sustain symbol extends a sound, which means a sound must already be playing.
 
 ### The Volume Modifier (`.vol()`) Rules
 * **Rule 1:** The `.vol()` modifier can only be attached to a Note, a Sample, or a closed Chord bracket.
-* **Rule 2:** It **cannot** be attached to a Rest or a Sustain.
-* **Valid:** `Kick.vol(0.8) - C4.vol(my_var)`
-* **Invalid:** `-.vol(0.5)` or `~.vol(1.0)`
+* **Rule 2:** Inside chord brackets, elements must be plain hits only. Apply `.vol()` to the whole closed chord, not each element.
+* **Rule 3:** It **cannot** be attached to a Rest or a Sustain.
+* **Valid:** `Kick.vol(0.8) - C4.vol(my_var) [C4, E4].vol(0.7)`
+* **Invalid:** `-.vol(0.5)`, `~.vol(1.0)`, or `[C4.vol(0.5), E4.vol(0.5)]`
 
 ---
 
@@ -85,6 +86,8 @@ grid (1/16) {
 ## 4. Resolution: Step Size vs. Capacity
 
 The resolution parameter in the grid declaration e.g., `grid (1/16)` or `grid (1/8)` is crucial to understand. 
+
+> **Important:** The resolution is a specially-parsed musical token restricted to standard DAW subdivisions to guarantee predictable timing. You must hardcode one of the following exact fractions: `1/1`, `1/2`, `1/4`, `1/8`, `1/16`, or `1/32`.
 
 **It does not mean "this block must contain exactly 16 notes."** Instead, it means: **"Every single symbol inside this block has a duration of exactly 1/16th of a bar."**
 

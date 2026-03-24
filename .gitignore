@@ -1,0 +1,15 @@
+# Compiled output
+out/
+*.class
+
+# IntelliJ IDEA files
+.idea/
+
+# ANTLR generated files
+src/gen/
+
+# ANTLR generated files
+*.interp
+*.tokens
+grammar/*.interp
+grammar/*.tokens

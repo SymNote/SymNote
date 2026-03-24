@@ -1,0 +1,75 @@
+// Hello World SymNote Example
+// Demonstrates sequential and parallel tracks
+
+set_bpm(105);
+
+synth SquareLead = load_synth("square");
+synth DeepBass = load_synth("bass");
+synth Strings = load_synth("strings");
+synth SawLead = load_synth("sawtooth");
+
+track Intro(int bars) {
+    use_synth(SquareLead);
+    loop (int i from 1 to bars) {
+        grid(1/8) {
+            C4 E4 G4 B4 C5 B4 G4 E4
+        }
+    }
+}
+
+track MainBass(int loops) {
+    use_synth(DeepBass);
+    loop (int i from 1 to loops) {
+        grid(1/8) {
+            C3 C3 - C3 C3 - C3 -
+            F2 F2 - F2 F2 - F2 -
+            A2 A2 - A2 A2 - A2 -
+            G2 G2 - G2 G2 - G2 -
+        }
+    }
+}
+
+track MainChords(int loops) {
+    use_synth(Strings);
+    loop (int i from 1 to loops) {
+        // 1/1 resolution = 1 symbol lasts an entire 4-beat bar
+        grid(1/1) {
+            [C4, E4, G4]
+            [F3, A3, C4]
+            [A3, C4, E4]
+            [G3, B3, D4]
+        }
+    }
+}
+
+track MainMelody(int loops) {
+    use_synth(SawLead);
+    loop (int i from 1 to loops) {
+        grid(1/8) {
+            C5 - E5 - G5 - C6 -
+            A5 - F5 - C5 - A4 -
+            C5 - E5 - A5 - C6 -
+            B5 - G5 - D5 - B4 -
+        }
+    }
+}
+
+track Outro() {
+    use_synth(SquareLead);
+    // 1/2 resolution = 1 symbol/chord lasts 2 beats
+    grid(1/2) {
+        [E4, G4, C5] ~ ~ ~
+    }
+}
+
+
+Intro(2);
+
+// Executes 3 tracks simultaneously for 4 bars
+parallel {
+    MainBass(1);
+    MainChords(1);
+    MainMelody(1);
+}
+
+Outro();

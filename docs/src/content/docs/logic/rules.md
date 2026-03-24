@@ -12,6 +12,9 @@ Breaking these rules will result in a compilation error, preventing the engine f
 ## 1. Contextual Constraints
 SymNote's 3-Level Architecture heavily restricts what keywords can be used where.
 
+### Level 1 Restrictions (Global Timeline)
+* **Parallel Strictness:** The `parallel` block is exclusively used to play tracks concurrently at the root level. You cannot declare variables, run math, or use `if`/`while` loops inside a `parallel` block. It expects only track invocations (e.g., `DrumMachine(4);`).
+
 ### Level 2 Restrictions (Inside a `track`)
 * **No concurrency:** You cannot use the `parallel` block inside a track. Concurrency is strictly a Level 1 (Timeline) operation.
 * **No nested tracks:** You cannot define a new `track` inside another `track`.
