@@ -7,3 +7,9 @@ out/
 
 # ANTLR generated files
 src/gen/
+
+# ANTLR generated files
+*.interp
+*.tokens
+grammar/*.interp
+grammar/*.tokens

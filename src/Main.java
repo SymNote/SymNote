@@ -16,10 +16,20 @@ public class Main {
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             SymNoteParser parser = new SymNoteParser(tokens);
 
+            lexer.removeErrorListeners();
+            parser.removeErrorListeners();
+            ErrorListener errorListener = new ErrorListener();
+            lexer.addErrorListener(errorListener);
+            parser.addErrorListener(errorListener);
+
             ParseTree tree = parser.program();
 
-            SymNoteInterpreter interpreter = new SymNoteInterpreter();
-            interpreter.visit(tree);
+            if (errorListener.hasError) {
+                System.err.println("Compilation aborted: The program contains syntax errors.");
+            } else {
+                SymNoteInterpreter interpreter = new SymNoteInterpreter();
+                interpreter.visit(tree);
+            }
 
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
