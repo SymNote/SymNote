@@ -11,7 +11,7 @@ echo "Generating parser with ANTLR..."
 mkdir -p src/gen
 
 cd grammar || exit
-java -jar "../$JAR_PATH" -visitor -no-listener -o ../src/gen SymNote.g4
+java -jar "../$JAR_PATH" -visitor -o ../src/gen SymNote.g4
 cd ..
 
 echo "Done. Parser files are in src/gen/"

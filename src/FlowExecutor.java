@@ -1,10 +1,6 @@
+import environment.Environment;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import audio.Synthesizer;
-import environment.Environment;
 
 public class FlowExecutor {
     private final SymNoteInterpreter interpreter;
@@ -16,6 +12,7 @@ public class FlowExecutor {
     public Object executeCall(SymNoteParser.CallExprContext ctx) {
         String functionName = ctx.ID().getText();
         List<Object> args = new ArrayList<>();
+
         if (ctx.arguments() != null) {
             for (SymNoteParser.ExpressionContext exprCtx : ctx.arguments().expression()) {
                 args.add(interpreter.visit(exprCtx));
@@ -24,25 +21,40 @@ public class FlowExecutor {
 
         switch (functionName) {
             case "set_bpm":
-                interpreter.bpm = (Integer) args.get(0);
-                System.out.println("[Audio] BPM set to " + interpreter.bpm);
+                if (args.isEmpty()) {
+                    throw new RuntimeException(
+                            "set_bpm requires one argument at line " + ctx.getStart().getLine());
+                }
+                interpreter.bpm = interpreter.toNumber(args.get(0), ctx.getStart().getLine()).intValue();
                 return null;
             case "load_synth":
-                String synthName = args.get(0).toString();
-                Synthesizer synth = interpreter.audioEngine.createSynthesizer(synthName);
-                System.out.println("[Audio] Loaded MIDI Synth: " + synthName);
-                return synth;
+                if (args.isEmpty()) {
+                    throw new RuntimeException(
+                            "load_synth requires one argument at line " + ctx.getStart().getLine());
+                }
+                return String.valueOf(args.get(0));
             case "use_synth":
-                interpreter.currentSynth = (Synthesizer) args.get(0);
+                if (args.isEmpty()) {
+                    throw new RuntimeException(
+                            "use_synth requires one argument at line " + ctx.getStart().getLine());
+                }
+                interpreter.currentSynthName = String.valueOf(args.get(0));
                 return null;
             default:
-                try {
-                    SymNoteParser.TrackDeclContext trackCtx = (SymNoteParser.TrackDeclContext) interpreter.env
-                            .getTrack(functionName);
+                SymNoteParser.TrackDeclContext trackCtx = (SymNoteParser.TrackDeclContext) interpreter.env
+                        .getTrack(functionName);
 
-                    // Create isolated scope for Track
-                    Environment previousEnv = interpreter.env;
-                    interpreter.env = new Environment(previousEnv);
+                Environment previousEnv = interpreter.env;
+                String previousSynth = interpreter.currentSynthName;
+                interpreter.env = new Environment(previousEnv);
+
+                try {
+                    int expectedParams = trackCtx.parameters() == null ? 0 : trackCtx.parameters().param().size();
+                    if (args.size() != expectedParams) {
+                        throw new RuntimeException(
+                                "Track '" + functionName + "' expected " + expectedParams + " argument(s) but got "
+                                        + args.size() + " at line " + ctx.getStart().getLine());
+                    }
 
                     if (trackCtx.parameters() != null) {
                         for (int i = 0; i < trackCtx.parameters().param().size(); i++) {
@@ -51,47 +63,37 @@ public class FlowExecutor {
                         }
                     }
 
-                    System.out.println("[Track] Started: " + functionName);
-                    Synthesizer oldSynth = interpreter.currentSynth;
-
                     interpreter.visit(trackCtx.blockLVL2());
-
-                    interpreter.currentSynth = oldSynth;
+                } finally {
+                    interpreter.currentSynthName = previousSynth;
                     interpreter.env = previousEnv;
-                    System.out.println("[Track] Completed: " + functionName);
-                } catch (Exception e) {
-                    System.err.println("Cannot run track '" + functionName + "'. " + e.getMessage());
                 }
+
                 return null;
         }
     }
 
     public Object executeParallel(SymNoteParser.ParallelStmtContext ctx) {
-        ExecutorService executor = Executors.newFixedThreadPool(ctx.parallelEntry().size());
+        long startTick = interpreter.currentTick;
+        long maxTick = startTick;
+        Environment baseEnv = interpreter.env;
+        String baseSynth = interpreter.currentSynthName;
+        int baseBpm = interpreter.bpm;
 
-        for (SymNoteParser.ParallelEntryContext pCtx : ctx.parallelEntry()) {
-            final Environment threadEnv = new Environment(interpreter.env);
-            final Synthesizer threadSynth = interpreter.currentSynth;
-            final int threadBpm = interpreter.bpm;
+        for (SymNoteParser.ParallelEntryContext entryCtx : ctx.parallelEntry()) {
+            interpreter.currentTick = startTick;
+            interpreter.env = new Environment(baseEnv);
+            interpreter.currentSynthName = baseSynth;
+            interpreter.bpm = baseBpm;
 
-            executor.submit(() -> {
-                SymNoteInterpreter threadVisitor = new SymNoteInterpreter();
-                threadVisitor.env = threadEnv;
-                threadVisitor.audioEngine = interpreter.audioEngine; // Share the global audio engine instance
-                threadVisitor.bpm = threadBpm;
-                threadVisitor.currentSynth = threadSynth;
-
-                threadVisitor.visit(pCtx.callExpr());
-            });
+            interpreter.visit(entryCtx.callExpr());
+            maxTick = Math.max(maxTick, interpreter.currentTick);
         }
 
-        executor.shutdown();
-        try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("[Audio] Track Execution Complete.");
+        interpreter.env = baseEnv;
+        interpreter.currentSynthName = baseSynth;
+        interpreter.bpm = baseBpm;
+        interpreter.currentTick = maxTick;
         return null;
     }
 }

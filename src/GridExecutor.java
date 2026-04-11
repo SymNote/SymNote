@@ -1,154 +1,269 @@
 import java.util.ArrayList;
 import java.util.List;
+import midi.MusicalEvent;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 public class GridExecutor {
     private final SymNoteInterpreter interpreter;
-    private final List<Integer> activeNotes = new ArrayList<>();
+
+    private static class PendingNote {
+        private final long startTick;
+        private final int pitch;
+        private final int velocity;
+        private final String synthName;
+
+        private PendingNote(long startTick, int pitch, int velocity, String synthName) {
+            this.startTick = startTick;
+            this.pitch = pitch;
+            this.velocity = velocity;
+            this.synthName = synthName;
+        }
+    }
 
     public GridExecutor(SymNoteInterpreter interpreter) {
         this.interpreter = interpreter;
     }
 
-    private int noteToMidi(String noteStr) {
-        String[] noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
-        String note = noteStr.substring(0, 1).toUpperCase();
-        int modifier = 0;
-        int octaveIndex = 1;
-
-        if (noteStr.contains("#")) {
-            modifier = 1;
-            octaveIndex = 2;
-        } else if (noteStr.contains("b")) {
-            modifier = -1;
-            octaveIndex = 2;
-        }
-
-        int octave = Integer.parseInt(noteStr.substring(octaveIndex));
-        int noteIndex = -1;
-        for (int i = 0; i < noteNames.length; i++) {
-            if (noteNames[i].equals(note)) {
-                noteIndex = i;
-                break;
-            }
-        }
-        return (octave + 1) * 12 + noteIndex + modifier;
-    }
-
     public Object executeGridStmt(SymNoteParser.GridStmtContext ctx) {
-        String resStr = ctx.RESOLUTION().getText();
-        String[] parts = resStr.split("/");
-        float num = Float.parseFloat(parts[0]);
-        float den = Float.parseFloat(parts[1]);
-
-        float beatsToWait = (num / den) * 4.0f;
-        long waitMs = (long) (beatsToWait * (60000.0f / interpreter.bpm));
+        long stepTicks = resolutionToTicks(ctx.RESOLUTION().getText());
+        List<PendingNote> activeNotes = new ArrayList<>();
 
         if (ctx.gridSequence() != null) {
-            executeGridSequence(ctx.gridSequence(), waitMs);
+            processGridSequence(ctx.gridSequence(), stepTicks, activeNotes);
         }
+
+        closeActiveNotes(activeNotes, interpreter.currentTick);
         return null;
     }
 
-    private void executeGridSequence(ParseTree node, long waitMs) {
+    private long resolutionToTicks(String resolutionText) {
+        String[] parts = resolutionText.split("/");
+        float numerator = Float.parseFloat(parts[0]);
+        float denominator = Float.parseFloat(parts[1]);
+        float beats = (numerator / denominator) * 4.0f;
+        long ticks = Math.round(beats * interpreter.getTicksPerBeat());
+        return Math.max(1, ticks);
+    }
+
+    private void processGridSequence(ParseTree node, long stepTicks, List<PendingNote> activeNotes) {
         if (node instanceof SymNoteParser.GridSequenceContext) {
-            SymNoteParser.GridSequenceContext ctx = (SymNoteParser.GridSequenceContext) node;
-            if (ctx.gridPlayable() != null) {
-                playPlayable(ctx.gridPlayable(), waitMs);
-                if (ctx.gridTailPlayable() != null)
-                    executeGridSequence(ctx.gridTailPlayable(), waitMs);
+            SymNoteParser.GridSequenceContext seqCtx = (SymNoteParser.GridSequenceContext) node;
+            if (seqCtx.gridPlayable() != null) {
+                processPlayable(seqCtx.gridPlayable(), stepTicks, activeNotes);
+                if (seqCtx.gridTailPlayable() != null) {
+                    processGridSequence(seqCtx.gridTailPlayable(), stepTicks, activeNotes);
+                }
             } else {
-                stopAllNotes();
-                sleep(waitMs);
-                if (ctx.gridTailNoHold() != null)
-                    executeGridSequence(ctx.gridTailNoHold(), waitMs);
+                processRest(stepTicks, activeNotes);
+                if (seqCtx.gridTailNoHold() != null) {
+                    processGridSequence(seqCtx.gridTailNoHold(), stepTicks, activeNotes);
+                }
             }
-        } else if (node instanceof SymNoteParser.GridTailPlayableContext) {
-            SymNoteParser.GridTailPlayableContext ctx = (SymNoteParser.GridTailPlayableContext) node;
-            if (ctx.gridPlayable() != null) {
-                playPlayable(ctx.gridPlayable(), waitMs);
-                if (ctx.gridTailPlayable() != null)
-                    executeGridSequence(ctx.gridTailPlayable(), waitMs);
-            } else if (ctx.getText().startsWith("~")) {
-                sleep(waitMs);
-                if (ctx.gridTailPlayable() != null)
-                    executeGridSequence(ctx.gridTailPlayable(), waitMs);
+            return;
+        }
+
+        if (node instanceof SymNoteParser.GridTailPlayableContext) {
+            SymNoteParser.GridTailPlayableContext tailPlayableCtx = (SymNoteParser.GridTailPlayableContext) node;
+            if (tailPlayableCtx.gridPlayable() != null) {
+                processPlayable(tailPlayableCtx.gridPlayable(), stepTicks, activeNotes);
+                if (tailPlayableCtx.gridTailPlayable() != null) {
+                    processGridSequence(tailPlayableCtx.gridTailPlayable(), stepTicks, activeNotes);
+                }
+            } else if (tailPlayableCtx.getText().startsWith("~")) {
+                processSustain(stepTicks);
+                if (tailPlayableCtx.gridTailPlayable() != null) {
+                    processGridSequence(tailPlayableCtx.gridTailPlayable(), stepTicks, activeNotes);
+                }
             } else {
-                stopAllNotes();
-                sleep(waitMs);
-                if (ctx.gridTailNoHold() != null)
-                    executeGridSequence(ctx.gridTailNoHold(), waitMs);
+                processRest(stepTicks, activeNotes);
+                if (tailPlayableCtx.gridTailNoHold() != null) {
+                    processGridSequence(tailPlayableCtx.gridTailNoHold(), stepTicks, activeNotes);
+                }
             }
-        } else if (node instanceof SymNoteParser.GridTailNoHoldContext) {
-            SymNoteParser.GridTailNoHoldContext ctx = (SymNoteParser.GridTailNoHoldContext) node;
-            if (ctx.gridPlayable() != null) {
-                playPlayable(ctx.gridPlayable(), waitMs);
-                if (ctx.gridTailPlayable() != null)
-                    executeGridSequence(ctx.gridTailPlayable(), waitMs);
+            return;
+        }
+
+        if (node instanceof SymNoteParser.GridTailNoHoldContext) {
+            SymNoteParser.GridTailNoHoldContext tailNoHoldCtx = (SymNoteParser.GridTailNoHoldContext) node;
+            if (tailNoHoldCtx.gridPlayable() != null) {
+                processPlayable(tailNoHoldCtx.gridPlayable(), stepTicks, activeNotes);
+                if (tailNoHoldCtx.gridTailPlayable() != null) {
+                    processGridSequence(tailNoHoldCtx.gridTailPlayable(), stepTicks, activeNotes);
+                }
             } else {
-                stopAllNotes();
-                sleep(waitMs);
-                if (ctx.gridTailNoHold() != null)
-                    executeGridSequence(ctx.gridTailNoHold(), waitMs);
+                processRest(stepTicks, activeNotes);
+                if (tailNoHoldCtx.gridTailNoHold() != null) {
+                    processGridSequence(tailNoHoldCtx.gridTailNoHold(), stepTicks, activeNotes);
+                }
             }
         }
     }
 
-    private void playPlayable(SymNoteParser.GridPlayableContext ctx, long waitMs) {
-        stopAllNotes();
+    private void processPlayable(SymNoteParser.GridPlayableContext playableCtx, long stepTicks,
+            List<PendingNote> activeNotes) {
+        closeActiveNotes(activeNotes, interpreter.currentTick);
 
-        int velocity = 100;
-        if (ctx.gridVolModifier() != null) {
-            String valueStr = ctx.gridVolModifier().gridVolValue().getText();
-            if (ctx.gridVolModifier().gridVolValue().ID() != null) {
-                valueStr = interpreter.env.get(valueStr).toString();
-            }
-            float volume = Float.parseFloat(valueStr);
-            if (volume <= 1.0f && valueStr.contains(".")) {
-                velocity = (int) (volume * 127);
-            } else {
-                velocity = (int) volume;
+        int velocity = resolveVelocity(playableCtx);
+        String synth = interpreter.currentSynthName == null ? "piano" : interpreter.currentSynthName;
+
+        if (playableCtx.noteElement() != null) {
+            int midiPitch = resolveMidiPitch(playableCtx.noteElement(), playableCtx.getStart().getLine());
+            activeNotes.add(new PendingNote(interpreter.currentTick, midiPitch, velocity, synth));
+        } else if (playableCtx.gridChord() != null) {
+            for (SymNoteParser.NoteElementContext noteCtx : playableCtx.gridChord().noteElement()) {
+                int midiPitch = resolveMidiPitch(noteCtx, noteCtx.getStart().getLine());
+                activeNotes.add(new PendingNote(interpreter.currentTick, midiPitch, velocity, synth));
             }
         }
 
-        String sName = (interpreter.currentSynth != null) ? interpreter.currentSynth.getName() : "None";
-
-        if (ctx.noteElement() != null) {
-            System.out.print("[" + sName + "] Playing Note: " + ctx.noteElement().getText());
-            int midiNote = noteToMidi(ctx.noteElement().getText());
-            activeNotes.add(midiNote);
-            if (interpreter.currentSynth != null)
-                interpreter.currentSynth.noteOn(midiNote, velocity);
-        } else if (ctx.gridChord() != null) {
-            System.out.print("[" + sName + "] Playing Chord: [");
-            for (SymNoteParser.NoteElementContext nCtx : ctx.gridChord().noteElement()) {
-                System.out.print(nCtx.getText() + " ");
-                int midiNote = noteToMidi(nCtx.getText());
-                activeNotes.add(midiNote);
-                if (interpreter.currentSynth != null)
-                    interpreter.currentSynth.noteOn(midiNote, velocity);
-            }
-            System.out.print("]");
-        }
-        System.out.println("  (" + waitMs + "ms)");
-
-        sleep(waitMs);
+        interpreter.currentTick += stepTicks;
     }
 
-    private void stopAllNotes() {
-        if (interpreter.currentSynth != null) {
-            for (int note : activeNotes) {
-                interpreter.currentSynth.noteOff(note);
-            }
+    private void processSustain(long stepTicks) {
+        interpreter.currentTick += stepTicks;
+    }
+
+    private void processRest(long stepTicks, List<PendingNote> activeNotes) {
+        closeActiveNotes(activeNotes, interpreter.currentTick);
+        interpreter.currentTick += stepTicks;
+    }
+
+    private void closeActiveNotes(List<PendingNote> activeNotes, long endTick) {
+        for (PendingNote pendingNote : activeNotes) {
+            long duration = Math.max(1, endTick - pendingNote.startTick);
+            interpreter.getTimeline().addEvent(
+                    new MusicalEvent(pendingNote.startTick, pendingNote.pitch, pendingNote.velocity, duration,
+                            pendingNote.synthName));
         }
         activeNotes.clear();
     }
 
-    private void sleep(long ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+    private int resolveVelocity(SymNoteParser.GridPlayableContext playableCtx) {
+        int velocity = 100;
+        if (playableCtx.gridVolModifier() == null) {
+            return velocity;
         }
+
+        SymNoteParser.GridVolValueContext volValueCtx = playableCtx.gridVolModifier().gridVolValue();
+        if (volValueCtx.ID() != null) {
+            String variableName = volValueCtx.ID().getText();
+            interpreter.validateVariableDeclared(variableName, volValueCtx.getStart().getLine());
+            Object value = interpreter.env.get(variableName);
+            return normalizeVelocity(value, volValueCtx.getStart().getLine());
+        }
+
+        if (volValueCtx.FLOAT() != null) {
+            return normalizeVelocity(Float.parseFloat(volValueCtx.FLOAT().getText()), volValueCtx.getStart().getLine());
+        }
+
+        return normalizeVelocity(Integer.parseInt(volValueCtx.INT().getText()), volValueCtx.getStart().getLine());
+    }
+
+    private int normalizeVelocity(Object value, int line) {
+        if (value instanceof Integer) {
+            return clampVelocity((Integer) value);
+        }
+
+        if (value instanceof Float) {
+            float floatValue = (Float) value;
+            if (floatValue >= 0.0f && floatValue <= 1.0f) {
+                return clampVelocity(Math.round(floatValue * 127.0f));
+            }
+            return clampVelocity(Math.round(floatValue));
+        }
+
+        if (value instanceof String) {
+            String text = (String) value;
+            if (text.contains(".")) {
+                float parsed = Float.parseFloat(text);
+                if (parsed >= 0.0f && parsed <= 1.0f) {
+                    return clampVelocity(Math.round(parsed * 127.0f));
+                }
+                return clampVelocity(Math.round(parsed));
+            }
+            return clampVelocity(Integer.parseInt(text));
+        }
+
+        throw new RuntimeException("Invalid velocity value at line " + line);
+    }
+
+    private int clampVelocity(int velocity) {
+        return Math.max(0, Math.min(127, velocity));
+    }
+
+    private int resolveMidiPitch(SymNoteParser.NoteElementContext noteCtx, int line) {
+        String noteText;
+        if (noteCtx.NOTE() != null) {
+            noteText = noteCtx.NOTE().getText();
+        } else {
+            String variableName = noteCtx.ID().getText();
+            interpreter.validateVariableDeclared(variableName, line);
+            Object value = interpreter.env.get(variableName);
+            noteText = String.valueOf(value);
+        }
+
+        return noteToMidi(noteText, line);
+    }
+
+    private int noteToMidi(String noteText, int line) {
+        if (noteText == null || noteText.length() < 2) {
+            throw new RuntimeException("Invalid note '" + noteText + "' at line " + line);
+        }
+
+        String normalized = noteText.trim();
+        char noteChar = Character.toUpperCase(normalized.charAt(0));
+        int noteIndex;
+
+        switch (noteChar) {
+            case 'C':
+                noteIndex = 0;
+                break;
+            case 'D':
+                noteIndex = 2;
+                break;
+            case 'E':
+                noteIndex = 4;
+                break;
+            case 'F':
+                noteIndex = 5;
+                break;
+            case 'G':
+                noteIndex = 7;
+                break;
+            case 'A':
+                noteIndex = 9;
+                break;
+            case 'B':
+                noteIndex = 11;
+                break;
+            default:
+                throw new RuntimeException("Invalid note letter in '" + noteText + "' at line " + line);
+        }
+
+        int offset = 0;
+        int octaveStart = 1;
+        if (normalized.length() > 2) {
+            char accidental = normalized.charAt(1);
+            if (accidental == '#') {
+                offset = 1;
+                octaveStart = 2;
+            } else if (accidental == 'b' || accidental == 'B') {
+                offset = -1;
+                octaveStart = 2;
+            }
+        }
+
+        int octave;
+        try {
+            octave = Integer.parseInt(normalized.substring(octaveStart));
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid octave in note '" + noteText + "' at line " + line);
+        }
+
+        int midiPitch = (octave + 1) * 12 + noteIndex + offset;
+        if (midiPitch < 0 || midiPitch > 127) {
+            throw new RuntimeException("MIDI pitch out of range for note '" + noteText + "' at line " + line);
+        }
+        return midiPitch;
     }
 }
