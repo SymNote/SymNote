@@ -1,0 +1,110 @@
+set_bpm(90);
+
+synth Piano = load_synth("piano");
+synth Choir = load_synth("choir");
+synth Strings = load_synth("strings");
+synth Bass = load_synth("bass");
+synth Trumpet = load_synth("trumpet");
+synth Bell = load_synth("bell");
+
+// =======================
+// TRACK DEFINITIONS
+// =======================
+
+track LowStrings() {
+    use_synth(Strings);
+    grid(1/1) {
+        [D2, D3]
+        [Bb1, Bb2]
+        [G1, G2]
+        [A1, A2]
+    }
+}
+
+track HighChoir() {
+    use_synth(Choir);
+    grid(1/1) {
+        [D4, F4, A4]
+        [Bb3, D4, F4]
+        [G3, Bb3, D4]
+        [A3, C#4, E4]
+    }
+}
+
+track PianoArp() {
+    use_synth(Piano);
+    grid(1/16) {
+        D4 F4 A4 D5 F5 D5 A4 F4 D4 F4 A4 D5 F5 D5 A4 F4
+        Bb3 D4 F4 Bb4 D5 Bb4 F4 D4 Bb3 D4 F4 Bb4 D5 Bb4 F4 D4
+        G3 Bb3 D4 G4 Bb4 G4 D4 Bb3 G3 Bb3 D4 G4 Bb4 G4 D4 Bb3
+        A3 C#4 E4 A4 C#5 A4 E4 C#4 A3 C#4 E4 A4 C#5 A4 E4 C#4
+    }
+}
+
+track PianoEnd() {
+    use_synth(Piano);
+    grid(1/1) {
+        [D2, A2, D3, A3, D4, F4]
+        [Bb1, F2, Bb2, F3, Bb3, D4]
+        [G1, D2, G2, D3, G3, Bb3]
+        [A1, E2, A2, E3, A3, C#4] ~
+    }
+}
+
+
+track DeepBassImpact() {
+    use_synth(Bass);
+    grid(1/4) {
+        D1 - - - 
+        Bb1 - - - 
+        G1 - - - 
+        A1 - - -
+    }
+}
+
+track EpicTrumpet() {
+    use_synth(Trumpet);
+    grid(1/4) {
+        D5 ~ ~ F5
+        D5 ~ ~ C5
+        Bb4 ~ ~ A4
+        A4 ~ ~ ~
+    }
+}
+
+track FastBells() {
+    use_synth(Bell);
+    loop(int i from 1 to 4) {
+        grid(1/16) {
+            D6 F6 A6 D7 A6 F6 D6 A5
+            D6 F6 A6 D7 A6 F6 D6 A5
+        }
+    }
+}
+
+// =======================
+// ARRANGEMENT TIMELINE
+// =======================
+
+parallel {
+    LowStrings();
+    PianoArp();
+}
+
+parallel {
+    LowStrings();
+    HighChoir();
+    PianoArp();
+}
+
+parallel {
+    LowStrings();
+    HighChoir();
+    PianoArp();
+    DeepBassImpact();
+    EpicTrumpet();
+    FastBells();
+}
+
+PianoArp();
+PianoEnd();
