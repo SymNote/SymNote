@@ -1,4 +1,7 @@
 import environment.Environment;
+import environment.Variable;
+import gen.SymNoteParser;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +28,7 @@ public class FlowExecutor {
                     throw new RuntimeException(
                             "set_bpm requires one argument at line " + ctx.getStart().getLine());
                 }
-                interpreter.bpm = interpreter.toNumber(args.get(0), ctx.getStart().getLine()).intValue();
+                interpreter.bpm = interpreter.toNumber(args.get(0), ctx.getStart().getLine()).floatValue();
                 return null;
             case "load_synth":
                 if (args.isEmpty()) {
@@ -59,7 +62,7 @@ public class FlowExecutor {
                     if (trackCtx.parameters() != null) {
                         for (int i = 0; i < trackCtx.parameters().param().size(); i++) {
                             String paramName = trackCtx.parameters().param(i).ID().getText();
-                            interpreter.env.define(paramName, args.get(i));
+                            interpreter.env.define(paramName, new Variable("int", args.get(i)));
                         }
                     }
 
@@ -78,7 +81,7 @@ public class FlowExecutor {
         long maxTick = startTick;
         Environment baseEnv = interpreter.env;
         String baseSynth = interpreter.currentSynthName;
-        int baseBpm = interpreter.bpm;
+        float baseBpm = interpreter.bpm;
 
         for (SymNoteParser.ParallelEntryContext entryCtx : ctx.parallelEntry()) {
             interpreter.currentTick = startTick;

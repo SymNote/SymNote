@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+
+import gen.SymNoteParser;
 import midi.MusicalEvent;
 import org.antlr.v4.runtime.tree.ParseTree;
 

@@ -35,7 +35,7 @@ These types are native to SymNote and represent actual audio objects or concepts
 
 ---
 
-## 3. Variable Declaration and Assignment
+## 3. environment.Variable Declaration and Assignment
 Variables are declared using the format `type name = value;`. 
 
 ```ts
@@ -57,7 +57,7 @@ Whenever the engine enters a new set of curly braces `{ ... }` (whether for a `t
 ### Rule 1: Isolation and Destruction
 Variables declared inside a block exist *only* within that block. When the execution exits the closing brace `}`, the environment frame is popped, and the variables are destroyed.
 
-### Rule 2: Variable Shadowing
+### Rule 2: environment.Variable Shadowing
 A variable declared in a nested local scope can share the same name as a global variable. The local variable will "shadow" (temporarily override) the global one. Once the local scope ends, the original global value is restored.
 
 ```ts
@@ -76,7 +76,7 @@ if (true) {
 
 // Scope destroyed.
 // Here, offset == 12 again.
-// Calling 'local_amp' here will throw an "Undefined Variable" compile error.
+// Calling 'local_amp' here will throw an "Undefined environment.Variable" compile error.
 ```
 
 ---

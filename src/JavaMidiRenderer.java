@@ -5,11 +5,11 @@ import midi.MidiScheduler;
 import midi.SymNoteTimeline;
 
 public class JavaMidiRenderer implements AudioRenderer {
-    private int bpm = 120;
+    private float bpm = 120;
     private MidiPlaybackEngine engine;
 
     @Override
-    public void init(int bpm) {
+    public void init(float bpm) {
         this.bpm = bpm;
     }
 

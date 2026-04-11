@@ -50,7 +50,7 @@ routine get_amp(int velocity) returns float {
 ```
 
 ### Lexical Scope Violation (Undefined Variables)
-Attempting to read or modify a variable that has not been declared in the current or parent scope will result in an `Undefined Variable` error. Remember that variables declared inside blocks `{ }` are destroyed when the block ends.
+Attempting to read or modify a variable that has not been declared in the current or parent scope will result in an `Undefined environment.Variable` error. Remember that variables declared inside blocks `{ }` are destroyed when the block ends.
 
 ---
 

@@ -1,7 +1,7 @@
 import midi.SymNoteTimeline;
 
 public interface AudioRenderer {
-    void init(int bpm);
+    void init(float bpm);
 
     void render(SymNoteTimeline timeline);
 

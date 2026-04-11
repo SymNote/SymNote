@@ -51,7 +51,7 @@ public class MidiPlaybackEngine {
         Thread.sleep(SYNTH_WARMUP_MS);
     }
 
-    public void play(List<MidiAction> actions, int bpm, int ticksPerBeat) throws Exception {
+    public void play(List<MidiAction> actions, float bpm, int ticksPerBeat) throws Exception {
         long previousTick = 0L;
         long currentClockNs = System.nanoTime();
 
@@ -108,7 +108,7 @@ public class MidiPlaybackEngine {
         }
     }
 
-    private long ticksToNanos(long ticks, int ticksPerBeat, int bpm) {
+    private long ticksToNanos(long ticks, int ticksPerBeat, float bpm) {
         if (ticks <= 0) {
             return 0L;
         }

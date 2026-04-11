@@ -5,7 +5,7 @@ import java.util.Map;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 public class Environment {
-    private final Map<String, Object> variables = new HashMap<>();
+    private final Map<String, Variable> variables = new HashMap<>();
     private final Map<String, ParseTree> trackDeclarations = new HashMap<>();
     private Environment parent;
 
@@ -17,13 +17,13 @@ public class Environment {
         this.parent = parent;
     }
 
-    public void define(String name, Object value) {
-        variables.put(name, value);
+    public void define(String name, Variable variable) {
+        variables.put(name, variable);
     }
 
     public void assign(String name, Object value) {
         if (variables.containsKey(name)) {
-            variables.put(name, value);
+            variables.put(name, new Variable(variables.get(name).type, value));
             return;
         }
         if (parent != null) {
@@ -33,7 +33,7 @@ public class Environment {
         throw new RuntimeException("Undefined variable '" + name + "'.");
     }
 
-    public Object get(String name) {
+    public Variable get(String name) {
         if (variables.containsKey(name)) {
             return variables.get(name);
         }

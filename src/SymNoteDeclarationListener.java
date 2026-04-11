@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import gen.SymNoteBaseListener;
+import gen.SymNoteParser;
 import org.antlr.v4.runtime.Token;
 
 public class SymNoteDeclarationListener extends SymNoteBaseListener {
