@@ -47,6 +47,40 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         return super.visitProgram(ctx);
     }
 
+    // --- Block Scopes ---
+    @Override
+    public Object visitBlockLVL1(SymNoteParser.BlockLVL1Context ctx) {
+        Environment previousEnv = env;
+        try {
+            env = new Environment(previousEnv);
+            return super.visitBlockLVL1(ctx);
+        } finally {
+            env = previousEnv;
+        }
+    }
+
+    @Override
+    public Object visitBlockLVL2(SymNoteParser.BlockLVL2Context ctx) {
+        Environment previousEnv = env;
+        try {
+            env = new Environment(previousEnv);
+            return super.visitBlockLVL2(ctx);
+        } finally {
+            env = previousEnv;
+        }
+    }
+
+    @Override
+    public Object visitBlockRoutine(SymNoteParser.BlockRoutineContext ctx) {
+        Environment previousEnv = env;
+        try {
+            env = new Environment(previousEnv);
+            return super.visitBlockRoutine(ctx);
+        } finally {
+            env = previousEnv;
+        }
+    }
+
     // --- State & Variables ---
 
     private void checkType(String type, Object value, String name, int line) {
