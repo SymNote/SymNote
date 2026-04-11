@@ -28,8 +28,8 @@ This is crucial for SymNote because:
 * If a `loop` is encountered, the Visitor can repeatedly visit the exact same AST subtree without having to re-parse the original text.
 * It allows for safe, recursive calls inside `routine` definitions.
 
-### Variable Safety: Two-Pass Validation
-Variable usage is validated in two explicit passes:
+### environment.Variable Safety: Two-Pass Validation
+environment.Variable usage is validated in two explicit passes:
 1. **Pass 1 (Listener):** register declarations (with types) into symbol tables and report redeclaration errors.
 2. **Pass 2 (Visitor):** evaluate expressions/assignments and report an error when a variable is used without prior registration in pass 1.
 

@@ -9,12 +9,12 @@ public class MidiScheduler {
     private static final double STARTUP_PREROLL_BEATS = 1.0;
 
     private final SymNoteTimeline timeline;
-    private final int bpm;
+    private final float bpm;
     private final Map<String, Integer> channelBySynth = new HashMap<>();
     private final Map<String, Integer> programBySynth = new HashMap<>();
     private long lastComputedTick = 0L;
 
-    public MidiScheduler(SymNoteTimeline timeline, int bpm) {
+    public MidiScheduler(SymNoteTimeline timeline, float bpm) {
         this.timeline = timeline;
         this.bpm = bpm;
     }
