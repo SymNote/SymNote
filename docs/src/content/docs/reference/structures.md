@@ -28,8 +28,10 @@ These types are native to SymNote and represent actual audio objects or concepts
 * **`sample`**: A reference pointer to an audio buffer loaded in memory.
   * *Declaration:* `sample Kick = load_sample("kick.wav");`
   * *Engine Note:* The interpreter should load the file from disk once, store it in a global buffer pool, and assign the variable as a reference pointer to avoid redundant memory allocation.
-* **`synth`**: A reference to an active oscillator/generator node in the Java audio engine (e.g., JSyn).
+* **`synth`**: A symbolic instrument name used by the MIDI renderer.
   * *Declaration:* `synth Lead = load_synth("sawtooth");`
+  * *Engine Note:* The value returned by `load_synth(...)` is mapped to a General MIDI program.
+  * *Canonical names currently supported:* `piano`, `organ`, `bass`, `guitar`, `strings`, `square`, `sawtooth`, `pad`, `choir`, `trumpet`, `sax`, `flute`, `bell`, `pluck`.
 
 ---
 

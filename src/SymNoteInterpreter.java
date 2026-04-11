@@ -1,19 +1,41 @@
-import audio.AudioEngine;
-import audio.Synthesizer;
 import environment.Environment;
+import java.util.HashSet;
+import java.util.Set;
+import midi.SymNoteTimeline;
 
 public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
-    public Environment env = new Environment();
-    public AudioEngine audioEngine = new AudioEngine();
-    public int bpm = 120;
-    public Synthesizer currentSynth = null;
+    private static final int TICKS_PER_BEAT = 480;
 
-    private final GridExecutor gridExecutor;
+    public Environment env = new Environment();
+    public int bpm = 120;
+    public String currentSynthName = "piano";
+    public long currentTick = 0;
+
+    private final Set<String> declaredVariables;
+    private final SymNoteTimeline timeline = new SymNoteTimeline(TICKS_PER_BEAT);
     private final FlowExecutor flowExecutor;
+    private final GridExecutor gridExecutor;
 
     public SymNoteInterpreter() {
-        this.gridExecutor = new GridExecutor(this);
+        this(new HashSet<>());
+    }
+
+    public SymNoteInterpreter(Set<String> declaredVariables) {
+        this.declaredVariables = new HashSet<>(declaredVariables);
         this.flowExecutor = new FlowExecutor(this);
+        this.gridExecutor = new GridExecutor(this);
+    }
+
+    public SymNoteTimeline getTimeline() {
+        return timeline;
+    }
+
+    public int getBpm() {
+        return bpm;
+    }
+
+    int getTicksPerBeat() {
+        return TICKS_PER_BEAT;
     }
 
     @Override
@@ -32,6 +54,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitAssignStmt(SymNoteParser.AssignStmtContext ctx) {
+        validateVariableDeclared(ctx.ID().getText(), ctx.getStart().getLine());
         env.assign(ctx.ID().getText(), visit(ctx.expression()));
         return null;
     }
@@ -46,6 +69,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitAssignStmtLVL2(SymNoteParser.AssignStmtLVL2Context ctx) {
+        validateVariableDeclared(ctx.ID().getText(), ctx.getStart().getLine());
         env.assign(ctx.ID().getText(), visit(ctx.expression()));
         return null;
     }
@@ -68,7 +92,19 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitAtomId(SymNoteParser.AtomIdContext ctx) {
-        return env.get(ctx.ID().getText());
+        String name = ctx.ID().getText();
+        validateVariableDeclared(name, ctx.getStart().getLine());
+        return env.get(name);
+    }
+
+    @Override
+    public Object visitParenExpr(SymNoteParser.ParenExprContext ctx) {
+        return visit(ctx.expression());
+    }
+
+    @Override
+    public Object visitFuncCallExpr(SymNoteParser.FuncCallExprContext ctx) {
+        return visit(ctx.callExpr());
     }
 
     // --- Function & Track Execution ---
@@ -89,6 +125,11 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitRoutineDecl(SymNoteParser.RoutineDeclContext ctx) {
+        throw new RuntimeException("routine is not implemented yet");
+    }
+
+    @Override
     public Object visitCallExpr(SymNoteParser.CallExprContext ctx) {
         return flowExecutor.executeCall(ctx);
     }
@@ -97,12 +138,15 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitLoopStmt(SymNoteParser.LoopStmtContext ctx) {
         String varName = ctx.ID().getText();
-        int from = (Integer) visit(ctx.e1);
-        int to = (Integer) visit(ctx.e2);
+        int from = toNumber(visit(ctx.e1), ctx.getStart().getLine()).intValue();
+        int to = toNumber(visit(ctx.e2), ctx.getStart().getLine()).intValue();
 
         for (int i = from; i <= to; i++) {
+            Environment previousEnv = env;
+            env = new Environment(previousEnv);
             env.define(varName, i);
             visit(ctx.statementLVL1());
+            env = previousEnv;
         }
         return null;
     }
@@ -110,14 +154,37 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitLoopStmtLVL2(SymNoteParser.LoopStmtLVL2Context ctx) {
         String varName = ctx.ID().getText();
-        int from = (Integer) visit(ctx.e1);
-        int to = (Integer) visit(ctx.e2);
+        int from = toNumber(visit(ctx.e1), ctx.getStart().getLine()).intValue();
+        int to = toNumber(visit(ctx.e2), ctx.getStart().getLine()).intValue();
 
         for (int i = from; i <= to; i++) {
+            Environment previousEnv = env;
+            env = new Environment(previousEnv);
             env.define(varName, i);
             visit(ctx.statementLVL2());
+            env = previousEnv;
         }
         return null;
+    }
+
+    @Override
+    public Object visitIfStmt(SymNoteParser.IfStmtContext ctx) {
+        throw new RuntimeException("if is not implemented yet");
+    }
+
+    @Override
+    public Object visitIfStmtLVL2(SymNoteParser.IfStmtLVL2Context ctx) {
+        throw new RuntimeException("if is not implemented yet");
+    }
+
+    @Override
+    public Object visitWhileStmt(SymNoteParser.WhileStmtContext ctx) {
+        throw new RuntimeException("while is not implemented yet");
+    }
+
+    @Override
+    public Object visitWhileStmtLVL2(SymNoteParser.WhileStmtLVL2Context ctx) {
+        throw new RuntimeException("while is not implemented yet");
     }
 
     @Override
@@ -128,11 +195,25 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     // --- Grid / Time Execution ---
     @Override
     public Object visitGridStmtLVL2(SymNoteParser.GridStmtLVL2Context ctx) {
-        return visit(ctx.gridStmt());
+        return gridExecutor.executeGridStmt(ctx.gridStmt());
     }
 
     @Override
     public Object visitGridStmt(SymNoteParser.GridStmtContext ctx) {
         return gridExecutor.executeGridStmt(ctx);
     }
+
+    void validateVariableDeclared(String variableName, int line) {
+        if (!declaredVariables.contains(variableName)) {
+            throw new RuntimeException("Undefined variable '" + variableName + "' at line " + line);
+        }
+    }
+
+    Number toNumber(Object value, int line) {
+        if (value instanceof Integer || value instanceof Float) {
+            return (Number) value;
+        }
+        throw new RuntimeException("Expected numeric value at line " + line);
+    }
+
 }

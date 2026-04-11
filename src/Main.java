@@ -2,6 +2,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 public class Main {
     public static void main(String[] args) {
@@ -27,12 +28,24 @@ public class Main {
             if (errorListener.hasError) {
                 System.err.println("Compilation aborted: The program contains syntax errors.");
             } else {
-                SymNoteInterpreter interpreter = new SymNoteInterpreter();
+                SymNoteDeclarationListener declarationListener = new SymNoteDeclarationListener();
+                ParseTreeWalker.DEFAULT.walk(declarationListener, tree);
+
+                SymNoteInterpreter interpreter = new SymNoteInterpreter(declarationListener.getDeclaredVariables());
                 interpreter.visit(tree);
+
+                AudioRenderer renderer = new JavaMidiRenderer();
+                try {
+                    renderer.init(interpreter.getBpm());
+                    renderer.render(interpreter.getTimeline());
+                } finally {
+                    renderer.shutdown();
+                }
             }
 
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
     }
+
 }
