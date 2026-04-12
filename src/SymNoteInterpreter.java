@@ -347,7 +347,16 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         Object expr1 = visit(ctx.expression(0));
         Object expr2 = visit(ctx.expression(1));
 
-        if(expr1 instanceof Number && expr2 instanceof Number) {
+        if (ctx.MOD() != null) {
+            if (expr1 instanceof Integer && expr2 instanceof Integer) {
+                int val1 = (Integer) expr1;
+                int val2 = (Integer) expr2;
+                return val1 % val2;
+            }
+            throw new RuntimeException("Invalid operands for modulus at line " + ctx.getStart().getLine());
+        }
+
+        if (expr1 instanceof Number && expr2 instanceof Number) {
             float val1 = ((Number) expr1).floatValue();
             float val2 = ((Number) expr2).floatValue();
             return ctx.MUL() != null ? val1 * val2 : val1 / val2;
