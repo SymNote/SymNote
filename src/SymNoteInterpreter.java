@@ -232,22 +232,106 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitIfStmt(SymNoteParser.IfStmtContext ctx) {
-        throw new RuntimeException("if is not implemented yet");
+        Object condition = visit(ctx.expression());
+        
+        if(!(condition instanceof Boolean)){
+            throw new RuntimeException("Condition in 'if' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
+        }
+
+        if((Boolean) condition){
+            Environment previousEnv = env;
+            try {
+                env = new Environment(previousEnv);
+                visit(ctx.statementLVL1(0));
+            } finally {
+                env = previousEnv;
+            }
+        } else if (ctx.statementLVL1(1) != null){
+            Environment previousEnv = env;
+            try {
+                env = new Environment(previousEnv);
+                visit(ctx.statementLVL1(1));
+            } finally {
+                env = previousEnv;
+            }
+        }
+        return null;
     }
 
     @Override
     public Object visitIfStmtLVL2(SymNoteParser.IfStmtLVL2Context ctx) {
-        throw new RuntimeException("if is not implemented yet");
+        Object condition = visit(ctx.expression());
+        
+        if(!(condition instanceof Boolean)){
+            throw new RuntimeException("Condition in 'if' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
+        }
+
+        if((Boolean) condition){
+            Environment previousEnv = env;
+            try {
+                env = new Environment(previousEnv);
+                visit(ctx.statementLVL2(0));
+            } finally {
+                env = previousEnv;
+            }
+        } else if (ctx.statementLVL2(1) != null){
+            Environment previousEnv = env;
+            try {
+                env = new Environment(previousEnv);
+                visit(ctx.statementLVL2(1));
+            } finally {
+                env = previousEnv;
+            }
+        }
+        return null;
     }
 
     @Override
     public Object visitWhileStmt(SymNoteParser.WhileStmtContext ctx) {
-        throw new RuntimeException("while is not implemented yet");
+        while (true) {
+            Object condition = visit(ctx.expression());
+            
+            if(!(condition instanceof Boolean)){
+                throw new RuntimeException("Condition in 'while' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
+            }
+            
+            if(!(Boolean) condition){
+                break;
+            }
+
+            Environment previousEnv = env;
+            try {
+                env = new Environment(previousEnv);
+                visit(ctx.statementLVL1());
+            } finally {
+                env = previousEnv;
+            }
+        }
+        return null;
     }
 
     @Override
     public Object visitWhileStmtLVL2(SymNoteParser.WhileStmtLVL2Context ctx) {
-        throw new RuntimeException("while is not implemented yet");
+        while(true){
+            Object condition = visit(ctx.expression());
+            
+            if(!(condition instanceof Boolean)){
+                throw new RuntimeException("Condition in 'while' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
+            }
+            
+            if(!(Boolean) condition){
+                break;
+            }
+
+            Environment previousEnv = env;
+            try {
+                env = new Environment(previousEnv);
+                visit(ctx.statementLVL2());
+            } finally {
+                env = previousEnv;
+            }
+        }
+        return null;
     }
 
     @Override
