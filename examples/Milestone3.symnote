@@ -1,0 +1,90 @@
+set_bpm(90);
+
+synth Piano = load_synth("piano");
+synth Choir = load_synth("choir");
+synth Strings = load_synth("strings");
+
+float a = (10.0 - 5.0) * (8.0 + 2.0) * 2.0;
+float b = (9.0 - 1.0) / (2.0 + 2.0);
+bool dramatic = (a > b) and not (3.0 == 4.0) and true;
+
+float baseVel = 0.55;
+if (dramatic) {
+    baseVel = 1.0;
+} else {
+    baseVel = 0.85;
+}
+
+float stringsVel = (baseVel - 0.2) * 127.0;
+float choirVel = (baseVel - 0.2) * 127.0;
+float pianoVel = (baseVel + 0.2) * 127.0;
+
+track LowStrings(float v, bool mode) {
+    use_synth(Strings);
+    if (mode) {
+        grid(1/1) {
+            [D2, D3].vol(v)
+            [Bb1, Bb2].vol(v)
+            [G1, G2].vol(v)
+            [A1, A2].vol(v)
+        }
+    } else {
+        grid(1/1) {
+            [D2, D3].vol(v)
+            [D2, D3].vol(v)
+            [D2, D3].vol(v)
+            [D2, D3].vol(v)
+        }
+    }
+}
+
+track HighChoir(float v, bool mode) {
+    use_synth(Choir);
+    if (mode) {
+        grid(1/1) {
+            [D4, F4, A4].vol(v)
+            [Bb3, D4, F4].vol(v)
+            [G3, Bb3, D4].vol(v)
+            [A3, C#4, E4].vol(v)
+        }
+    } else {
+        grid(1/1) {
+            [D4, F4, A4].vol(v)
+            -
+            [D4, F4, A4].vol(v)
+            -
+        }
+    }
+}
+
+track PianoArp(float v, bool mode) {
+    use_synth(Piano);
+    if (mode) {
+        loop(int i from 1 to 2) {
+            grid(1/16) {
+                D4.vol(v) F4.vol(v) A4.vol(v) D5.vol(v) F5.vol(v) D5.vol(v) A4.vol(v) F4.vol(v)
+                D4.vol(v) F4.vol(v) A4.vol(v) D5.vol(v) F5.vol(v) D5.vol(v) A4.vol(v) F4.vol(v)
+            }
+        }
+    } else {
+        loop(int i from 1 to 4) {
+            grid(1/8) {
+                D4.vol(v) A4.vol(v) D5.vol(v) A4.vol(v)
+                D4.vol(v) A4.vol(v) D5.vol(v) A4.vol(v)
+            }
+        }
+    }
+}
+
+parallel {
+    LowStrings(stringsVel, dramatic);
+    HighChoir(choirVel, dramatic);
+    PianoArp(pianoVel, dramatic);
+}
+
+// Errors
+
+// ghost = 1.0; // not declared variable (pass 2)
+// float baseVel = 0.2; // redeclaration in same scope (pass 1)
+// float wrongType = true; // type mismatch
+// bool brokenLogic = 1.0 and 2.0; // and needs bool

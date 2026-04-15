@@ -150,7 +150,7 @@ public class GridExecutor {
         if (volValueCtx.ID() != null) {
             String variableName = volValueCtx.ID().getText();
             interpreter.validateVariableDeclared(variableName, volValueCtx.getStart().getLine());
-            Object value = interpreter.env.get(variableName);
+            Object value = interpreter.env.get(variableName).value;
             return normalizeVelocity(value, volValueCtx.getStart().getLine());
         }
 
@@ -200,7 +200,7 @@ public class GridExecutor {
         } else {
             String variableName = noteCtx.ID().getText();
             interpreter.validateVariableDeclared(variableName, line);
-            Object value = interpreter.env.get(variableName);
+            Object value = interpreter.env.get(variableName).value;
             noteText = String.valueOf(value);
         }
 
