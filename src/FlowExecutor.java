@@ -62,7 +62,8 @@ public class FlowExecutor {
                     if (trackCtx.parameters() != null) {
                         for (int i = 0; i < trackCtx.parameters().param().size(); i++) {
                             String paramName = trackCtx.parameters().param(i).ID().getText();
-                            interpreter.env.define(paramName, new Variable("int", args.get(i)));
+                            String paramType = trackCtx.parameters().param(i).type().getText();
+                            interpreter.env.define(paramName, new Variable(paramType, args.get(i)));
                         }
                     }
 
