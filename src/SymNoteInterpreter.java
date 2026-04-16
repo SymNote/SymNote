@@ -481,11 +481,12 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitOpUnaryMinus(SymNoteParser.OpUnaryMinusContext ctx) {
+    public Object visitOpUnaryMinusPlus(SymNoteParser.OpUnaryMinusPlusContext ctx) {
         Object expr = visit(ctx.expression());
         if(expr instanceof Number) {
             float val = ((Number) expr).floatValue();
-            return -val;
+            if (ctx.SUB() != null) return -val;
+            if (ctx.ADD() != null) return val;
         }
         throw new RuntimeException("Invalid operand for unary minus at line " + ctx.getStart().getLine());
     }
