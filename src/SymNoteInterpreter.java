@@ -85,8 +85,8 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     private void checkType(String type, Object value, String name, int line) {
         boolean error = false;
-        if (type.equals("int") && !(value instanceof Integer)) error = true;
-        else if (type.equals("float") && !(value instanceof Float)) error = true;
+        if (type.equals("int") && !(value instanceof Integer || value instanceof Float || value instanceof Double)) error = true;
+        else if (type.equals("float") && !(value instanceof Float || value instanceof Double)) error = true;
         else if (type.equals("string") && !(value instanceof String)) error = true;
         else if (type.equals("bool") && !(value instanceof Boolean)) error = true;
 
@@ -103,6 +103,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         if(value != null) {
             int line = ctx.getStart().getLine();
             checkType(type, value, name, line);
+            if (type.equals("int")) {
+                env.define(name, new Variable(type, ((Number) value).intValue()));
+                return null;
+            }
         }
         env.define(name, new Variable(type, value));
         return null;
@@ -112,9 +116,16 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     public Object visitAssignStmt(SymNoteParser.AssignStmtContext ctx) {
         validateVariableDeclared(ctx.ID().getText(), ctx.getStart().getLine());
         Object value = visit(ctx.expression());
-        checkType(env.get(ctx.ID().getText()).type, value, ctx.ID().getText(), ctx.getStart().getLine());
+        String type = env.get(ctx.ID().getText()).type;
+        String name = ctx.ID().getText();
+        checkType(type, value, name, ctx.getStart().getLine());
 
-        env.assign(ctx.ID().getText(), visit(ctx.expression()));
+        if (type.equals("int")) {
+            env.assign(name, ((Number) value).intValue());
+            return null;
+        }
+
+        env.assign(name, visit(ctx.expression()));
         return null;
     }
 
@@ -134,7 +145,17 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitAssignStmtLVL2(SymNoteParser.AssignStmtLVL2Context ctx) {
         validateVariableDeclared(ctx.ID().getText(), ctx.getStart().getLine());
-        env.assign(ctx.ID().getText(), visit(ctx.expression()));
+        Object value = visit(ctx.expression());
+        String type = env.get(ctx.ID().getText()).type;
+        String name = ctx.ID().getText();
+        checkType(type, value, name, ctx.getStart().getLine());
+
+        if (type.equals("int")) {
+            env.assign(name, ((Number) value).intValue());
+            return null;
+        }
+
+        env.assign(name, visit(ctx.expression()));
         return null;
     }
 
@@ -450,7 +471,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             if (ctx.MUL() == null)
                 throw new RuntimeException("Cannot divide strings at line " + ctx.getStart().getLine());
             StringBuilder sb = new StringBuilder();
-            for(int i = 0; i < (Integer) expr2; i++){
+            for (int i = 0; i < (Integer) expr2; i++){
                 sb.append(expr1);
             }
             return sb.toString();
@@ -480,9 +501,9 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             if (ctx.EQ() != null) return val1 == val2;
             else if (ctx.NE() != null) return val1 != val2;
             else if (ctx.LT() != null) return val1 < val2;
-            else if (ctx.LT() != null) return val1 <= val2;
+            else if (ctx.LE() != null) return val1 <= val2;
             else if (ctx.GT() != null) return val1 > val2;
-            else if (ctx.GT() != null) return val1 >= val2;
+            else if (ctx.GE() != null) return val1 >= val2;
         }
 
         if(expr1 instanceof String && expr2 instanceof String) {
@@ -490,9 +511,9 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             if (ctx.EQ() != null) return cmp == 0;
             else if (ctx.NE() != null) return cmp != 0;
             else if (ctx.LT() != null) return cmp < 0;
-            else if (ctx.LT() != null) return cmp <= 0;
+            else if (ctx.LE() != null) return cmp <= 0;
             else if (ctx.GT() != null) return cmp > 0;
-            else if (ctx.GT() != null) return cmp >= 0;
+            else if (ctx.GE() != null) return cmp >= 0;
         }
 
         if(expr1 instanceof Boolean && expr2 instanceof Boolean) {
