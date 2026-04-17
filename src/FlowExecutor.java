@@ -43,6 +43,13 @@ public class FlowExecutor {
                 }
                 interpreter.currentSynthName = String.valueOf(args.get(0));
                 return null;
+            case "print":
+                if (args.isEmpty()) {
+                    throw new RuntimeException(
+                            "print requires one argument at line " + ctx.getStart().getLine());
+                }
+                System.out.println(args.getFirst());
+                return null;
             default:
                 SymNoteParser.TrackDeclContext trackCtx = (SymNoteParser.TrackDeclContext) interpreter.env
                         .getTrack(functionName);

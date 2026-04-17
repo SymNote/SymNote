@@ -100,7 +100,7 @@ noteElement: (NOTE | ID);
 expression:
 	'(' expression ')'										# parenExpr
 	| 'not' expression										# opNot
-	| SUB expression										# opUnaryMinus
+    | (SUB | ADD) expression                                # opUnaryMinusPlus
 	| callExpr												# funcCallExpr
 	| expression (MUL | DIV | MOD) expression				# opMulDivMod
 	| expression (ADD | SUB) expression						# opAddSub
