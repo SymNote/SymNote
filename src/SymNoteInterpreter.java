@@ -219,6 +219,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         return flowExecutor.executeCall(ctx);
     }
 
+    @Override public Object visitExprOnlyStmt(SymNoteParser.ExprOnlyStmtContext ctx) {
+        return visit(ctx.expression());
+    }
+
     // --- Control Flow ---
     @Override
     public Object visitLoopStmt(SymNoteParser.LoopStmtContext ctx) {
@@ -456,6 +460,8 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             if (expr1 instanceof Integer && expr2 instanceof Integer) {
                 int val1 = (Integer) expr1;
                 int val2 = (Integer) expr2;
+                if(val2 == 0)
+                    throw new ArithmeticException("Division by zero in modulus operation at line " + ctx.getStart().getLine());
                 return val1 % val2;
             }
             throw new RuntimeException("Invalid operands for modulus at line " + ctx.getStart().getLine());
@@ -464,6 +470,8 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         if (expr1 instanceof Number && expr2 instanceof Number) {
             float val1 = ((Number) expr1).floatValue();
             float val2 = ((Number) expr2).floatValue();
+            if(ctx.DIV() != null && val2 == 0)
+                    throw new ArithmeticException("Division by zero at line " + ctx.getStart().getLine());
             return ctx.MUL() != null ? val1 * val2 : val1 / val2;
         }
 
@@ -525,6 +533,64 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         }
 
         throw new RuntimeException("Invalid operands for comparison at line " + ctx.getStart().getLine());
+    }
+
+    // increment and decrement
+
+    @Override public Object visitPostDec(SymNoteParser.PostDecContext ctx) {
+        String name = ctx.ID().getText();
+        validateVariableDeclared(name, ctx.getStart().getLine());
+
+        if(!env.get(name).type.equals("int"))
+            throw new RuntimeException("Post-decrement can only be applied to integers at line " + ctx.getStart().getLine());
+        if(env.get(name).value == null)
+            throw new RuntimeException("Cannot apply post-decrement to uninitialized variable '" + name + "' at line " + ctx.getStart().getLine());
+
+        int value = ((Number) env.get(name).value).intValue();
+        env.assign(name, value - 1);
+        return value;
+    }
+
+    @Override public Object visitPreDec(SymNoteParser.PreDecContext ctx) {
+        String name = ctx.ID().getText();
+        validateVariableDeclared(name, ctx.getStart().getLine());
+
+        if(!env.get(name).type.equals("int"))
+            throw new RuntimeException("Pre-decrement can only be applied to integers at line " + ctx.getStart().getLine());
+        if(env.get(name).value == null)
+            throw new RuntimeException("Cannot apply pre-decrement to uninitialized variable '" + name + "' at line " + ctx.getStart().getLine());
+
+        int value = ((Number) env.get(name).value).intValue();
+        env.assign(name, value - 1);
+        return value - 1;
+    }
+
+    @Override public Object visitPostInc(SymNoteParser.PostIncContext ctx) {
+        String name = ctx.ID().getText();
+        validateVariableDeclared(name, ctx.getStart().getLine());
+
+        if(!env.get(name).type.equals("int"))
+            throw new RuntimeException("Post-decrement can only be applied to integers at line " + ctx.getStart().getLine());
+        if(env.get(name).value == null)
+            throw new RuntimeException("Cannot apply post-increment to uninitialized variable '" + name + "' at line " + ctx.getStart().getLine());
+
+        int value = ((Number) env.get(name).value).intValue();
+        env.assign(name, value + 1);
+        return value;
+    }
+
+    @Override public Object visitPreInc(SymNoteParser.PreIncContext ctx){
+        String name = ctx.ID().getText();
+        validateVariableDeclared(name, ctx.getStart().getLine());
+
+        if(!env.get(name).type.equals("int"))
+            throw new RuntimeException("Pre-increment can only be applied to integers at line " + ctx.getStart().getLine());
+        if(env.get(name).value == null)
+            throw new RuntimeException("Cannot apply pre-increment to uninitialized variable '" + name + "' at line " + ctx.getStart().getLine());
+
+        int value = ((Number) env.get(name).value).intValue();
+        env.assign(name, value + 1);
+        return value + 1;
     }
 
 }
