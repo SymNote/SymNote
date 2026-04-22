@@ -17,7 +17,8 @@ statementLVL1:
 	| 'parallel' '{' parallelEntry* '}'													# parallelStmt
 	| type ID ( '=' expression)? ';'													# declAssignStmt
 	| ID '=' expression ';'																# assignStmt
-	| callStmt																			# exprStmt;
+	| callStmt																			# exprStmt
+	| expression ';'																	# exprOnlyStmt;
 
 parallelEntry: callExpr ';';
 
@@ -98,7 +99,11 @@ noteElement: (NOTE | ID);
 
 // expressions
 expression:
-	'(' expression ')'										# parenExpr
+    ID '++'												    # postInc
+    | ID '--'												# postDec
+    | '++' ID												# preInc
+    | '--' ID												# preDec
+	| '(' expression ')'								    # parenExpr
 	| 'not' expression										# opNot
     | (SUB | ADD) expression                                # opUnaryMinusPlus
 	| callExpr												# funcCallExpr
