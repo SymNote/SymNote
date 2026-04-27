@@ -14,6 +14,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     public float bpm = 120;
     public String currentSynthName = "piano";
     public long currentTick = 0;
+    public OutputCollector output;
 
     private final Set<String> declaredVariables;
     private final SymNoteTimeline timeline = new SymNoteTimeline(TICKS_PER_BEAT);
@@ -21,11 +22,16 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     private final GridExecutor gridExecutor;
 
     public SymNoteInterpreter() {
-        this(new HashSet<>());
+        this(new HashSet<>(), new StdoutCollector());
     }
 
     public SymNoteInterpreter(Set<String> declaredVariables) {
+        this(declaredVariables, new StdoutCollector());
+    }
+
+    public SymNoteInterpreter(Set<String> declaredVariables, OutputCollector output) {
         this.declaredVariables = new HashSet<>(declaredVariables);
+        this.output = output;
         this.flowExecutor = new FlowExecutor(this);
         this.gridExecutor = new GridExecutor(this);
     }
@@ -85,10 +91,14 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     private void checkType(String type, Object value, String name, int line) {
         boolean error = false;
-        if (type.equals("int") && !(value instanceof Integer || value instanceof Float || value instanceof Double)) error = true;
-        else if (type.equals("float") && !(value instanceof Float || value instanceof Double)) error = true;
-        else if (type.equals("string") && !(value instanceof String)) error = true;
-        else if (type.equals("bool") && !(value instanceof Boolean)) error = true;
+        if (type.equals("int") && !(value instanceof Integer || value instanceof Float || value instanceof Double))
+            error = true;
+        else if (type.equals("float") && !(value instanceof Float || value instanceof Double))
+            error = true;
+        else if (type.equals("string") && !(value instanceof String))
+            error = true;
+        else if (type.equals("bool") && !(value instanceof Boolean))
+            error = true;
 
         if (error) {
             throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
@@ -100,7 +110,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         String name = ctx.ID().getText();
         String type = ctx.type().getText();
         Object value = ctx.expression() != null ? visit(ctx.expression()) : null;
-        if(value != null) {
+        if (value != null) {
             int line = ctx.getStart().getLine();
             checkType(type, value, name, line);
             if (type.equals("int")) {
@@ -134,7 +144,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         String name = ctx.ID().getText();
         String type = ctx.type().getText();
         Object value = ctx.expression() != null ? visit(ctx.expression()) : null;
-        if(value != null) {
+        if (value != null) {
             int line = ctx.getStart().getLine();
             checkType(type, value, name, line);
         }
@@ -219,7 +229,8 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         return flowExecutor.executeCall(ctx);
     }
 
-    @Override public Object visitExprOnlyStmt(SymNoteParser.ExprOnlyStmtContext ctx) {
+    @Override
+    public Object visitExprOnlyStmt(SymNoteParser.ExprOnlyStmtContext ctx) {
         return visit(ctx.expression());
     }
 
@@ -258,12 +269,13 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitIfStmt(SymNoteParser.IfStmtContext ctx) {
         Object condition = visit(ctx.expression());
-        
-        if(!(condition instanceof Boolean)){
-            throw new RuntimeException("Condition in 'if' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
+
+        if (!(condition instanceof Boolean)) {
+            throw new RuntimeException(
+                    "Condition in 'if' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
         }
 
-        if((Boolean) condition){
+        if ((Boolean) condition) {
             Environment previousEnv = env;
             try {
                 env = new Environment(previousEnv);
@@ -271,7 +283,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             } finally {
                 env = previousEnv;
             }
-        } else if (ctx.statementLVL1(1) != null){
+        } else if (ctx.statementLVL1(1) != null) {
             Environment previousEnv = env;
             try {
                 env = new Environment(previousEnv);
@@ -286,12 +298,13 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitIfStmtLVL2(SymNoteParser.IfStmtLVL2Context ctx) {
         Object condition = visit(ctx.expression());
-        
-        if(!(condition instanceof Boolean)){
-            throw new RuntimeException("Condition in 'if' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
+
+        if (!(condition instanceof Boolean)) {
+            throw new RuntimeException(
+                    "Condition in 'if' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
         }
 
-        if((Boolean) condition){
+        if ((Boolean) condition) {
             Environment previousEnv = env;
             try {
                 env = new Environment(previousEnv);
@@ -299,7 +312,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             } finally {
                 env = previousEnv;
             }
-        } else if (ctx.statementLVL2(1) != null){
+        } else if (ctx.statementLVL2(1) != null) {
             Environment previousEnv = env;
             try {
                 env = new Environment(previousEnv);
@@ -315,12 +328,13 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     public Object visitWhileStmt(SymNoteParser.WhileStmtContext ctx) {
         while (true) {
             Object condition = visit(ctx.expression());
-            
-            if(!(condition instanceof Boolean)){
-                throw new RuntimeException("Condition in 'while' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
+
+            if (!(condition instanceof Boolean)) {
+                throw new RuntimeException("Condition in 'while' statement must evaluate to a boolean at line "
+                        + ctx.getStart().getLine());
             }
-            
-            if(!(Boolean) condition){
+
+            if (!(Boolean) condition) {
                 break;
             }
 
@@ -337,14 +351,15 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitWhileStmtLVL2(SymNoteParser.WhileStmtLVL2Context ctx) {
-        while(true){
+        while (true) {
             Object condition = visit(ctx.expression());
-            
-            if(!(condition instanceof Boolean)){
-                throw new RuntimeException("Condition in 'while' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
+
+            if (!(condition instanceof Boolean)) {
+                throw new RuntimeException("Condition in 'while' statement must evaluate to a boolean at line "
+                        + ctx.getStart().getLine());
             }
-            
-            if(!(Boolean) condition){
+
+            if (!(Boolean) condition) {
                 break;
             }
 
@@ -392,8 +407,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitAtomBool(SymNoteParser.AtomBoolContext ctx) {
-        if(ctx.BOOL().getText().equals("true")) return true;
-        else if(ctx.BOOL().getText().equals("false")) return false;
+        if (ctx.BOOL().getText().equals("true"))
+            return true;
+        else if (ctx.BOOL().getText().equals("false"))
+            return false;
         throw new RuntimeException("Invalid boolean value at line " + ctx.getStart().getLine());
     }
 
@@ -402,7 +419,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         Object expr1 = visit(ctx.expression(0));
         Object expr2 = visit(ctx.expression(1));
 
-        if(expr1 instanceof Boolean && expr2 instanceof Boolean)
+        if (expr1 instanceof Boolean && expr2 instanceof Boolean)
             return (Boolean) expr1 || (Boolean) expr2;
 
         throw new RuntimeException("Invalid operands for logical OR at line " + ctx.getStart().getLine());
@@ -413,7 +430,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         Object expr1 = visit(ctx.expression(0));
         Object expr2 = visit(ctx.expression(1));
 
-        if(expr1 instanceof Boolean && expr2 instanceof Boolean)
+        if (expr1 instanceof Boolean && expr2 instanceof Boolean)
             return (Boolean) expr1 && (Boolean) expr2;
 
         throw new RuntimeException("Invalid operands for logical AND at line " + ctx.getStart().getLine());
@@ -422,12 +439,11 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitOpNot(SymNoteParser.OpNotContext ctx) {
         Object expr = visit(ctx.expression());
-        if(expr instanceof Boolean)
+        if (expr instanceof Boolean)
             return !(Boolean) expr;
 
         throw new RuntimeException("Invalid operand for logical NOT at line " + ctx.getStart().getLine());
     }
-
 
     // Numer operations
 
@@ -436,13 +452,18 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         Object expr1 = visit(ctx.expression(0));
         Object expr2 = visit(ctx.expression(1));
 
-        if(expr1 instanceof String || expr2 instanceof String){
+        if (expr1 instanceof String || expr2 instanceof String) {
             if (ctx.ADD() == null)
                 throw new RuntimeException("Cannot subtract strings at line " + ctx.getStart().getLine());
             return expr1.toString() + expr2.toString();
         }
 
-        if(expr1 instanceof Number && expr2 instanceof Number) {
+        if (expr1 instanceof Number && expr2 instanceof Number) {
+            if (expr1 instanceof Integer && expr2 instanceof Integer) {
+                int val1 = (Integer) expr1;
+                int val2 = (Integer) expr2;
+                return ctx.ADD() != null ? val1 + val2 : val1 - val2;
+            }
             float val1 = ((Number) expr1).floatValue();
             float val2 = ((Number) expr2).floatValue();
             return ctx.ADD() != null ? val1 + val2 : val1 - val2;
@@ -460,26 +481,37 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             if (expr1 instanceof Integer && expr2 instanceof Integer) {
                 int val1 = (Integer) expr1;
                 int val2 = (Integer) expr2;
-                if(val2 == 0)
-                    throw new ArithmeticException("Division by zero in modulus operation at line " + ctx.getStart().getLine());
+                if (val2 == 0)
+                    throw new ArithmeticException(
+                            "Division by zero in modulus operation at line " + ctx.getStart().getLine());
                 return val1 % val2;
             }
             throw new RuntimeException("Invalid operands for modulus at line " + ctx.getStart().getLine());
         }
 
         if (expr1 instanceof Number && expr2 instanceof Number) {
+            if (expr1 instanceof Integer && expr2 instanceof Integer) {
+                int val1 = (Integer) expr1;
+                int val2 = (Integer) expr2;
+                if (ctx.DIV() != null) {
+                    if (val2 == 0)
+                        throw new ArithmeticException("Division by zero at line " + ctx.getStart().getLine());
+                    return val1 / val2;
+                }
+                return val1 * val2;
+            }
             float val1 = ((Number) expr1).floatValue();
             float val2 = ((Number) expr2).floatValue();
-            if(ctx.DIV() != null && val2 == 0)
-                    throw new ArithmeticException("Division by zero at line " + ctx.getStart().getLine());
+            if (ctx.DIV() != null && val2 == 0)
+                throw new ArithmeticException("Division by zero at line " + ctx.getStart().getLine());
             return ctx.MUL() != null ? val1 * val2 : val1 / val2;
         }
 
-        if(expr1 instanceof String && expr2 instanceof Integer){
+        if (expr1 instanceof String && expr2 instanceof Integer) {
             if (ctx.MUL() == null)
                 throw new RuntimeException("Cannot divide strings at line " + ctx.getStart().getLine());
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < (Integer) expr2; i++){
+            for (int i = 0; i < (Integer) expr2; i++) {
                 sb.append(expr1);
             }
             return sb.toString();
@@ -491,10 +523,19 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitOpUnaryMinusPlus(SymNoteParser.OpUnaryMinusPlusContext ctx) {
         Object expr = visit(ctx.expression());
-        if(expr instanceof Number) {
+        if (expr instanceof Integer) {
+            int val = (Integer) expr;
+            if (ctx.SUB() != null)
+                return -val;
+            if (ctx.ADD() != null)
+                return val;
+        }
+        if (expr instanceof Number) {
             float val = ((Number) expr).floatValue();
-            if (ctx.SUB() != null) return -val;
-            if (ctx.ADD() != null) return val;
+            if (ctx.SUB() != null)
+                return -val;
+            if (ctx.ADD() != null)
+                return val;
         }
         throw new RuntimeException("Invalid operand for unary minus at line " + ctx.getStart().getLine());
     }
@@ -504,32 +545,46 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         Object expr1 = visit(ctx.expression(0));
         Object expr2 = visit(ctx.expression(1));
 
-        if(expr1 instanceof Number && expr2 instanceof Number) {
+        if (expr1 instanceof Number && expr2 instanceof Number) {
             float val1 = ((Number) expr1).floatValue();
             float val2 = ((Number) expr2).floatValue();
-            if (ctx.EQ() != null) return val1 == val2;
-            else if (ctx.NE() != null) return val1 != val2;
-            else if (ctx.LT() != null) return val1 < val2;
-            else if (ctx.LE() != null) return val1 <= val2;
-            else if (ctx.GT() != null) return val1 > val2;
-            else if (ctx.GE() != null) return val1 >= val2;
+            if (ctx.EQ() != null)
+                return val1 == val2;
+            else if (ctx.NE() != null)
+                return val1 != val2;
+            else if (ctx.LT() != null)
+                return val1 < val2;
+            else if (ctx.LE() != null)
+                return val1 <= val2;
+            else if (ctx.GT() != null)
+                return val1 > val2;
+            else if (ctx.GE() != null)
+                return val1 >= val2;
         }
 
-        if(expr1 instanceof String && expr2 instanceof String) {
+        if (expr1 instanceof String && expr2 instanceof String) {
             int cmp = ((String) expr1).compareTo((String) expr2);
-            if (ctx.EQ() != null) return cmp == 0;
-            else if (ctx.NE() != null) return cmp != 0;
-            else if (ctx.LT() != null) return cmp < 0;
-            else if (ctx.LE() != null) return cmp <= 0;
-            else if (ctx.GT() != null) return cmp > 0;
-            else if (ctx.GE() != null) return cmp >= 0;
+            if (ctx.EQ() != null)
+                return cmp == 0;
+            else if (ctx.NE() != null)
+                return cmp != 0;
+            else if (ctx.LT() != null)
+                return cmp < 0;
+            else if (ctx.LE() != null)
+                return cmp <= 0;
+            else if (ctx.GT() != null)
+                return cmp > 0;
+            else if (ctx.GE() != null)
+                return cmp >= 0;
         }
 
-        if(expr1 instanceof Boolean && expr2 instanceof Boolean) {
+        if (expr1 instanceof Boolean && expr2 instanceof Boolean) {
             boolean val1 = (Boolean) expr1;
             boolean val2 = (Boolean) expr2;
-            if (ctx.EQ() != null) return val1 == val2;
-            else if (ctx.NE() != null) return val1 != val2;
+            if (ctx.EQ() != null)
+                return val1 == val2;
+            else if (ctx.NE() != null)
+                return val1 != val2;
         }
 
         throw new RuntimeException("Invalid operands for comparison at line " + ctx.getStart().getLine());
@@ -537,56 +592,68 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     // increment and decrement
 
-    @Override public Object visitPostDec(SymNoteParser.PostDecContext ctx) {
+    @Override
+    public Object visitPostDec(SymNoteParser.PostDecContext ctx) {
         String name = ctx.ID().getText();
         validateVariableDeclared(name, ctx.getStart().getLine());
 
-        if(!env.get(name).type.equals("int"))
-            throw new RuntimeException("Post-decrement can only be applied to integers at line " + ctx.getStart().getLine());
-        if(env.get(name).value == null)
-            throw new RuntimeException("Cannot apply post-decrement to uninitialized variable '" + name + "' at line " + ctx.getStart().getLine());
+        if (!env.get(name).type.equals("int"))
+            throw new RuntimeException(
+                    "Post-decrement can only be applied to integers at line " + ctx.getStart().getLine());
+        if (env.get(name).value == null)
+            throw new RuntimeException("Cannot apply post-decrement to uninitialized variable '" + name + "' at line "
+                    + ctx.getStart().getLine());
 
         int value = ((Number) env.get(name).value).intValue();
         env.assign(name, value - 1);
         return value;
     }
 
-    @Override public Object visitPreDec(SymNoteParser.PreDecContext ctx) {
+    @Override
+    public Object visitPreDec(SymNoteParser.PreDecContext ctx) {
         String name = ctx.ID().getText();
         validateVariableDeclared(name, ctx.getStart().getLine());
 
-        if(!env.get(name).type.equals("int"))
-            throw new RuntimeException("Pre-decrement can only be applied to integers at line " + ctx.getStart().getLine());
-        if(env.get(name).value == null)
-            throw new RuntimeException("Cannot apply pre-decrement to uninitialized variable '" + name + "' at line " + ctx.getStart().getLine());
+        if (!env.get(name).type.equals("int"))
+            throw new RuntimeException(
+                    "Pre-decrement can only be applied to integers at line " + ctx.getStart().getLine());
+        if (env.get(name).value == null)
+            throw new RuntimeException("Cannot apply pre-decrement to uninitialized variable '" + name + "' at line "
+                    + ctx.getStart().getLine());
 
         int value = ((Number) env.get(name).value).intValue();
         env.assign(name, value - 1);
         return value - 1;
     }
 
-    @Override public Object visitPostInc(SymNoteParser.PostIncContext ctx) {
+    @Override
+    public Object visitPostInc(SymNoteParser.PostIncContext ctx) {
         String name = ctx.ID().getText();
         validateVariableDeclared(name, ctx.getStart().getLine());
 
-        if(!env.get(name).type.equals("int"))
-            throw new RuntimeException("Post-decrement can only be applied to integers at line " + ctx.getStart().getLine());
-        if(env.get(name).value == null)
-            throw new RuntimeException("Cannot apply post-increment to uninitialized variable '" + name + "' at line " + ctx.getStart().getLine());
+        if (!env.get(name).type.equals("int"))
+            throw new RuntimeException(
+                    "Post-decrement can only be applied to integers at line " + ctx.getStart().getLine());
+        if (env.get(name).value == null)
+            throw new RuntimeException("Cannot apply post-increment to uninitialized variable '" + name + "' at line "
+                    + ctx.getStart().getLine());
 
         int value = ((Number) env.get(name).value).intValue();
         env.assign(name, value + 1);
         return value;
     }
 
-    @Override public Object visitPreInc(SymNoteParser.PreIncContext ctx){
+    @Override
+    public Object visitPreInc(SymNoteParser.PreIncContext ctx) {
         String name = ctx.ID().getText();
         validateVariableDeclared(name, ctx.getStart().getLine());
 
-        if(!env.get(name).type.equals("int"))
-            throw new RuntimeException("Pre-increment can only be applied to integers at line " + ctx.getStart().getLine());
-        if(env.get(name).value == null)
-            throw new RuntimeException("Cannot apply pre-increment to uninitialized variable '" + name + "' at line " + ctx.getStart().getLine());
+        if (!env.get(name).type.equals("int"))
+            throw new RuntimeException(
+                    "Pre-increment can only be applied to integers at line " + ctx.getStart().getLine());
+        if (env.get(name).value == null)
+            throw new RuntimeException("Cannot apply pre-increment to uninitialized variable '" + name + "' at line "
+                    + ctx.getStart().getLine());
 
         int value = ((Number) env.get(name).value).intValue();
         env.assign(name, value + 1);
