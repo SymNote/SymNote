@@ -18,7 +18,8 @@ statementLVL1:
 	| type ID ( '=' expression)? ';'													# declAssignStmt
 	| ID '=' expression ';'																# assignStmt
 	| callStmt																			# exprStmt
-	| expression ';'																	# exprOnlyStmt;
+	| expression ';'																	# exprOnlyStmt
+	| ';'																				# emptyStmtLVL1;
 
 parallelEntry: callExpr ';';
 
@@ -33,7 +34,8 @@ routineStatement:
 	| type ID ('=' expression)? ';'	# declAssignRoutineStmt
 	| ID '=' expression ';'			# assignRoutineStmt
 	| 'return' expression? ';'		# returnRoutineStmt
-	| callStmt						# exprRoutineStmt;
+	| callStmt						# exprRoutineStmt
+	| ';'							# emptyRoutineStmt;
 
 statementLVL2:
 	blockLVL2	# blockStmtLVL2
@@ -45,7 +47,8 @@ statementLVL2:
 	| 'loop' '(' type ID 'from' e1 = expression 'to' e2 = expression ')' statementLVL2	# loopStmtLVL2
 	| type ID ( '=' expression)? ';'													# declAssignStmtLVL2
 	| ID '=' expression ';'																# assignStmtLVL2
-	| callStmt																			# exprStmtLVL2;
+	| callStmt																			# exprStmtLVL2
+	| ';'																				# emptyStmtLVL2;
 
 callStmt: callExpr ';';
 
@@ -152,4 +155,4 @@ STRING: '"' ( '\\' . | ~('\\' | '"'))* '"';
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
 
 WS: [ \t\r\n]+ -> skip;
-COMMENT: '//' .*? '\n' -> skip;
+COMMENT: '//' ~[\r\n]* -> skip;
