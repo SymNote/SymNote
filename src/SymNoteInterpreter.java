@@ -1,5 +1,7 @@
 import environment.Environment;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import environment.Variable;
@@ -20,6 +22,8 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     private final SymNoteTimeline timeline = new SymNoteTimeline(TICKS_PER_BEAT);
     private final FlowExecutor flowExecutor;
     private final GridExecutor gridExecutor;
+
+    public Map<String, SymNoteParser.RoutineDeclContext> routines = new HashMap<>();
 
     public SymNoteInterpreter() {
         this(new HashSet<>(), new StdoutCollector());
@@ -89,7 +93,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     // --- State & Variables ---
 
-    private void checkType(String type, Object value, String name, int line) {
+    public void checkType(String type, Object value, String name, int line) {
         boolean error = false;
         if (type.equals("int") && !(value instanceof Integer || value instanceof Float || value instanceof Double))
             error = true;
@@ -134,8 +138,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             env.assign(name, ((Number) value).intValue());
             return null;
         }
-
-        env.assign(name, visit(ctx.expression()));
+        env.assign(name, value);
         return null;
     }
 
@@ -147,6 +150,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         if (value != null) {
             int line = ctx.getStart().getLine();
             checkType(type, value, name, line);
+            if (type.equals("int")) {
+                env.define(name, new Variable(type, ((Number) value).intValue()));
+                return null;
+            }
         }
         env.define(name, new Variable(type, value));
         return null;
@@ -164,8 +171,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             env.assign(name, ((Number) value).intValue());
             return null;
         }
-
-        env.assign(name, visit(ctx.expression()));
+        env.assign(name, value);
         return null;
     }
 
@@ -189,7 +195,12 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     public Object visitAtomId(SymNoteParser.AtomIdContext ctx) {
         String name = ctx.ID().getText();
         validateVariableDeclared(name, ctx.getStart().getLine());
-        return env.get(name).value;
+        
+        Object val = env.get(name).value;
+        if(val == null){
+            throw new RuntimeException("Variable '" + name + "' is used before being initialized at line " + ctx.getStart().getLine());
+        }
+        return val;
     }
 
     @Override
@@ -221,7 +232,84 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitRoutineDecl(SymNoteParser.RoutineDeclContext ctx) {
-        throw new RuntimeException("routine is not implemented yet");
+        routines.put(ctx.ID().getText(), ctx);
+        return null;
+    }
+
+    @Override
+    public Object visitReturnRoutineStmt(SymNoteParser.ReturnRoutineStmtContext ctx) {
+        Object value = null;
+        if (ctx.expression() != null) {
+            value = visit(ctx.expression());
+        }
+        throw new ReturnException(value);
+    }
+
+    @Override
+    public Object visitDeclAssignRoutineStmt(SymNoteParser.DeclAssignRoutineStmtContext ctx) {
+        String name = ctx.ID().getText();
+        String type = ctx.type().getText();
+        Object value = ctx.expression() != null ? visit(ctx.expression()) : null;
+        if (value != null) {
+            checkType(type, value, name, ctx.getStart().getLine());
+        }
+        env.define(name, new Variable(type, value));
+        return null;
+    }
+
+    @Override
+    public Object visitAssignRoutineStmt(SymNoteParser.AssignRoutineStmtContext ctx) {
+        validateVariableDeclared(ctx.ID().getText(), ctx.getStart().getLine());
+        String name = ctx.ID().getText();
+        Object value = visit(ctx.expression());
+        String type = env.get(name).type;
+        checkType(type, value, name, ctx.getStart().getLine());
+        env.assign(name, value);
+        return null;
+    }
+
+    @Override
+    public Object visitIfRoutineStmt(SymNoteParser.IfRoutineStmtContext ctx) {
+        Object condition = visit(ctx.expression());
+        if (!(condition instanceof Boolean)) {
+            throw new RuntimeException("Condition must be boolean at line " + ctx.getStart().getLine());
+        }
+        if ((Boolean) condition) {
+            Environment prev = env;
+            try { env = new Environment(prev); visit(ctx.routineStatement(0)); } finally { env = prev; }
+        } else if (ctx.routineStatement(1) != null) {
+            Environment prev = env;
+            try { env = new Environment(prev); visit(ctx.routineStatement(1)); } finally { env = prev; }
+        }
+        return null;
+    }
+
+    @Override
+    public Object visitWhileRoutineStmt(SymNoteParser.WhileRoutineStmtContext ctx) {
+        while (true) {
+            Object condition = visit(ctx.expression());
+            if (!(condition instanceof Boolean)) throw new RuntimeException("Condition must be boolean");
+            if (!(Boolean) condition) break;
+            
+            Environment prev = env;
+            try { env = new Environment(prev); visit(ctx.routineStatement()); } finally { env = prev; }
+        }
+        return null;
+    }
+
+    @Override
+    public Object visitLoopRoutineStmt(SymNoteParser.LoopRoutineStmtContext ctx) {
+        String varName = ctx.ID().getText();
+        int from = toNumber(visit(ctx.e1), ctx.getStart().getLine()).intValue();
+        int to = toNumber(visit(ctx.e2), ctx.getStart().getLine()).intValue();
+        for (int i = from; i <= to; i++) {
+            Environment prev = env;
+            env = new Environment(prev);
+            env.define(varName, new Variable("int", i));
+            visit(ctx.routineStatement());
+            env = prev;
+        }
+        return null;
     }
 
     @Override
@@ -231,6 +319,16 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitExprOnlyStmt(SymNoteParser.ExprOnlyStmtContext ctx) {
+        return visit(ctx.expression());
+    }
+
+    @Override
+    public Object visitExprOnlyRoutineStmt(SymNoteParser.ExprOnlyRoutineStmtContext ctx) {
+        return visit(ctx.expression());
+    }
+
+    @Override
+    public Object visitExprOnlyStmtLVL2(SymNoteParser.ExprOnlyStmtLVL2Context ctx) {
         return visit(ctx.expression());
     }
 

@@ -15,6 +15,13 @@ public class Main {
                 System.err.println("Please provide a file path as an argument.");
                 return;
             }
+
+            java.io.File sourceFile = new java.io.File(args[0]);
+            if (!sourceFile.exists() || !sourceFile.isFile()) {
+                System.err.println("Fatal Error: Could not locate SymNote file at '" + args[0] + "'");
+                return;
+            }
+
             CharStream input = CharStreams.fromFileName(args[0]);
 
             SymNoteLexer lexer = new SymNoteLexer(input);

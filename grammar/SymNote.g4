@@ -35,6 +35,7 @@ routineStatement:
 	| ID '=' expression ';'			# assignRoutineStmt
 	| 'return' expression? ';'		# returnRoutineStmt
 	| callStmt						# exprRoutineStmt
+	| expression ';' 				# exprOnlyRoutineStmt
 	| ';'							# emptyRoutineStmt;
 
 statementLVL2:
@@ -48,6 +49,7 @@ statementLVL2:
 	| type ID ( '=' expression)? ';'													# declAssignStmtLVL2
 	| ID '=' expression ';'																# assignStmtLVL2
 	| callStmt																			# exprStmtLVL2
+	| expression ';' 																	# exprOnlyStmtLVL2
 	| ';'																				# emptyStmtLVL2;
 
 callStmt: callExpr ';';
