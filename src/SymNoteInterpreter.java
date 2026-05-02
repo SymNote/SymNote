@@ -417,23 +417,41 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitOpOr(SymNoteParser.OpOrContext ctx) {
         Object expr1 = visit(ctx.expression(0));
+        
+        if (!(expr1 instanceof Boolean)) {
+            throw new RuntimeException("Invalid operands for logical OR at line " + ctx.getStart().getLine());
+        }
+        
+        if ((Boolean) expr1) {
+            return true;
+        }
+
         Object expr2 = visit(ctx.expression(1));
-
-        if (expr1 instanceof Boolean && expr2 instanceof Boolean)
-            return (Boolean) expr1 || (Boolean) expr2;
-
-        throw new RuntimeException("Invalid operands for logical OR at line " + ctx.getStart().getLine());
+        if (!(expr2 instanceof Boolean)) {
+            throw new RuntimeException("Invalid operands for logical OR at line " + ctx.getStart().getLine());
+        }
+        
+        return (Boolean) expr2;
     }
 
     @Override
     public Object visitOpAnd(SymNoteParser.OpAndContext ctx) {
         Object expr1 = visit(ctx.expression(0));
+        
+        if (!(expr1 instanceof Boolean)) {
+            throw new RuntimeException("Invalid operands for logical AND at line " + ctx.getStart().getLine());
+        }
+        
+        if (!(Boolean) expr1) {
+            return false;
+        }
+
         Object expr2 = visit(ctx.expression(1));
-
-        if (expr1 instanceof Boolean && expr2 instanceof Boolean)
-            return (Boolean) expr1 && (Boolean) expr2;
-
-        throw new RuntimeException("Invalid operands for logical AND at line " + ctx.getStart().getLine());
+        if (!(expr2 instanceof Boolean)) {
+            throw new RuntimeException("Invalid operands for logical AND at line " + ctx.getStart().getLine());
+        }
+        
+        return (Boolean) expr2;
     }
 
     @Override
@@ -453,9 +471,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         Object expr2 = visit(ctx.expression(1));
 
         if (expr1 instanceof String || expr2 instanceof String) {
-            if (ctx.ADD() == null)
+            if (ctx.ADD() == null) {
                 throw new RuntimeException("Cannot subtract strings at line " + ctx.getStart().getLine());
-            return expr1.toString() + expr2.toString();
+            }
+            return String.valueOf(expr1) + String.valueOf(expr2);
         }
 
         if (expr1 instanceof Number && expr2 instanceof Number) {
@@ -513,6 +532,16 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < (Integer) expr2; i++) {
                 sb.append(expr1);
+            }
+            return sb.toString();
+        }
+
+        if (expr2 instanceof String && expr1 instanceof Integer) {
+            if (ctx.MUL() == null)
+                throw new RuntimeException("Cannot divide strings at line " + ctx.getStart().getLine());
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < (Integer) expr1; i++) {
+                sb.append(expr2);
             }
             return sb.toString();
         }
@@ -633,7 +662,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
         if (!env.get(name).type.equals("int"))
             throw new RuntimeException(
-                    "Post-decrement can only be applied to integers at line " + ctx.getStart().getLine());
+                    "Post-increment can only be applied to integers at line " + ctx.getStart().getLine());
         if (env.get(name).value == null)
             throw new RuntimeException("Cannot apply post-increment to uninitialized variable '" + name + "' at line "
                     + ctx.getStart().getLine());
@@ -658,6 +687,22 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         int value = ((Number) env.get(name).value).intValue();
         env.assign(name, value + 1);
         return value + 1;
+    }
+
+    // Empty Statements (Allows double semicolons)
+    @Override
+    public Object visitEmptyStmtLVL1(SymNoteParser.EmptyStmtLVL1Context ctx) {
+        return null;
+    }
+
+    @Override
+    public Object visitEmptyStmtLVL2(SymNoteParser.EmptyStmtLVL2Context ctx) {
+        return null;
+    }
+
+    @Override
+    public Object visitEmptyRoutineStmt(SymNoteParser.EmptyRoutineStmtContext ctx) {
+        return null;
     }
 
 }

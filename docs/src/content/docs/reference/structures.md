@@ -3,7 +3,7 @@ title: Data Structures & Variables
 description: The static type system, memory management, and lexical scoping rules in SymNote.
 ---
 
-SymNote utilizes a **statically typed** system. Every variable must be explicitly declared with its type before use. There is no implicit type coercion between primitives (e.g., you cannot pass a `float` where an `int` is expected without explicit engine support).
+SymNote utilizes a **statically typed** system. Every variable must be explicitly declared with its type before use. Assigning a float to an integer variable will safely truncate the decimal value.
 
 This strictness ensures that the underlying Java audio engine receives exact, predictable data types to prevent runtime audio dropouts or buffer errors.
 
