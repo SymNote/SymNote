@@ -20,8 +20,11 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    - name: Make test.sh executable
-      run: chmod +x test.sh
+    - name: Make scripts executable
+      run: chmod +x generate.sh test.sh
+
+    - name: Generate ANTLR parser
+      run: ./generate.sh
 
     - name: Run SymNote Tests
       run: ./test.sh

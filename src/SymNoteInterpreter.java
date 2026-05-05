@@ -288,7 +288,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     public Object visitWhileRoutineStmt(SymNoteParser.WhileRoutineStmtContext ctx) {
         while (true) {
             Object condition = visit(ctx.expression());
-            if (!(condition instanceof Boolean)) throw new RuntimeException("Condition must be boolean");
+            if (!(condition instanceof Boolean)) throw new RuntimeException("Condition must be boolean at line " + ctx.getStart().getLine());
             if (!(Boolean) condition) break;
             
             Environment prev = env;
