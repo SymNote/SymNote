@@ -228,6 +228,42 @@ public class InterpreterTest {
     }
 
     @Test
+    @DisplayName("error: cannot assign void return value to a variable")
+    void error_assign_void_to_variable() {
+        TestHelper.Result r = TestHelper.run(
+                "routine voidFunc() returns void { }\n" +
+                "int a = voidFunc();"
+        );
+        assertFalse(r.isSuccess());
+        assertTrue(r.error.getMessage().contains("Cannot assign void value to variable 'a'"),
+                "Expected error about assigning void value, got: " + r.error.getMessage());
+    }
+
+    @Test
+    @DisplayName("error: cannot pass void value as an argument")
+    void error_pass_void_as_argument() {
+        TestHelper.Result r = TestHelper.run(
+                "routine voidFunc() returns void { }\n" +
+                "print(voidFunc());"
+        );
+        assertFalse(r.isSuccess());
+        assertTrue(r.error.getMessage().contains("Cannot pass void value as argument"),
+                "Expected error about passing void value, got: " + r.error.getMessage());
+    }
+
+    @Test
+    @DisplayName("error: cannot use void value in mathematical expression")
+    void error_math_with_void() {
+        TestHelper.Result r = TestHelper.run(
+                "routine voidFunc() returns void { }\n" +
+                "int a = 1 + voidFunc();"
+        );
+        assertFalse(r.isSuccess());
+        assertTrue(r.error.getMessage().contains("Invalid operands for addition/subtraction"),
+                "Expected error about invalid operands, got: " + r.error.getMessage());
+    }
+
+    @Test
     @DisplayName("valid: standalone expressions (++) work inside routines")
     void valid_standalone_expressions_in_routines() {
         TestHelper.Result r = TestHelper.run(

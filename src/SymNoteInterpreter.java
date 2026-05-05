@@ -114,6 +114,9 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         String name = ctx.ID().getText();
         String type = ctx.type().getText();
         Object value = ctx.expression() != null ? visit(ctx.expression()) : null;
+        if (ctx.expression() != null && value == null) {
+            throw new RuntimeException("Cannot assign void value to variable '" + name + "' at line " + ctx.getStart().getLine());
+        }
         if (value != null) {
             int line = ctx.getStart().getLine();
             checkType(type, value, name, line);
@@ -130,6 +133,9 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     public Object visitAssignStmt(SymNoteParser.AssignStmtContext ctx) {
         validateVariableDeclared(ctx.ID().getText(), ctx.getStart().getLine());
         Object value = visit(ctx.expression());
+        if (value == null) {
+            throw new RuntimeException("Cannot assign void value to variable '" + ctx.ID().getText() + "' at line " + ctx.getStart().getLine());
+        }
         String type = env.get(ctx.ID().getText()).type;
         String name = ctx.ID().getText();
         checkType(type, value, name, ctx.getStart().getLine());
@@ -147,6 +153,9 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         String name = ctx.ID().getText();
         String type = ctx.type().getText();
         Object value = ctx.expression() != null ? visit(ctx.expression()) : null;
+        if (ctx.expression() != null && value == null) {
+            throw new RuntimeException("Cannot assign void value to variable '" + name + "' at line " + ctx.getStart().getLine());
+        }
         if (value != null) {
             int line = ctx.getStart().getLine();
             checkType(type, value, name, line);
@@ -163,6 +172,9 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     public Object visitAssignStmtLVL2(SymNoteParser.AssignStmtLVL2Context ctx) {
         validateVariableDeclared(ctx.ID().getText(), ctx.getStart().getLine());
         Object value = visit(ctx.expression());
+        if (value == null) {
+            throw new RuntimeException("Cannot assign void value to variable '" + ctx.ID().getText() + "' at line " + ctx.getStart().getLine());
+        }
         String type = env.get(ctx.ID().getText()).type;
         String name = ctx.ID().getText();
         checkType(type, value, name, ctx.getStart().getLine());
@@ -250,6 +262,9 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         String name = ctx.ID().getText();
         String type = ctx.type().getText();
         Object value = ctx.expression() != null ? visit(ctx.expression()) : null;
+        if (ctx.expression() != null && value == null) {
+            throw new RuntimeException("Cannot assign void value to variable '" + name + "' at line " + ctx.getStart().getLine());
+        }
         if (value != null) {
             checkType(type, value, name, ctx.getStart().getLine());
         }
@@ -262,6 +277,9 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         validateVariableDeclared(ctx.ID().getText(), ctx.getStart().getLine());
         String name = ctx.ID().getText();
         Object value = visit(ctx.expression());
+        if (value == null) {
+            throw new RuntimeException("Cannot assign void value to variable '" + name + "' at line " + ctx.getStart().getLine());
+        }
         String type = env.get(name).type;
         checkType(type, value, name, ctx.getStart().getLine());
         env.assign(name, value);
