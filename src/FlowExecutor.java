@@ -51,26 +51,103 @@ public class FlowExecutor {
                 interpreter.output.println(args.getFirst());
                 return null;
             default:
+                if (interpreter.routines.containsKey(functionName)) {
+                    SymNoteParser.RoutineDeclContext routineCtx = interpreter.routines.get(functionName);
+                    Environment previousEnv = interpreter.env;
+                    interpreter.env = new Environment(previousEnv.getGlobal());
+
+                    try {
+                        int expectedParams = routineCtx.parameters() == null ? 0
+                                : routineCtx.parameters().param().size();
+                        if (args.size() != expectedParams) {
+                            throw new RuntimeException("Routine '" + functionName + "' expected " + expectedParams
+                                    + " arguments but got " + args.size() + " at line " + ctx.getStart().getLine());
+                        }
+
+                        // Bind arguments to parameters
+                        if (routineCtx.parameters() != null) {
+                            for (int i = 0; i < routineCtx.parameters().param().size(); i++) {
+                                String paramName = routineCtx.parameters().param(i).ID().getText();
+                                String paramType = routineCtx.parameters().param(i).type().getText();
+                                Object argValue = args.get(i);
+
+                                interpreter.checkType(paramType, argValue,
+                                        "argument '" + paramName + "' in routine '" + functionName + "'",
+                                        ctx.getStart().getLine());
+
+                                interpreter.env.define(paramName, new Variable(paramType, argValue));
+                            }
+                        }
+
+                        // Execute routine block
+                        interpreter.visit(routineCtx.blockRoutine());
+
+                        // If we get here, no return statement was hit
+                        if (!routineCtx.type().getText().equals("void")) {
+                            throw new RuntimeException("Routine '" + functionName + "' missing return statement.");
+                        }
+                        return null;
+
+                    } catch (ReturnException e) {
+                        // Return statement was hit, catch the value
+                        Object returnValue = e.getValue();
+                        String expectedType = routineCtx.type().getText();
+                        int line = ctx.getStart().getLine();
+
+                        // Check if void returns a value
+                        if (expectedType.equals("void")) {
+                            if (returnValue != null) {
+                                throw new RuntimeException(
+                                        "Void routine '" + functionName + "' cannot return a value at line " + line);
+                            }
+                            return null;
+                        }
+
+                        // Check if a non-void routine returned nothing
+                        if (returnValue == null) {
+                            throw new RuntimeException("Routine '" + functionName + "' must return a value of type '"
+                                    + expectedType + "' at line " + line);
+                        }
+
+                        // Check if the type matches exactly
+                        interpreter.checkType(expectedType, returnValue, "return value of " + functionName, line);
+
+                        return returnValue;
+                    } finally {
+                        interpreter.env = previousEnv; // Restore scope
+                    }
+                }
+
+                // Otherwise, it must be a Track
                 SymNoteParser.TrackDeclContext trackCtx = (SymNoteParser.TrackDeclContext) interpreter.env
                         .getTrack(functionName);
+                if (trackCtx == null) {
+                    throw new RuntimeException(
+                            "Undefined function or track '" + functionName + "' at line " + ctx.getStart().getLine());
+                }
 
                 Environment previousEnv = interpreter.env;
                 String previousSynth = interpreter.currentSynthName;
-                interpreter.env = new Environment(previousEnv);
+                interpreter.env = new Environment(previousEnv.getGlobal());
 
                 try {
                     int expectedParams = trackCtx.parameters() == null ? 0 : trackCtx.parameters().param().size();
                     if (args.size() != expectedParams) {
-                        throw new RuntimeException(
-                                "Track '" + functionName + "' expected " + expectedParams + " argument(s) but got "
-                                        + args.size() + " at line " + ctx.getStart().getLine());
+                        throw new RuntimeException("Track '" + functionName + "' expected " + expectedParams
+                                + " argument(s) but got " + args.size() + " at line " + ctx.getStart().getLine());
                     }
 
                     if (trackCtx.parameters() != null) {
                         for (int i = 0; i < trackCtx.parameters().param().size(); i++) {
                             String paramName = trackCtx.parameters().param(i).ID().getText();
                             String paramType = trackCtx.parameters().param(i).type().getText();
-                            interpreter.env.define(paramName, new Variable(paramType, args.get(i)));
+                            Object argValue = args.get(i);
+
+                            interpreter.checkType(paramType, argValue,
+                                    "argument '" + paramName + "' in track '" + functionName + "'",
+                                    ctx.getStart().getLine());
+
+                            interpreter.env.define(paramName, new Variable(paramType, argValue));
                         }
                     }
 

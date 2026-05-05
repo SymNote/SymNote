@@ -70,7 +70,13 @@ public class SymNoteDeclarationListener extends SymNoteBaseListener {
 
     @Override
     public void enterLoopStmt(SymNoteParser.LoopStmtContext ctx) {
+        pushScope();
         defineInCurrentScope(ctx.ID().getText(), ctx.type().getText(), ctx.ID().getSymbol());
+    }
+
+    @Override
+    public void exitLoopStmt(SymNoteParser.LoopStmtContext ctx) {
+        popScope();
     }
 
     @Override
@@ -113,5 +119,76 @@ public class SymNoteDeclarationListener extends SymNoteBaseListener {
         if (!scopeStack.isEmpty()) {
             scopeStack.pop();
         }
+    }
+
+    @Override
+    public void enterRoutineDecl(SymNoteParser.RoutineDeclContext ctx) {
+        pushScope();
+        registerParameters(ctx.parameters());
+    }
+
+    @Override
+    public void exitRoutineDecl(SymNoteParser.RoutineDeclContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterBlockRoutine(SymNoteParser.BlockRoutineContext ctx) {
+        pushScope();
+    }
+
+    @Override
+    public void exitBlockRoutine(SymNoteParser.BlockRoutineContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterDeclAssignRoutineStmt(SymNoteParser.DeclAssignRoutineStmtContext ctx) {
+        defineInCurrentScope(ctx.ID().getText(), ctx.type().getText(), ctx.ID().getSymbol());
+    }
+
+    @Override
+    public void enterLoopRoutineStmt(SymNoteParser.LoopRoutineStmtContext ctx) {
+        pushScope();
+        defineInCurrentScope(ctx.ID().getText(), ctx.type().getText(), ctx.ID().getSymbol());
+    }
+
+    @Override
+    public void exitLoopRoutineStmt(SymNoteParser.LoopRoutineStmtContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterIfStmt(SymNoteParser.IfStmtContext ctx) {
+        pushScope();
+    }
+    @Override
+    public void exitIfStmt(SymNoteParser.IfStmtContext ctx) {
+        popScope();
+    }
+    @Override
+    public void enterWhileStmt(SymNoteParser.WhileStmtContext ctx) {
+        pushScope();
+    }
+    @Override
+    public void exitWhileStmt(SymNoteParser.WhileStmtContext ctx) {
+        popScope();
+    }
+
+    @Override
+    public void enterIfStmtLVL2(SymNoteParser.IfStmtLVL2Context ctx) {
+        pushScope();
+    }
+    @Override
+    public void exitIfStmtLVL2(SymNoteParser.IfStmtLVL2Context ctx) {
+        popScope();
+    }
+    @Override
+    public void enterWhileStmtLVL2(SymNoteParser.WhileStmtLVL2Context ctx) {
+        pushScope();
+    }
+    @Override
+    public void exitWhileStmtLVL2(SymNoteParser.WhileStmtLVL2Context ctx) {
+        popScope();
     }
 }
