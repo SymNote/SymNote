@@ -113,8 +113,18 @@ public class FlowExecutor {
                                     + expectedType + "' at line " + line);
                         }
 
-                        // Check if the type matches exactly
-                        interpreter.checkType(expectedType, returnValue, "return value of " + functionName, line);
+
+                        // Cast return value to the expected type
+                        if (expectedType.equals("int")) {
+                            interpreter.checkType("int", returnValue, "return value of routine '" + functionName + "'", line);
+                            return ((Number) returnValue).intValue();
+                        } else if (expectedType.equals("float")) {
+                            interpreter.checkType("float", returnValue, "return value of routine '" + functionName + "'", line);
+                            return ((Number) returnValue).floatValue();
+                        }
+
+                        // Check if the type matches exactly (strict check - no implicit casting)
+                        interpreter.checkTypeStrict(expectedType, returnValue, "return value of " + functionName, line);
 
                         return returnValue;
                     } finally {
