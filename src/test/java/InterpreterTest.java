@@ -42,6 +42,22 @@ public class InterpreterTest {
     }
 
     @Test
+    @DisplayName("valid: boolean not and equality")
+    void valid_bool_not_and_equality() {
+        TestHelper.Result r = TestHelper.run(
+                "bool a = true;\n" +
+                "bool b = not a;\n" +
+                "bool c = (a != b);\n" +
+                "bool d = (a == true);\n" +
+                "print(b);\n" +
+                "print(c);\n" +
+                "print(d);"
+        );
+        assertTrue(r.isSuccess(), "Expected no error but got: " + errorMsg(r));
+        assertEquals(List.of("false", "true", "true"), r.output);
+    }
+
+    @Test
     @DisplayName("valid: int aa = 2+-2 is 0")
     void valid_int_add_unary_minus() {
         TestHelper.Result r = TestHelper.run("int aa = 2+-2; print(aa);");
@@ -130,6 +146,20 @@ public class InterpreterTest {
         assertEquals(List.of("1", "2", "1", "2"), r.output);
     }
 
+    @Test
+    @DisplayName("valid: while loop execution")
+    void valid_while_loop() {
+        TestHelper.Result r = TestHelper.run(
+                "int i = 0;\n" +
+                "while (i < 3) {\n" +
+                "    i++;\n" +
+                "    print(i);\n" +
+                "}"
+        );
+        assertTrue(r.isSuccess(), "Expected no error but got: " + errorMsg(r));
+        assertEquals(List.of("1", "2", "3"), r.output);
+    }
+
     // ROUTINE TESTS
 
     @Test
@@ -147,6 +177,21 @@ public class InterpreterTest {
     }
 
     @Test
+    @DisplayName("valid: void routine execution")
+    void valid_void_routine() {
+        TestHelper.Result r = TestHelper.run(
+                "int global = 0;\n" +
+                "routine mutate_global() returns void {\n" +
+                "    global = 42;\n" +
+                "}\n" +
+                "mutate_global();\n" +
+                "print(global);"
+        );
+        assertTrue(r.isSuccess(), "Expected no error but got: " + errorMsg(r));
+        assertEquals(List.of("42"), r.output);
+    }
+
+    @Test
     @DisplayName("valid: pass-by-value prevents mutation of outer variables")
     void valid_routine_pass_by_value() {
         TestHelper.Result r = TestHelper.run(
@@ -161,6 +206,25 @@ public class InterpreterTest {
         );
         assertTrue(r.isSuccess(), "Expected no error but got: " + errorMsg(r));
         assertEquals(List.of("10", "99"), r.output);
+    }
+
+    @Test
+    @DisplayName("error: inner function cannot access caller's local variables (lexical scoping)")
+    void error_inner_function_no_caller_access() {
+        TestHelper.Result r = TestHelper.run(
+                "routine inner() returns int {\n" +
+                "    return secret;\n" +
+                "}\n" +
+                "routine outer() returns int {\n" +
+                "    int secret = 42;\n" +
+                "    return inner();\n" +
+                "}\n" +
+                "print(outer());"
+        );
+        assertFalse(r.isSuccess(), "Expected undefined variable error");
+        assertNotNull(r.error);
+        assertTrue(r.error.getMessage().contains("Undefined variable 'secret'"), 
+                "Expected Undefined variable, got: " + r.error.getMessage());
     }
 
     @Test
@@ -219,6 +283,22 @@ public class InterpreterTest {
         TestHelper.Result r = TestHelper.run("int a = 5;; print(a);");
         assertTrue(r.isSuccess(), "Expected no error but got: " + errorMsg(r));
         assertEquals(List.of("5"), r.output);
+    }
+
+    @Test
+    @DisplayName("valid: if/else branch execution")
+    void valid_if_else() {
+        TestHelper.Result r = TestHelper.run(
+                "int x = 0;\n" +
+                "if (false) {\n" +
+                "    x = 1;\n" +
+                "} else {\n" +
+                "    x = 2;\n" +
+                "}\n" +
+                "print(x);"
+        );
+        assertTrue(r.isSuccess(), "Expected no error but got: " + errorMsg(r));
+        assertEquals(List.of("2"), r.output);
     }
 
     // ERROR CASES

@@ -17,6 +17,14 @@ public class Environment {
         this.parent = parent;
     }
 
+    public Environment getGlobal() {
+        Environment current = this;
+        while (current.parent != null) {
+            current = current.parent;
+        }
+        return current;
+    }
+
     public void define(String name, Variable variable) {
         variables.put(name, variable);
     }
