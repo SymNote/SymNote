@@ -94,18 +94,15 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     // --- State & Variables ---
 
     public void checkType(String type, Object value, String name, int line) {
-        boolean error = false;
-        if (type.equals("int") && !(value instanceof Integer || value instanceof Float || value instanceof Double))
-            error = true;
-        else if (type.equals("float") && !(value instanceof Float || value instanceof Double))
-            error = true;
-        else if (type.equals("string") && !(value instanceof String))
-            error = true;
-        else if (type.equals("bool") && !(value instanceof Boolean))
-            error = true;
-
-        if (error) {
-            throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+        if (type.equals("int") || type.equals("float")) {
+            if (!(value instanceof Integer || value instanceof Float || value instanceof Double))
+                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+        } else if (type.equals("string")) {
+            if (!(value instanceof String))
+                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+        } else if (type.equals("bool")) {
+            if (!(value instanceof Boolean))
+                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
         }
     }
 
@@ -119,6 +116,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             checkType(type, value, name, line);
             if (type.equals("int")) {
                 env.define(name, new Variable(type, ((Number) value).intValue()));
+                return null;
+            }
+            if (type.equals("float")) {
+                env.define(name, new Variable(type, ((Number) value).floatValue()));
                 return null;
             }
         }
@@ -138,6 +139,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             env.assign(name, ((Number) value).intValue());
             return null;
         }
+        if (type.equals("float")) {
+            env.assign(name, ((Number) value).floatValue());
+            return null;
+        }
         env.assign(name, value);
         return null;
     }
@@ -152,6 +157,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             checkType(type, value, name, line);
             if (type.equals("int")) {
                 env.define(name, new Variable(type, ((Number) value).intValue()));
+                return null;
+            }
+            if (type.equals("float")) {
+                env.define(name, new Variable(type, ((Number) value).floatValue()));
                 return null;
             }
         }
@@ -169,6 +178,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
         if (type.equals("int")) {
             env.assign(name, ((Number) value).intValue());
+            return null;
+        }
+        if (type.equals("float")) {
+            env.assign(name, ((Number) value).floatValue());
             return null;
         }
         env.assign(name, value);
@@ -252,6 +265,14 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         Object value = ctx.expression() != null ? visit(ctx.expression()) : null;
         if (value != null) {
             checkType(type, value, name, ctx.getStart().getLine());
+            if (type.equals("int")) {
+                env.define(name, new Variable(type, ((Number) value).intValue()));
+                return null;
+            }
+            if (type.equals("float")) {
+                env.define(name, new Variable(type, ((Number) value).floatValue()));
+                return null;
+            }
         }
         env.define(name, new Variable(type, value));
         return null;
@@ -264,6 +285,15 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         Object value = visit(ctx.expression());
         String type = env.get(name).type;
         checkType(type, value, name, ctx.getStart().getLine());
+
+        if (type.equals("int")) {
+            env.assign(name, ((Number) value).intValue());
+            return null;
+        }
+        if (type.equals("float")) {
+            env.assign(name, ((Number) value).floatValue());
+            return null;
+        }
         env.assign(name, value);
         return null;
     }
@@ -594,49 +624,51 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         Object expr1 = visit(ctx.expression(0));
         Object expr2 = visit(ctx.expression(1));
 
+        // Modulus operation
         if (ctx.MOD() != null) {
             if (expr1 instanceof Integer && expr2 instanceof Integer) {
                 int val1 = (Integer) expr1;
                 int val2 = (Integer) expr2;
                 if (val2 == 0)
-                    throw new ArithmeticException(
-                            "Division by zero in modulus operation at line " + ctx.getStart().getLine());
+                    throw new ArithmeticException("Division by zero in modulus operation at line " + ctx.getStart().getLine());
                 return val1 % val2;
             }
             throw new RuntimeException("Invalid operands for modulus at line " + ctx.getStart().getLine());
         }
 
-        if (expr1 instanceof Number && expr2 instanceof Number) {
-            if (expr1 instanceof Integer && expr2 instanceof Integer) {
-                int val1 = (Integer) expr1;
-                int val2 = (Integer) expr2;
-                if (ctx.DIV() != null) {
-                    if (val2 == 0)
-                        throw new ArithmeticException("Division by zero at line " + ctx.getStart().getLine());
-                    return val1 / val2;
-                }
-                return val1 * val2;
+        // Integer multiplication/division
+        if (expr1 instanceof Integer && expr2 instanceof Integer) {
+            int val1 = (Integer) expr1;
+            int val2 = (Integer) expr2;
+            if (ctx.DIV() != null) {
+                if (val2 == 0)
+                    throw new ArithmeticException("Division by zero at line " + ctx.getStart().getLine());
+                return val1 / val2;
             }
-            float val1 = ((Number) expr1).floatValue();
-            float val2 = ((Number) expr2).floatValue();
-            if (ctx.DIV() != null && val2 == 0)
-                throw new ArithmeticException("Division by zero at line " + ctx.getStart().getLine());
-            return ctx.MUL() != null ? val1 * val2 : val1 / val2;
+            return val1 * val2;
         }
 
-        if (expr1 instanceof String && expr2 instanceof Integer) {
-            if (ctx.MUL() == null)
-                throw new RuntimeException("Cannot divide strings at line " + ctx.getStart().getLine());
+        // Floating point multiplication/division
+        if (expr1 instanceof Number && expr2 instanceof Number) {
+            float val1 = ((Number) expr1).floatValue();
+            float val2 = ((Number) expr2).floatValue();
+            if (ctx.DIV() != null) {
+                if (val2 == 0)
+                    throw new ArithmeticException("Division by zero at line " + ctx.getStart().getLine());
+                return val1 / val2;
+            }
+            return val1 * val2;
+        }
+
+        // String repetition
+        if (expr1 instanceof String && expr2 instanceof Integer && ctx.MUL() != null) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < (Integer) expr2; i++) {
                 sb.append(expr1);
             }
             return sb.toString();
         }
-
-        if (expr2 instanceof String && expr1 instanceof Integer) {
-            if (ctx.MUL() == null)
-                throw new RuntimeException("Cannot divide strings at line " + ctx.getStart().getLine());
+        if (expr2 instanceof String && expr1 instanceof Integer && ctx.MUL() != null) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < (Integer) expr1; i++) {
                 sb.append(expr2);
