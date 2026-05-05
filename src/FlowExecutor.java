@@ -18,7 +18,11 @@ public class FlowExecutor {
 
         if (ctx.arguments() != null) {
             for (SymNoteParser.ExpressionContext exprCtx : ctx.arguments().expression()) {
-                args.add(interpreter.visit(exprCtx));
+                Object argVal = interpreter.visit(exprCtx);
+                if (argVal == null) {
+                    throw new RuntimeException("Cannot pass void value as argument at line " + ctx.getStart().getLine());
+                }
+                args.add(argVal);
             }
         }
 
