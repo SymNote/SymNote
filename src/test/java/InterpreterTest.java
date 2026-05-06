@@ -380,6 +380,63 @@ public class InterpreterTest {
     }
 
     @Test
+    @DisplayName("error: int a = 2 + 2.3 (no implicit float to int)")
+    void error_int_from_float_expression() {
+        TestHelper.Result r = TestHelper.run("int a = 2 + 2.3;");
+        assertFalse(r.isSuccess(), "Expected type mismatch when assigning float to int");
+        assertNotNull(r.error, "Expected a RuntimeException");
+        assertTrue(r.error.getMessage().contains("Type mismatch"),
+                "Expected Type mismatch, got: " + r.error.getMessage());
+    }
+
+    @Test
+    @DisplayName("valid: float a = 2 + 2.3")
+    void valid_float_from_mixed_expression() {
+        TestHelper.Result r = TestHelper.run("float a = 2 + 2.3; print(a);");
+        assertTrue(r.isSuccess(), "Expected mixed int + float expression to be valid for float");
+        assertEquals(List.of("4.3"), r.output);
+    }
+
+    @Test
+    @DisplayName("error: routine int parameter rejects float argument")
+    void error_routine_int_param_from_float() {
+        TestHelper.Result r = TestHelper.run(
+                "routine take_int(int a) returns int { return a; }\n" +
+                "take_int(2.3);"
+        );
+        assertFalse(r.isSuccess(), "Expected type mismatch when passing float to int param");
+        assertNotNull(r.error, "Expected a RuntimeException");
+        assertTrue(r.error.getMessage().contains("Type mismatch"),
+                "Expected Type mismatch, got: " + r.error.getMessage());
+    }
+
+        @Test
+        @DisplayName("error: track int parameter rejects float argument")
+        void error_track_int_param_from_float() {
+        TestHelper.Result r = TestHelper.run(
+            "track Beat(int steps) { }\n" +
+            "Beat(2.3);"
+        );
+        assertFalse(r.isSuccess(), "Expected type mismatch when passing float to int param");
+        assertNotNull(r.error, "Expected a RuntimeException");
+        assertTrue(r.error.getMessage().contains("Type mismatch"),
+            "Expected Type mismatch, got: " + r.error.getMessage());
+        }
+
+        @Test
+        @DisplayName("error: duplicate track declaration is rejected")
+        void error_duplicate_track_declaration() {
+        TestHelper.Result r = TestHelper.run(
+            "track Beat(int steps) { }\n" +
+            "track Beat(int steps) { }"
+        );
+        assertFalse(r.isSuccess(), "Expected duplicate track declaration to fail");
+        assertNotNull(r.error, "Expected a RuntimeException");
+        assertTrue(r.error.getMessage().contains("already defined"),
+            "Expected already defined error, got: " + r.error.getMessage());
+        }
+
+    @Test
     @DisplayName("error: int a = x undefined variable")
     void error_undefined_variable() {
         TestHelper.Result r = TestHelper.run("int a = x;");
