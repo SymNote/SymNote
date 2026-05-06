@@ -79,7 +79,13 @@ public class FlowExecutor {
                                         "argument '" + paramName + "' in routine '" + functionName + "'",
                                         ctx.getStart().getLine());
 
-                                interpreter.env.define(paramName, new Variable(paramType, argValue));
+                                if (paramType.equals("int")) {
+                                    interpreter.env.define(paramName, new Variable(paramType, ((Number) argValue).intValue()));
+                                } else if (paramType.equals("float")) {
+                                    interpreter.env.define(paramName, new Variable(paramType, ((Number) argValue).floatValue()));
+                                } else {
+                                    interpreter.env.define(paramName, new Variable(paramType, argValue));
+                                }
                             }
                         }
 
@@ -158,7 +164,13 @@ public class FlowExecutor {
                                     "argument '" + paramName + "' in track '" + functionName + "'",
                                     ctx.getStart().getLine());
 
-                            interpreter.env.define(paramName, new Variable(paramType, argValue));
+                            if (paramType.equals("int")) {
+                                interpreter.env.define(paramName, new Variable(paramType, ((Number) argValue).intValue()));
+                            } else if (paramType.equals("float")) {
+                                interpreter.env.define(paramName, new Variable(paramType, ((Number) argValue).floatValue()));
+                            } else {
+                                interpreter.env.define(paramName, new Variable(paramType, argValue));
+                            }
                         }
                     }
 
