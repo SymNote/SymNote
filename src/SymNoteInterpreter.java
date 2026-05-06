@@ -106,6 +106,22 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         }
     }
 
+    public void checkTypeStrict(String type, Object value, String name, int line) {
+        if (type.equals("int")) {
+            if (!(value instanceof Integer))
+                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+        } else if (type.equals("float")) {
+            if (!(value instanceof Float || value instanceof Double))
+                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+        } else if (type.equals("string")) {
+            if (!(value instanceof String))
+                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+        } else if (type.equals("bool")) {
+            if (!(value instanceof Boolean))
+                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+        }
+    }
+
     @Override
     public Object visitDeclAssignStmt(SymNoteParser.DeclAssignStmtContext ctx) {
         String name = ctx.ID().getText();
