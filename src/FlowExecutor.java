@@ -115,10 +115,7 @@ public class FlowExecutor {
 
 
                         // Cast return value to the expected type
-                        if (expectedType.equals("int")) {
-                            interpreter.checkType("int", returnValue, "return value of routine '" + functionName + "'", line);
-                            return ((Number) returnValue).intValue();
-                        } else if (expectedType.equals("float")) {
+                        if (expectedType.equals("float")) {
                             interpreter.checkType("float", returnValue, "return value of routine '" + functionName + "'", line);
                             return ((Number) returnValue).floatValue();
                         }
