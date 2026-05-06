@@ -55,6 +55,16 @@ public class Environment {
         trackDeclarations.put(name, ctx);
     }
 
+    public boolean hasTrack(String name) {
+        if (trackDeclarations.containsKey(name)) {
+            return true;
+        }
+        if (parent != null) {
+            return parent.hasTrack(name);
+        }
+        return false;
+    }
+
     public ParseTree getTrack(String name) {
         if (trackDeclarations.containsKey(name)) {
             return trackDeclarations.get(name);

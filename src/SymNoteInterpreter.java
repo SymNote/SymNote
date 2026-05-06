@@ -270,7 +270,11 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitTrackDecl(SymNoteParser.TrackDeclContext ctx) {
-        env.defineTrack(ctx.ID().getText(), ctx);
+        String name = ctx.ID().getText();
+        if (env.hasTrack(name)) {
+            throw new RuntimeException("Track '" + name + "' is already defined at line " + ctx.getStart().getLine());
+        }
+        env.defineTrack(name, ctx);
         return null;
     }
 
@@ -371,8 +375,13 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitLoopRoutineStmt(SymNoteParser.LoopRoutineStmtContext ctx) {
         String varName = ctx.ID().getText();
-        int from = toNumber(visit(ctx.e1), ctx.getStart().getLine()).intValue();
-        int to = toNumber(visit(ctx.e2), ctx.getStart().getLine()).intValue();
+        Object fromValue = visit(ctx.e1);
+        Object toValue = visit(ctx.e2);
+        int line = ctx.getStart().getLine();
+        checkType("int", fromValue, "loop start", line);
+        checkType("int", toValue, "loop end", line);
+        int from = ((Number) fromValue).intValue();
+        int to = ((Number) toValue).intValue();
         for (int i = from; i <= to; i++) {
             Environment prev = env;
             env = new Environment(prev);
@@ -407,8 +416,13 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitLoopStmt(SymNoteParser.LoopStmtContext ctx) {
         String varName = ctx.ID().getText();
-        int from = toNumber(visit(ctx.e1), ctx.getStart().getLine()).intValue();
-        int to = toNumber(visit(ctx.e2), ctx.getStart().getLine()).intValue();
+        Object fromValue = visit(ctx.e1);
+        Object toValue = visit(ctx.e2);
+        int line = ctx.getStart().getLine();
+        checkType("int", fromValue, "loop start", line);
+        checkType("int", toValue, "loop end", line);
+        int from = ((Number) fromValue).intValue();
+        int to = ((Number) toValue).intValue();
         for (int i = from; i <= to; i++) {
             Environment previousEnv = env;
             env = new Environment(previousEnv);
@@ -422,8 +436,13 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitLoopStmtLVL2(SymNoteParser.LoopStmtLVL2Context ctx) {
         String varName = ctx.ID().getText();
-        int from = toNumber(visit(ctx.e1), ctx.getStart().getLine()).intValue();
-        int to = toNumber(visit(ctx.e2), ctx.getStart().getLine()).intValue();
+        Object fromValue = visit(ctx.e1);
+        Object toValue = visit(ctx.e2);
+        int line = ctx.getStart().getLine();
+        checkType("int", fromValue, "loop start", line);
+        checkType("int", toValue, "loop end", line);
+        int from = ((Number) fromValue).intValue();
+        int to = ((Number) toValue).intValue();
 
         for (int i = from; i <= to; i++) {
             Environment previousEnv = env;
