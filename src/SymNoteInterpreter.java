@@ -94,7 +94,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     // --- State & Variables ---
 
     public void checkType(String type, Object value, String name, int line) {
-        if (type.equals("int") || type.equals("float")) {
+        if (type.equals("int")) {
+            if (!(value instanceof Integer))
+                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+        } else if (type.equals("float")) {
             if (!(value instanceof Integer || value instanceof Float || value instanceof Double))
                 throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
         } else if (type.equals("string")) {
@@ -273,7 +276,11 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitRoutineDecl(SymNoteParser.RoutineDeclContext ctx) {
-        routines.put(ctx.ID().getText(), ctx);
+        String name = ctx.ID().getText();
+        if (routines.containsKey(name)) {
+            throw new RuntimeException("Routine '" + name + "' is already defined at line " + ctx.getStart().getLine());
+        }
+        routines.put(name, ctx);
         return null;
     }
 
