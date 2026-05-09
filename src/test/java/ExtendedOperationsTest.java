@@ -39,7 +39,7 @@ public class ExtendedOperationsTest {
 
         TestHelper.Result r = TestHelper.run(code);
         assertTrue(r.isSuccess(), "Błąd: " + getErrorMessage(r));
-        // Najpierw lokalne 'x' (5), potem globalne 'x' (10)
+        
         assertEquals(List.of("5", "10"), r.output);
     }
 
@@ -66,7 +66,7 @@ public class ExtendedOperationsTest {
     @Test
     @DisplayName("advanced: complex math precedence")
     void test_math_precedence() {
-        // 10 + (2 * 5) - (20 / 4) = 10 + 10 - 5 = 15
+        
         String code = "int res = 10 + 2 * 5 - 20 / 4; print(res);";
 
         TestHelper.Result r = TestHelper.run(code);
@@ -83,7 +83,7 @@ public class ExtendedOperationsTest {
             "    int temp = 42;\n" +
             "    i++;\n" +
             "}\n" +
-            "print(temp);"; // 'temp' nie powinno istnieć tutaj
+            "print(temp);"; 
 
         TestHelper.Result r = TestHelper.run(code);
         assertFalse(r.isSuccess(), "Zmienna 'temp' wyciekła poza pętlę while!");
@@ -99,7 +99,7 @@ public class ExtendedOperationsTest {
             "    if (n <= 1) { return n; }\n" +
             "    return fib(n - 1) + fib(n - 2);\n" +
             "}\n" +
-            "print(fib(6));"; // 0, 1, 1, 2, 3, 5, 8
+            "print(fib(6));"; 
 
         TestHelper.Result r = TestHelper.run(code);
         assertTrue(r.isSuccess());

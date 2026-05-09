@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class RoutineAdvancedTest {
 
-    // --- ZASIĘG ZMIENNYCH (SCOPING) ---
+    
 
     @Test
     @DisplayName("valid: routine uses its own local variable, not global with same name")
@@ -20,7 +20,7 @@ public class RoutineAdvancedTest {
             "print(x);"
         );
         assertTrue(r.isSuccess(), "Error: " + (r.error != null ? r.error.getMessage() : "unknown"));
-        // Pierwsze x to 5 (lokalne), drugie to 100 (globalne)
+        
         assertEquals(List.of("5", "100"), r.output);
     }
 
@@ -39,7 +39,7 @@ public class RoutineAdvancedTest {
         assertEquals(List.of("15"), r.output);
     }
 
-    // --- PRZEKAZYWANIE TYPÓW ---
+    
 
     @Test
     @DisplayName("valid: routine accepting and returning different types")
@@ -54,8 +54,8 @@ public class RoutineAdvancedTest {
         assertEquals(List.of("Hero: 20 pts, score 9.5"), r.output);
     }
 
-    // --- PRZECIĄŻANIE (OVERLOADING) ---
-    // Uwaga: Sprawdź czy Twój język wspiera funkcje o tej samej nazwie z różnymi parametrami!
+    
+    
 
     @Test
     @DisplayName("valid: routine overloading (same name, different params)")
@@ -69,12 +69,12 @@ public class RoutineAdvancedTest {
         if (r.isSuccess()) {
             assertEquals(List.of("5", "HelloWorld"), r.output);
         } else {
-            // Jeśli Twój język nie wspiera przeciążania, ten test udokumentuje to zachowanie
+            
             System.out.println("Note: Overloading not supported or failed: " + r.error.getMessage());
         }
     }
 
-    // --- REKURENCJA (RECURSION) ---
+    
 
     @Test
     @DisplayName("valid: recursive routine (factorial)")
@@ -90,7 +90,7 @@ public class RoutineAdvancedTest {
         assertEquals(List.of("120"), r.output);
     }
 
-    // --- TESTY BŁĘDÓW ---
+    
 
     @Test
     @DisplayName("error: access routine parameter outside its scope")
@@ -98,7 +98,7 @@ public class RoutineAdvancedTest {
         TestHelper.Result r = TestHelper.run(
             "routine test(int secret) returns void { print(secret); }\n" +
             "test(10);\n" +
-            "print(secret);" // secret nie powinien być dostępny tutaj
+            "print(secret);" 
         );
         assertFalse(r.isSuccess(), "Variable 'secret' should not leak to global scope");
     }
@@ -120,7 +120,7 @@ public class RoutineAdvancedTest {
     void error_missing_args() {
         TestHelper.Result r = TestHelper.run(
             "routine add(int a, int b) returns int { return a + b; }\n" +
-            "add(5);" // Brakuje b
+            "add(5);" 
         );
         assertFalse(r.isSuccess());
     }
