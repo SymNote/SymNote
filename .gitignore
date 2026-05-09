@@ -17,3 +17,6 @@ grammar/*.tokens
 
 # Testing examples
 examples/Test*
+
+# Log files
+logs/
