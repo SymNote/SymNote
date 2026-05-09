@@ -79,7 +79,13 @@ public class FlowExecutor {
                                         "argument '" + paramName + "' in routine '" + functionName + "'",
                                         ctx.getStart().getLine());
 
-                                interpreter.env.define(paramName, new Variable(paramType, argValue));
+                                if (paramType.equals("int")) {
+                                    interpreter.env.define(paramName, new Variable(paramType, ((Integer) argValue).intValue()));
+                                } else if (paramType.equals("float")) {
+                                    interpreter.env.define(paramName, new Variable(paramType, ((Number) argValue).floatValue()));
+                                } else {
+                                    interpreter.env.define(paramName, new Variable(paramType, argValue));
+                                }
                             }
                         }
 
@@ -115,10 +121,7 @@ public class FlowExecutor {
 
 
                         // Cast return value to the expected type
-                        if (expectedType.equals("int")) {
-                            interpreter.checkType("int", returnValue, "return value of routine '" + functionName + "'", line);
-                            return ((Number) returnValue).intValue();
-                        } else if (expectedType.equals("float")) {
+                        if (expectedType.equals("float")) {
                             interpreter.checkType("float", returnValue, "return value of routine '" + functionName + "'", line);
                             return ((Number) returnValue).floatValue();
                         }
@@ -161,7 +164,13 @@ public class FlowExecutor {
                                     "argument '" + paramName + "' in track '" + functionName + "'",
                                     ctx.getStart().getLine());
 
-                            interpreter.env.define(paramName, new Variable(paramType, argValue));
+                            if (paramType.equals("int")) {
+                                interpreter.env.define(paramName, new Variable(paramType, ((Integer) argValue).intValue()));
+                            } else if (paramType.equals("float")) {
+                                interpreter.env.define(paramName, new Variable(paramType, ((Number) argValue).floatValue()));
+                            } else {
+                                interpreter.env.define(paramName, new Variable(paramType, argValue));
+                            }
                         }
                     }
 

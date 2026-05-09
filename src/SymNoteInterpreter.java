@@ -229,7 +229,11 @@ public void checkType(String type, Object value, String name, int line) {
 
     @Override
     public Object visitRoutineDecl(SymNoteParser.RoutineDeclContext ctx) {
-        routines.put(ctx.ID().getText(), ctx);
+        String name = ctx.ID().getText();
+        if (routines.containsKey(name)) {
+            throw new RuntimeException("Routine '" + name + "' is already defined at line " + ctx.getStart().getLine());
+        }
+        routines.put(name, ctx);
         return null;
     }
 
