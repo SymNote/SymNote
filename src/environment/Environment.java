@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public class Environment {
     private final Map<String, Variable> variables = new HashMap<>();
     private final Map<String, ParseTree> trackDeclarations = new HashMap<>();
-    private Environment parent;
+    private final Environment parent;
 
     public Environment() {
         this.parent = null;
