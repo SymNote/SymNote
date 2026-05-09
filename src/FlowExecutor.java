@@ -32,20 +32,20 @@ public class FlowExecutor {
                     throw new RuntimeException(
                             "set_bpm requires one argument at line " + ctx.getStart().getLine());
                 }
-                interpreter.bpm = interpreter.toNumber(args.get(0), ctx.getStart().getLine()).floatValue();
+                interpreter.bpm = interpreter.toNumber(args.getFirst(), ctx.getStart().getLine()).floatValue();
                 return null;
             case "load_synth":
                 if (args.isEmpty()) {
                     throw new RuntimeException(
                             "load_synth requires one argument at line " + ctx.getStart().getLine());
                 }
-                return String.valueOf(args.get(0));
+                return String.valueOf(args.getFirst());
             case "use_synth":
                 if (args.isEmpty()) {
                     throw new RuntimeException(
                             "use_synth requires one argument at line " + ctx.getStart().getLine());
                 }
-                interpreter.currentSynthName = String.valueOf(args.get(0));
+                interpreter.currentSynthName = String.valueOf(args.getFirst());
                 return null;
             case "print":
                 if (args.isEmpty()) {
@@ -165,7 +165,7 @@ public class FlowExecutor {
                         }
                     }
 
-                    interpreter.visit(trackCtx.blockLVL2());
+                    interpreter.visit(trackCtx.blockTrack());
                 } finally {
                     interpreter.currentSynthName = previousSynth;
                     interpreter.env = previousEnv;
@@ -176,6 +176,31 @@ public class FlowExecutor {
     }
 
     public Object executeParallel(SymNoteParser.ParallelStmtContext ctx) {
+        long startTick = interpreter.currentTick;
+        long maxTick = startTick;
+        Environment baseEnv = interpreter.env;
+        String baseSynth = interpreter.currentSynthName;
+        float baseBpm = interpreter.bpm;
+
+        for (SymNoteParser.ParallelEntryContext entryCtx : ctx.parallelEntry()) {
+            interpreter.currentTick = startTick;
+            interpreter.env = new Environment(baseEnv);
+            interpreter.currentSynthName = baseSynth;
+            interpreter.bpm = baseBpm;
+
+            interpreter.visit(entryCtx.callExpr());
+            maxTick = Math.max(maxTick, interpreter.currentTick);
+        }
+
+        interpreter.env = baseEnv;
+        interpreter.currentSynthName = baseSynth;
+        interpreter.bpm = baseBpm;
+        interpreter.currentTick = maxTick;
+        return null;
+    }
+
+    // For iteration
+    public Object executeParallel(SymNoteParser.ParallelIterationStmtContext ctx) {
         long startTick = interpreter.currentTick;
         long maxTick = startTick;
         Environment baseEnv = interpreter.env;

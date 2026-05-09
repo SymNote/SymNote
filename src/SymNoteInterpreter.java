@@ -8,6 +8,8 @@ import environment.Variable;
 import gen.SymNoteBaseVisitor;
 import gen.SymNoteParser;
 import midi.SymNoteTimeline;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     private static final int TICKS_PER_BEAT = 480;
@@ -70,11 +72,11 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitBlockLVL2(SymNoteParser.BlockLVL2Context ctx) {
+    public Object visitBlockTrack(SymNoteParser.BlockTrackContext ctx) {
         Environment previousEnv = env;
         try {
             env = new Environment(previousEnv);
-            return super.visitBlockLVL2(ctx);
+            return super.visitBlockTrack(ctx);
         } finally {
             env = previousEnv;
         }
@@ -92,9 +94,11 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     }
 
     // --- State & Variables ---
-
-    public void checkType(String type, Object value, String name, int line) {
-        if (type.equals("int") || type.equals("float")) {
+public void checkType(String type, Object value, String name, int line) {
+        if (type.equals("int")) {
+            if (!(value instanceof Integer))
+                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+        } else if (type.equals("float")) {
             if (!(value instanceof Integer || value instanceof Float || value instanceof Double))
                 throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
         } else if (type.equals("string")) {
@@ -170,53 +174,6 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitDeclAssignStmtLVL2(SymNoteParser.DeclAssignStmtLVL2Context ctx) {
-        String name = ctx.ID().getText();
-        String type = ctx.type().getText();
-        Object value = ctx.expression() != null ? visit(ctx.expression()) : null;
-        if (ctx.expression() != null && value == null) {
-            throw new RuntimeException("Cannot assign void value to variable '" + name + "' at line " + ctx.getStart().getLine());
-        }
-        if (value != null) {
-            int line = ctx.getStart().getLine();
-            checkType(type, value, name, line);
-            if (type.equals("int")) {
-                env.define(name, new Variable(type, ((Number) value).intValue()));
-                return null;
-            }
-            if (type.equals("float")) {
-                env.define(name, new Variable(type, ((Number) value).floatValue()));
-                return null;
-            }
-        }
-        env.define(name, new Variable(type, value));
-        return null;
-    }
-
-    @Override
-    public Object visitAssignStmtLVL2(SymNoteParser.AssignStmtLVL2Context ctx) {
-        validateVariableDeclared(ctx.ID().getText(), ctx.getStart().getLine());
-        Object value = visit(ctx.expression());
-        if (value == null) {
-            throw new RuntimeException("Cannot assign void value to variable '" + ctx.ID().getText() + "' at line " + ctx.getStart().getLine());
-        }
-        String type = env.get(ctx.ID().getText()).type;
-        String name = ctx.ID().getText();
-        checkType(type, value, name, ctx.getStart().getLine());
-
-        if (type.equals("int")) {
-            env.assign(name, ((Number) value).intValue());
-            return null;
-        }
-        if (type.equals("float")) {
-            env.assign(name, ((Number) value).floatValue());
-            return null;
-        }
-        env.assign(name, value);
-        return null;
-    }
-
-    @Override
     public Object visitAtomInt(SymNoteParser.AtomIntContext ctx) {
         return Integer.parseInt(ctx.INT().getText());
     }
@@ -233,10 +190,19 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitAtomBool(SymNoteParser.AtomBoolContext ctx) {
+        if (ctx.BOOL().getText().equals("true"))
+            return true;
+        else if (ctx.BOOL().getText().equals("false"))
+            return false;
+        throw new RuntimeException("Invalid boolean value at line " + ctx.getStart().getLine());
+    }
+
+    @Override
     public Object visitAtomId(SymNoteParser.AtomIdContext ctx) {
         String name = ctx.ID().getText();
         validateVariableDeclared(name, ctx.getStart().getLine());
-        
+
         Object val = env.get(name).value;
         if(val == null){
             throw new RuntimeException("Variable '" + name + "' is used before being initialized at line " + ctx.getStart().getLine());
@@ -260,16 +226,6 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         return visit(ctx.callStmt().callExpr());
     }
 
-    @Override
-    public Object visitExprStmtLVL2(SymNoteParser.ExprStmtLVL2Context ctx) {
-        return visit(ctx.callStmt().callExpr());
-    }
-
-    @Override
-    public Object visitTrackDecl(SymNoteParser.TrackDeclContext ctx) {
-        env.defineTrack(ctx.ID().getText(), ctx);
-        return null;
-    }
 
     @Override
     public Object visitRoutineDecl(SymNoteParser.RoutineDeclContext ctx) {
@@ -287,92 +243,17 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitDeclAssignRoutineStmt(SymNoteParser.DeclAssignRoutineStmtContext ctx) {
-        String name = ctx.ID().getText();
-        String type = ctx.type().getText();
-        Object value = ctx.expression() != null ? visit(ctx.expression()) : null;
-        if (ctx.expression() != null && value == null) {
-            throw new RuntimeException("Cannot assign void value to variable '" + name + "' at line " + ctx.getStart().getLine());
+    public Object visitReturnIterationRoutineStmt(SymNoteParser.ReturnIterationRoutineStmtContext ctx) {
+        Object value = null;
+        if (ctx.expression() != null) {
+            value = visit(ctx.expression());
         }
-        if (value != null) {
-            checkType(type, value, name, ctx.getStart().getLine());
-            if (type.equals("int")) {
-                env.define(name, new Variable(type, ((Number) value).intValue()));
-                return null;
-            }
-            if (type.equals("float")) {
-                env.define(name, new Variable(type, ((Number) value).floatValue()));
-                return null;
-            }
-        }
-        env.define(name, new Variable(type, value));
-        return null;
+        throw new ReturnException(value);
     }
 
     @Override
-    public Object visitAssignRoutineStmt(SymNoteParser.AssignRoutineStmtContext ctx) {
-        validateVariableDeclared(ctx.ID().getText(), ctx.getStart().getLine());
-        String name = ctx.ID().getText();
-        Object value = visit(ctx.expression());
-        if (value == null) {
-            throw new RuntimeException("Cannot assign void value to variable '" + name + "' at line " + ctx.getStart().getLine());
-        }
-        String type = env.get(name).type;
-        checkType(type, value, name, ctx.getStart().getLine());
-
-        if (type.equals("int")) {
-            env.assign(name, ((Number) value).intValue());
-            return null;
-        }
-        if (type.equals("float")) {
-            env.assign(name, ((Number) value).floatValue());
-            return null;
-        }
-        env.assign(name, value);
-        return null;
-    }
-
-    @Override
-    public Object visitIfRoutineStmt(SymNoteParser.IfRoutineStmtContext ctx) {
-        Object condition = visit(ctx.expression());
-        if (!(condition instanceof Boolean)) {
-            throw new RuntimeException("Condition must be boolean at line " + ctx.getStart().getLine());
-        }
-        if ((Boolean) condition) {
-            Environment prev = env;
-            try { env = new Environment(prev); visit(ctx.routineStatement(0)); } finally { env = prev; }
-        } else if (ctx.routineStatement(1) != null) {
-            Environment prev = env;
-            try { env = new Environment(prev); visit(ctx.routineStatement(1)); } finally { env = prev; }
-        }
-        return null;
-    }
-
-    @Override
-    public Object visitWhileRoutineStmt(SymNoteParser.WhileRoutineStmtContext ctx) {
-        while (true) {
-            Object condition = visit(ctx.expression());
-            if (!(condition instanceof Boolean)) throw new RuntimeException("Condition must be boolean at line " + ctx.getStart().getLine());
-            if (!(Boolean) condition) break;
-            
-            Environment prev = env;
-            try { env = new Environment(prev); visit(ctx.routineStatement()); } finally { env = prev; }
-        }
-        return null;
-    }
-
-    @Override
-    public Object visitLoopRoutineStmt(SymNoteParser.LoopRoutineStmtContext ctx) {
-        String varName = ctx.ID().getText();
-        int from = toNumber(visit(ctx.e1), ctx.getStart().getLine()).intValue();
-        int to = toNumber(visit(ctx.e2), ctx.getStart().getLine()).intValue();
-        for (int i = from; i <= to; i++) {
-            Environment prev = env;
-            env = new Environment(prev);
-            env.define(varName, new Variable("int", i));
-            visit(ctx.routineStatement());
-            env = prev;
-        }
+    public Object visitTrackDecl(SymNoteParser.TrackDeclContext ctx) {
+        env.defineTrack(ctx.ID().getText(), ctx);
         return null;
     }
 
@@ -381,106 +262,115 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         return flowExecutor.executeCall(ctx);
     }
 
-    @Override
-    public Object visitExprOnlyStmt(SymNoteParser.ExprOnlyStmtContext ctx) {
-        return visit(ctx.expression());
-    }
-
-    @Override
-    public Object visitExprOnlyRoutineStmt(SymNoteParser.ExprOnlyRoutineStmtContext ctx) {
-        return visit(ctx.expression());
-    }
-
-    @Override
-    public Object visitExprOnlyStmtLVL2(SymNoteParser.ExprOnlyStmtLVL2Context ctx) {
-        return visit(ctx.expression());
-    }
 
     // --- Control Flow ---
-    @Override
-    public Object visitLoopStmt(SymNoteParser.LoopStmtContext ctx) {
-        String varName = ctx.ID().getText();
-        int from = toNumber(visit(ctx.e1), ctx.getStart().getLine()).intValue();
-        int to = toNumber(visit(ctx.e2), ctx.getStart().getLine()).intValue();
-        for (int i = from; i <= to; i++) {
-            Environment previousEnv = env;
-            env = new Environment(previousEnv);
-            env.define(varName, new Variable("int", i));
-            visit(ctx.statementLVL1());
-            env = previousEnv;
+    Object executeBlockIteration(ParserRuleContext ctx) {
+        for (var child : ctx.children) {
+            Object result = visit(child);
+            if (result != null && (result.equals("BREAK") || result.equals("CONTINUE"))) {
+                return result;
+            }
         }
         return null;
     }
 
     @Override
-    public Object visitLoopStmtLVL2(SymNoteParser.LoopStmtLVL2Context ctx) {
-        String varName = ctx.ID().getText();
-        int from = toNumber(visit(ctx.e1), ctx.getStart().getLine()).intValue();
-        int to = toNumber(visit(ctx.e2), ctx.getStart().getLine()).intValue();
+    public Object visitBlockIterationLVL1(SymNoteParser.BlockIterationLVL1Context ctx) {
+        return executeBlockIteration(ctx);
+    }
 
-        for (int i = from; i <= to; i++) {
-            Environment previousEnv = env;
-            env = new Environment(previousEnv);
-            env.define(varName, new Variable("int", i));
-            visit(ctx.statementLVL2());
-            env = previousEnv;
+    @Override
+    public Object visitBlockIterationRoutine(SymNoteParser.BlockIterationRoutineContext ctx) {
+        return executeBlockIteration(ctx);
+    }
+
+    @Override
+    public Object visitBlockIterationTrack(SymNoteParser.BlockIterationTrackContext ctx) {
+        return executeBlockIteration(ctx);
+    }
+
+
+    // - If -
+    Object executeIfStmt(SymNoteParser.ExpressionContext expression, ParserRuleContext trueBranch,
+                         ParserRuleContext falseBranch, Integer line) {
+        Object condition = visit(expression);
+
+        if (!(condition instanceof Boolean)) {
+            throw new RuntimeException(
+                    "Condition in 'if' statement must evaluate to a boolean at line " + line);
         }
-        return null;
+
+        Object result = null;
+        if ((Boolean) condition) {
+            Environment previousEnv = env;
+            try {
+                env = new Environment(previousEnv);
+                result = visit(trueBranch);
+            } finally {
+                env = previousEnv;
+            }
+        } else if (falseBranch != null) {
+            Environment previousEnv = env;
+            try {
+                env = new Environment(previousEnv);
+                result = visit(falseBranch);
+            } finally {
+                env = previousEnv;
+            }
+        }
+        return (result != null && (result.equals("BREAK") || result.equals("CONTINUE"))) ? result : null;
     }
 
     @Override
     public Object visitIfStmt(SymNoteParser.IfStmtContext ctx) {
-        Object condition = visit(ctx.expression());
-
-        if (!(condition instanceof Boolean)) {
-            throw new RuntimeException(
-                    "Condition in 'if' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
-        }
-
-        if ((Boolean) condition) {
-            Environment previousEnv = env;
-            try {
-                env = new Environment(previousEnv);
-                visit(ctx.statementLVL1(0));
-            } finally {
-                env = previousEnv;
-            }
-        } else if (ctx.statementLVL1(1) != null) {
-            Environment previousEnv = env;
-            try {
-                env = new Environment(previousEnv);
-                visit(ctx.statementLVL1(1));
-            } finally {
-                env = previousEnv;
-            }
-        }
-        return null;
+        return executeIfStmt(ctx.expression(), ctx.statementLVL1(0), ctx.statementLVL1(1), ctx.getStart().getLine());
     }
 
     @Override
-    public Object visitIfStmtLVL2(SymNoteParser.IfStmtLVL2Context ctx) {
-        Object condition = visit(ctx.expression());
+    public Object visitIfIterationStmt(SymNoteParser.IfIterationStmtContext ctx) {
+        return executeIfStmt(ctx.expression(), ctx.iterationStatementLVL1(0), ctx.iterationStatementLVL1(1), ctx.getStart().getLine());
+    }
 
-        if (!(condition instanceof Boolean)) {
-            throw new RuntimeException(
-                    "Condition in 'if' statement must evaluate to a boolean at line " + ctx.getStart().getLine());
-        }
+    @Override
+    public Object visitIfRoutineStmt(SymNoteParser.IfRoutineStmtContext ctx) {
+        return executeIfStmt(ctx.expression(), ctx.statementRoutine(0), ctx.statementRoutine(1), ctx.getStart().getLine());
+    }
 
-        if ((Boolean) condition) {
-            Environment previousEnv = env;
+    @Override
+    public Object visitIfIterationRoutineStmt(SymNoteParser.IfIterationRoutineStmtContext ctx) {
+        return executeIfStmt(ctx.expression(), ctx.iterationStatementRoutine(0), ctx.iterationStatementRoutine(1), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Object visitIfTrackStmt(SymNoteParser.IfTrackStmtContext ctx) {
+        return executeIfStmt(ctx.expression(), ctx.statementTrack(0), ctx.statementTrack(1), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Object visitIfIterationTrackStmt(SymNoteParser.IfIterationTrackStmtContext ctx) {
+        return executeIfStmt(ctx.expression(), ctx.iterationStatementTrack(0), ctx.iterationStatementTrack(1), ctx.getStart().getLine());
+    }
+
+
+    // - While -
+    Object executeWhileStmt(SymNoteParser.ExpressionContext expression, ParserRuleContext body, Integer line){
+        while (true) {
+            Object condition = visit(expression);
+            if (!(condition instanceof Boolean))
+                throw new RuntimeException("Condition must be boolean at line " + line);
+            if (!(Boolean) condition) break;
+
+            Environment prev = env;
+
             try {
-                env = new Environment(previousEnv);
-                visit(ctx.statementLVL2(0));
+                env = new Environment(prev);
+                Object result = visit(body);
+
+                if (result != null && result.toString().equals("BREAK")) {
+                    break;
+                }
             } finally {
-                env = previousEnv;
-            }
-        } else if (ctx.statementLVL2(1) != null) {
-            Environment previousEnv = env;
-            try {
-                env = new Environment(previousEnv);
-                visit(ctx.statementLVL2(1));
-            } finally {
-                env = previousEnv;
+                env = prev;
             }
         }
         return null;
@@ -488,22 +378,66 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitWhileStmt(SymNoteParser.WhileStmtContext ctx) {
-        while (true) {
-            Object condition = visit(ctx.expression());
+        return executeWhileStmt(ctx.expression(), ctx.iterationStatementLVL1(), ctx.getStart().getLine());
+    }
 
-            if (!(condition instanceof Boolean)) {
-                throw new RuntimeException("Condition in 'while' statement must evaluate to a boolean at line "
-                        + ctx.getStart().getLine());
-            }
+    @Override
+    public Object visitWhileIterationStmt(SymNoteParser.WhileIterationStmtContext ctx) {
+        return executeWhileStmt(ctx.expression(), ctx.iterationStatementLVL1(), ctx.getStart().getLine());
+    }
 
-            if (!(Boolean) condition) {
-                break;
-            }
+    @Override
+    public Object visitWhileRoutineStmt(SymNoteParser.WhileRoutineStmtContext ctx) {
+        return executeWhileStmt(ctx.expression(), ctx.iterationStatementRoutine(), ctx.getStart().getLine());
+    }
 
+    @Override
+    public Object visitWhileIterationRoutineStmt(SymNoteParser.WhileIterationRoutineStmtContext ctx) {
+        return executeWhileStmt(ctx.expression(), ctx.iterationStatementRoutine(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Object visitWhileTrackStmt(SymNoteParser.WhileTrackStmtContext ctx) {
+        return executeWhileStmt(ctx.expression(), ctx.iterationStatementTrack(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Object visitWhileIterationTrackStmt(SymNoteParser.WhileIterationTrackStmtContext ctx) {
+        return executeWhileStmt(ctx.expression(), ctx.iterationStatementTrack(), ctx.getStart().getLine());
+    }
+
+    // - Loop -
+    Object executeLoopStmt(String varName, ParserRuleContext e1, ParserRuleContext e2, ParserRuleContext body,  Integer line){
+        Object from = visit(e1);
+        Object to = visit(e2);
+
+        if (!(from instanceof Integer)) throw new RuntimeException("Loop start value must be an integer at line " + line);
+        if (!(to instanceof Integer)) throw new RuntimeException("Loop end value must be an integer at line " + line);
+
+        int fromVal = (Integer) from;
+        int toVal = (Integer) to;
+
+        for (int i = fromVal; i <= toVal; i++) {
             Environment previousEnv = env;
+
             try {
                 env = new Environment(previousEnv);
-                visit(ctx.statementLVL1());
+                env.define(varName, new Variable("int", i));
+
+                Object result = visit(body);
+
+                // Update loop variable in case it was modified inside the loop
+                i = (Integer) env.get(varName).value;
+
+                // Re-evaluate loop end condition in case it was modified inside the loop
+                to = visit(e2);
+                if (!(to instanceof Integer))
+                    throw new RuntimeException("Loop end value must be an integer at line " + line);
+                toVal = (Integer) to;
+
+                if (result != null && result.toString().equals("BREAK")) {
+                    break;
+                }
             } finally {
                 env = previousEnv;
             }
@@ -512,38 +446,64 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitWhileStmtLVL2(SymNoteParser.WhileStmtLVL2Context ctx) {
-        while (true) {
-            Object condition = visit(ctx.expression());
-
-            if (!(condition instanceof Boolean)) {
-                throw new RuntimeException("Condition in 'while' statement must evaluate to a boolean at line "
-                        + ctx.getStart().getLine());
-            }
-
-            if (!(Boolean) condition) {
-                break;
-            }
-
-            Environment previousEnv = env;
-            try {
-                env = new Environment(previousEnv);
-                visit(ctx.statementLVL2());
-            } finally {
-                env = previousEnv;
-            }
-        }
-        return null;
+    public Object visitLoopStmt(SymNoteParser.LoopStmtContext ctx) {
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementLVL1(), ctx.getStart().getLine());
     }
 
+    @Override
+    public Object visitLoopIterationStmt(SymNoteParser.LoopIterationStmtContext ctx) {
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementLVL1(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Object visitLoopRoutineStmt(SymNoteParser.LoopRoutineStmtContext ctx) {
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementRoutine(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Object visitLoopIterationRoutineStmt(SymNoteParser.LoopIterationRoutineStmtContext ctx) {
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementRoutine(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Object visitLoopTrackStmt(SymNoteParser.LoopTrackStmtContext ctx) {
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementTrack(), ctx.getStart().getLine());
+    }
+
+    @Override
+    public Object visitLoopIterationTrackStmt(SymNoteParser.LoopIterationTrackStmtContext ctx) {
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementTrack(), ctx.getStart().getLine());
+    }
+
+    // --- Break & Continue ---
+    @Override
+    public Object visitBreakStmt(SymNoteParser.BreakStmtContext ctx) {
+        return "BREAK";
+    }
+
+    @Override
+    public Object visitContinueStmt(SymNoteParser.ContinueStmtContext ctx) {
+        return "CONTINUE";
+    }
+
+    // --- Parallel ---
     @Override
     public Object visitParallelStmt(SymNoteParser.ParallelStmtContext ctx) {
         return flowExecutor.executeParallel(ctx);
     }
 
+    @Override
+    public Object visitParallelIterationStmt(SymNoteParser.ParallelIterationStmtContext ctx) {
+        return flowExecutor.executeParallel(ctx);
+    }
+
     // --- Grid / Time Execution ---
     @Override
-    public Object visitGridStmtLVL2(SymNoteParser.GridStmtLVL2Context ctx) {
+    public Object visitGridTrackStmt(SymNoteParser.GridTrackStmtContext ctx) {
+        return gridExecutor.executeGridStmt(ctx.gridStmt());
+    }
+
+    public Object visitGridIterationTrackStmt(SymNoteParser.GridIterationTrackStmtContext ctx) {
         return gridExecutor.executeGridStmt(ctx.gridStmt());
     }
 
@@ -566,16 +526,6 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     }
 
     // Logical operations
-
-    @Override
-    public Object visitAtomBool(SymNoteParser.AtomBoolContext ctx) {
-        if (ctx.BOOL().getText().equals("true"))
-            return true;
-        else if (ctx.BOOL().getText().equals("false"))
-            return false;
-        throw new RuntimeException("Invalid boolean value at line " + ctx.getStart().getLine());
-    }
-
     @Override
     public Object visitOpOr(SymNoteParser.OpOrContext ctx) {
         Object expr1 = visit(ctx.expression(0));
@@ -593,7 +543,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             throw new RuntimeException("Invalid operands for logical OR at line " + ctx.getStart().getLine());
         }
         
-        return (Boolean) expr2;
+        return expr2;
     }
 
     @Override
@@ -613,7 +563,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             throw new RuntimeException("Invalid operands for logical AND at line " + ctx.getStart().getLine());
         }
         
-        return (Boolean) expr2;
+        return expr2;
     }
 
     @Override
@@ -697,16 +647,16 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         // String repetition
         if (expr1 instanceof String && expr2 instanceof Integer && ctx.MUL() != null) {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < (Integer) expr2; i++) {
-                sb.append(expr1);
-            }
+            sb.repeat(String.valueOf(expr1), Math.abs((Integer) expr2));
+
+            if ((Integer) expr2 < 0) return sb.reverse().toString();
             return sb.toString();
         }
         if (expr2 instanceof String && expr1 instanceof Integer && ctx.MUL() != null) {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < (Integer) expr1; i++) {
-                sb.append(expr2);
-            }
+            sb.repeat(String.valueOf(expr2), Math.abs((Integer) expr1));
+
+            if ((Integer) expr1 < 0) return sb.reverse().toString();
             return sb.toString();
         }
 
@@ -784,7 +734,6 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     }
 
     // increment and decrement
-
     @Override
     public Object visitPostDec(SymNoteParser.PostDecContext ctx) {
         String name = ctx.ID().getText();
@@ -853,20 +802,14 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         return value + 1;
     }
 
+    @Override
+    public Object visitStandaloneExpr(SymNoteParser.StandaloneExprContext ctx) {
+        return visit(ctx.expression());
+    }
+
     // Empty Statements (Allows double semicolons)
     @Override
-    public Object visitEmptyStmtLVL1(SymNoteParser.EmptyStmtLVL1Context ctx) {
-        return null;
-    }
+    public Object visitEmptyStmt(SymNoteParser.EmptyStmtContext ctx) { return null; }
 
-    @Override
-    public Object visitEmptyStmtLVL2(SymNoteParser.EmptyStmtLVL2Context ctx) {
-        return null;
-    }
-
-    @Override
-    public Object visitEmptyRoutineStmt(SymNoteParser.EmptyRoutineStmtContext ctx) {
-        return null;
-    }
 
 }
