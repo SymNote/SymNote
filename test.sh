@@ -23,6 +23,7 @@ javac -cp "$ANTLR_JAR:$JUNIT_JAR:out/main:src:src/gen" $TEST_SRC -d out/test
 
 echo "=== Running tests ==="
 set +e
+set -o pipefail
 
 java -jar "$JUNIT_JAR" \
     --class-path "$ANTLR_JAR:out/main:out/test" \
@@ -30,6 +31,7 @@ java -jar "$JUNIT_JAR" \
     --details=verbose 2>&1 | sed 's/ms)/ms)\n/' | tee "$FULL_LOG"
 
 TEST_EXIT_CODE=$?
+set +o pipefail
 set -e
 
 exit $TEST_EXIT_CODE
