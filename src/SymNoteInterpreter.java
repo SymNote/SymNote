@@ -415,7 +415,11 @@ public void checkType(String type, Object value, String name, int line) {
     }
 
     // - Loop -
-    Object executeLoopStmt(String varName, ParserRuleContext e1, ParserRuleContext e2, ParserRuleContext body,  Integer line){
+    Object executeLoopStmt(String varName, ParserRuleContext e1, ParserRuleContext e2, ParserRuleContext body,  Integer line, String type){
+        if (!type.equals("int"))           {
+            throw new RuntimeException("Loop variable must be of type int at line " + line);
+        }
+
         Object from = visit(e1);
         Object to = visit(e2);
 
@@ -455,32 +459,32 @@ public void checkType(String type, Object value, String name, int line) {
 
     @Override
     public Object visitLoopStmt(SymNoteParser.LoopStmtContext ctx) {
-        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementLVL1(), ctx.getStart().getLine());
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementLVL1(), ctx.getStart().getLine(), ctx.type().getText());
     }
 
     @Override
     public Object visitLoopIterationStmt(SymNoteParser.LoopIterationStmtContext ctx) {
-        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementLVL1(), ctx.getStart().getLine());
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementLVL1(), ctx.getStart().getLine(), ctx.type().getText());
     }
 
     @Override
     public Object visitLoopRoutineStmt(SymNoteParser.LoopRoutineStmtContext ctx) {
-        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementRoutine(), ctx.getStart().getLine());
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementRoutine(), ctx.getStart().getLine(), ctx.type().getText());
     }
 
     @Override
     public Object visitLoopIterationRoutineStmt(SymNoteParser.LoopIterationRoutineStmtContext ctx) {
-        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementRoutine(), ctx.getStart().getLine());
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementRoutine(), ctx.getStart().getLine(), ctx.type().getText());
     }
 
     @Override
     public Object visitLoopTrackStmt(SymNoteParser.LoopTrackStmtContext ctx) {
-        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementTrack(), ctx.getStart().getLine());
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementTrack(), ctx.getStart().getLine(), ctx.type().getText());
     }
 
     @Override
     public Object visitLoopIterationTrackStmt(SymNoteParser.LoopIterationTrackStmtContext ctx) {
-        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementTrack(), ctx.getStart().getLine());
+        return executeLoopStmt(ctx.ID().getText(), ctx.e1, ctx.e2, ctx.iterationStatementTrack(), ctx.getStart().getLine(), ctx.type().getText());
     }
 
     // --- Break & Continue ---

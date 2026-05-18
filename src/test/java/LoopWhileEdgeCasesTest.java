@@ -504,12 +504,12 @@ public class LoopWhileEdgeCasesTest {
     }
 
     @Test
-    @DisplayName("valid: loop with void type iterator")
+    @DisplayName("error: loop with void type iterator")
     void loop_void_iterator() {
         TestHelper.Result r = TestHelper.run(
             "loop(void v from 0 to 1) {}"
         );
-        assertTrue(r.isSuccess());
+        assertFalse(r.isSuccess());
     }
 
     @Test
