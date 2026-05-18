@@ -257,6 +257,10 @@ public void checkType(String type, Object value, String name, int line) {
 
     @Override
     public Object visitTrackDecl(SymNoteParser.TrackDeclContext ctx) {
+        String name = ctx.ID().getText();
+        if (env.hasTrack(name)) {
+            throw new RuntimeException("Track '" + name + "' is already defined at line " + ctx.getStart().getLine());
+        }
         env.defineTrack(ctx.ID().getText(), ctx);
         return null;
     }
