@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class InterpreterTest {
 
-    // VALID CASES: value assertions
+
 
     @Test
     @DisplayName("valid: int a = 7/(3) a == 2")
@@ -94,7 +94,7 @@ public class InterpreterTest {
         assertEquals(List.of("AAA", "BB"), r.output);
     }
 
-    // LOOP TESTS
+
 
     @Test
     @DisplayName("valid: loop variable value correct on each iteration (print(i))")
@@ -160,7 +160,7 @@ public class InterpreterTest {
         assertEquals(List.of("1", "2", "3"), r.output);
     }
 
-    // ROUTINE TESTS
+
 
     @Test
     @DisplayName("valid: routine returns calculated value correctly")
@@ -295,7 +295,7 @@ public class InterpreterTest {
         assertEquals(List.of("1"), r.output);
     }
 
-    // EXTRA TESTS
+
 
     @Test
     @DisplayName("valid: logical AND short-circuits")
@@ -337,12 +337,12 @@ public class InterpreterTest {
         assertEquals(List.of("2"), r.output);
     }
 
-    // ERROR CASES
+
 
     @Test
     @DisplayName("valid: float b = a (int) implicit conversion")
     void valid_float_from_int_variable() {
-        // Zmieniono na valid, ponieważ silnik najwyraźniej pozwala na to przypisanie
+
         TestHelper.Result r = TestHelper.run("int a = 7/(3); float b = a; print(b);");
         assertTrue(r.isSuccess(), "Expected implicit conversion from int to float to be valid");
     }
@@ -374,7 +374,7 @@ public class InterpreterTest {
     @Test
     @DisplayName("valid: float aa = 3 implicit conversion from literal")
     void valid_float_from_int_literal() {
-        // Zmieniono na valid zgodnie z zachowaniem silnika w logach
+
         TestHelper.Result r = TestHelper.run("float aa = 3; print(aa);");
         assertTrue(r.isSuccess(), "Expected implicit conversion from int literal to float to be valid");
     }
@@ -530,7 +530,7 @@ public class InterpreterTest {
                 "Expected argument count error, got: " + r.error.getMessage());
     }
 
-    // PRINT
+
 
     @Test
     @DisplayName("print: single integer value captured correctly")
@@ -551,7 +551,7 @@ public class InterpreterTest {
         assertEquals(List.of("1", "hello", "true"), r.output);
     }
 
-    // HELPERS
+
 
     private static String errorMsg(TestHelper.Result r) {
         if (r.hasSyntaxError)

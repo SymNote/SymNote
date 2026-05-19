@@ -3,77 +3,111 @@ grammar SymNote;
 // Parser
 program: (topLevelElement | statementLVL1)* EOF;
 
-// Functions like set_bpm, load_sample should be contained in visitor as system functions
-
 topLevelElement: routineDecl | trackDecl;
 
-statementLVL1:
-	blockLVL1 # blockStmt
-	| 'if' '(' expression ')' statementLVL1 (
-		'else' statementLVL1
-	)?																					# ifStmt
-	| 'while' '(' expression ')' statementLVL1											# whileStmt
-	| 'loop' '(' type ID 'from' e1 = expression 'to' e2 = expression ')' statementLVL1	# loopStmt
-	| 'parallel' '{' parallelEntry* '}'													# parallelStmt
-	| type ID ( '=' expression)? ';'													# declAssignStmt
-	| ID '=' expression ';'																# assignStmt
-	| callStmt																			# exprStmt
-	| expression ';'																	# exprOnlyStmt
-	| ';'																				# emptyStmtLVL1;
-
-parallelEntry: callExpr ';';
-
-routineStatement:
-	blockRoutine # blockRoutineStmt
-	| 'if' '(' expression ')' routineStatement (
-		'else' routineStatement
-	)?																						# ifRoutineStmt
-	| 'while' '(' expression ')' routineStatement											# whileRoutineStmt
-	| 'loop' '(' type ID 'from' e1 = expression 'to' e2 = expression ')' routineStatement	#
-		loopRoutineStmt
-	| type ID ('=' expression)? ';'	# declAssignRoutineStmt
-	| ID '=' expression ';'			# assignRoutineStmt
-	| 'return' expression? ';'		# returnRoutineStmt
-	| callStmt						# exprRoutineStmt
-	| expression ';' 				# exprOnlyRoutineStmt
-	| ';'							# emptyRoutineStmt;
-
-statementLVL2:
-	blockLVL2	# blockStmtLVL2
-	| gridStmt	# gridStmtLVL2
-	| 'if' '(' expression ')' statementLVL2 (
-		'else' statementLVL2
-	)?																					# ifStmtLVL2
-	| 'while' '(' expression ')' statementLVL2											# whileStmtLVL2
-	| 'loop' '(' type ID 'from' e1 = expression 'to' e2 = expression ')' statementLVL2	# loopStmtLVL2
-	| type ID ( '=' expression)? ';'													# declAssignStmtLVL2
-	| ID '=' expression ';'																# assignStmtLVL2
-	| callStmt																			# exprStmtLVL2
-	| expression ';' 																	# exprOnlyStmtLVL2
-	| ';'																				# emptyStmtLVL2;
-
-callStmt: callExpr ';';
-
-callExpr: ID '(' arguments? ')';
-
 // Routine and track declarations
-routineDecl:
-	'routine' ID '(' parameters? ')' 'returns' type blockRoutine;
+routineDecl: 'routine' ID '(' parameters? ')' 'returns' type blockRoutine;
+trackDecl: 'track' ID '(' parameters? ')' blockTrack;
 
-trackDecl: 'track' ID '(' parameters? ')' blockLVL2;
 
 parameters: param (',' param)*;
 param: type ID;
-arguments: expression (',' expression)*;
 
-// layers
+
+
+commonStatement:
+     type ID ( '=' expression)? ';'													    # declAssignStmt
+	| ID '=' expression ';'																# assignStmt
+	| callStmt																			# exprStmt
+	| expression ';'																	# standaloneExpr
+	| ';'																				# emptyStmt;
+
+
+// Statements - LEVEL 1
+statementLVL1:
+	blockLVL1                                                                                   # blockStmt
+	| 'if' '(' expression ')' statementLVL1 (
+		'else' statementLVL1
+	)?																					        # ifStmt
+	| 'while' '(' expression ')' iterationStatementLVL1										    # whileStmt
+	| 'loop' '(' type ID 'from' e1 = expression 'to' e2 = expression ')' iterationStatementLVL1	# loopStmt
+	| 'parallel' '{' parallelEntry* '}'													        # parallelStmt
+	| commonStatement                                                                           # commonStmt;
+
 blockLVL1: '{' statementLVL1* '}'; // layer 1
 
-blockRoutine:
-	'{' routineStatement* '}'; // routines (global declarations)
+iterationStatementLVL1:
+    blockIterationLVL1                                                                               # blockIterationStmt
+	| 'if' '(' expression ')' iterationStatementLVL1 (
+		'else' iterationStatementLVL1
+	)?                                                                                               # ifIterationStmt
+	| 'while' '(' expression ')' iterationStatementLVL1                                              # whileIterationStmt
+	| 'loop' '(' type ID 'from' e1 = expression 'to' e2 = expression ')' iterationStatementLVL1      # loopIterationStmt
+	| 'parallel' '{' parallelEntry* '}'                                                              # parallelIterationStmt
+	| commonStatement                                                                                # commonIterationStmt
+	| jumpStatement                                                                                  # jumpIterationStmt;
 
-blockLVL2: '{' statementLVL2* '}'; //layer 2
+blockIterationLVL1: '{' iterationStatementLVL1* '}'; // layer 1 - iteration statements
 
+parallelEntry: callExpr ';';
+
+
+//Routine statements
+statementRoutine:
+	blockRoutine                                                                                   # blockRoutineStmt
+	| 'if' '(' expression ')' statementRoutine (
+		'else' statementRoutine
+	)?																						        # ifRoutineStmt
+	| 'while' '(' expression ')' iterationStatementRoutine											# whileRoutineStmt
+	| 'loop' '(' type ID 'from' e1 = expression 'to' e2 = expression ')' iterationStatementRoutine	# loopRoutineStmt
+	| 'return' expression? ';'		                                                                # returnRoutineStmt
+	| commonStatement                                                                               # commonRoutineStmt;
+
+blockRoutine: '{' statementRoutine* '}'; // routines (global declarations)
+
+iterationStatementRoutine:
+    blockIterationRoutine                                                                               # blockIterationRoutineStmt
+    | 'if' '(' expression ')' iterationStatementRoutine (
+        'else' iterationStatementRoutine
+    )?                                                                                                  # ifIterationRoutineStmt
+    | 'while' '(' expression ')' iterationStatementRoutine                                              # whileIterationRoutineStmt
+    | 'loop' '(' type ID 'from' e1 = expression 'to' e2 = expression ')' iterationStatementRoutine      # loopIterationRoutineStmt
+    | 'return' expression? ';'		                                                                    # returnIterationRoutineStmt
+    | commonStatement                                                                                   # commonIterationRoutineStmt
+    | jumpStatement                                                                                     # jumpIterationRoutineStmt;
+
+blockIterationRoutine: '{' iterationStatementRoutine* '}'; // routines - iteration statements
+
+
+// Track statements - LEVEL 2
+statementTrack:
+	blockTrack	                                                                                    # blockTrackStmt
+	| gridStmt	                                                                                    # gridTrackStmt
+	| 'if' '(' expression ')' statementTrack (
+		'else' statementTrack
+	)?																					            # ifTrackStmt
+	| 'while' '(' expression ')' iterationStatementTrack											# whileTrackStmt
+	| 'loop' '(' type ID 'from' e1 = expression 'to' e2 = expression ')' iterationStatementTrack	# loopTrackStmt
+	| commonStatement                                                                               # commonTrackStmt;
+
+blockTrack: '{' statementTrack* '}'; //layer 2
+
+iterationStatementTrack:
+    blockIterationTrack                                                                               # blockIterationTrackStmt
+    | gridStmt                                                                                       # gridIterationTrackStmt
+    | 'if' '(' expression ')' iterationStatementTrack (
+        'else' iterationStatementTrack
+    )?                                                                                               # ifIterationTrackStmt
+    | 'while' '(' expression ')' iterationStatementTrack                                              # whileIterationTrackStmt
+    | 'loop' '(' type ID 'from' e1 = expression 'to' e2 = expression ')' iterationStatementTrack      # loopIterationTrackStmt
+    | commonStatement                                                                                # commonIterationTrackStmt
+    | jumpStatement                                                                                  # jumpIterationTrackStmt;
+
+blockIterationTrack: '{' iterationStatementTrack* '}'; //layer 2 - iteration statements
+
+
+
+// Grid statements - LEVEL 3
 gridStmt:
 	'grid' '(' RESOLUTION ')' '{' gridSequence? '}'; //layer 3 - grid
 
@@ -95,12 +129,22 @@ gridPlayable:
 	| gridChord gridVolModifier?;
 
 gridChord: '[' noteElement (',' noteElement)* ']';
-
 gridVolModifier: '.' 'vol' '(' gridVolValue ')';
-
 gridVolValue: ID | INT | FLOAT;
-
 noteElement: (NOTE | ID);
+
+
+// Jump statements
+jumpStatement:
+    'break' ';'																			# breakStmt
+    | 'continue' ';'																	# continueStmt;
+
+
+// Calling expressions
+callStmt: callExpr ';';
+callExpr: ID '(' arguments? ')';
+arguments: expression (',' expression)*;
+
 
 // expressions
 expression:

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ComparisonTest {
 
-    // --- PORÓWNANIA LICZBOWE (INT / FLOAT) ---
+    
 
     @Test
     @DisplayName("valid: int comparison 10 > 5")
@@ -26,7 +26,7 @@ public class ComparisonTest {
     @Test
     @DisplayName("valid: mixed type comparison int == float (implicit cast)")
     void valid_mixed_comparison() {
-        // Testuje czy 5 (int) jest równe 5.0 (float)
+        
         TestHelper.Result r = TestHelper.run("bool res = (5 == 5.0); print(res);");
         assertTrue(r.isSuccess());
         assertEquals(List.of("true"), r.output);
@@ -40,7 +40,7 @@ public class ComparisonTest {
         assertEquals(List.of("true"), r.output);
     }
 
-    // --- PORÓWNANIA STRUNÓW I LOGIKI ---
+    
 
     @Test
     @DisplayName("valid: string equality")
@@ -58,7 +58,7 @@ public class ComparisonTest {
         assertEquals(List.of("true"), r.output);
     }
 
-    // --- TESTY BŁĘDÓW (INCOMPATIBLE TYPES) ---
+    
 
 
     @Test
@@ -71,12 +71,12 @@ public class ComparisonTest {
     @Test
     @DisplayName("error: greater than operator on booleans (invalid)")
     void error_bool_gt() {
-        // Relacje > < >= <= zazwyczaj nie mają sensu dla booli
+        
         TestHelper.Result r = TestHelper.run("bool res = (true > false);");
         assertFalse(r.isSuccess(), "Operator '>' should not be applicable to booleans");
     }
 
-    // --- ZŁOŻONE WARUNKI ---
+    
 
     @Test
     @DisplayName("valid: complex comparison chain")
