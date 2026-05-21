@@ -153,6 +153,7 @@ expression:
     | '++' ID												# preInc
     | '--' ID												# preDec
 	| '(' expression ')'								    # parenExpr
+    | '(' type ')' expression   							# castExprStmt
 	| 'not' expression										# opNot
     | (SUB | ADD) expression                                # opUnaryMinusPlus
 	| callExpr												# funcCallExpr
