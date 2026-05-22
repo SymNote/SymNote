@@ -20,3 +20,6 @@ examples/Test*
 
 # Log files
 logs/
+
+# Internal notes
+internal_notes/

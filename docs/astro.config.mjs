@@ -12,37 +12,17 @@ export default defineConfig({
             plugins: [starlightThemeNext()],
             title: 'SymNote Docs',
             customCss: ['./src/styles/custom.css'],
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/trojancoding/SymNote' }],
+            social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/trojancoding/SymNote' }],
             sidebar: [
-            { label: 'Introduction', link: '/' },
-
-            {
-                label: 'Core Concepts',
-                autogenerate: { directory: 'logic' },
-            },
-
-            {
-                label: 'Architecture',
-                items: [
+                { label: 'Introduction', link: '/' },
                 {
-                    label: 'Level 1 (Timeline)',
-                    autogenerate: { directory: 'architecture/level-1' },
+                    label: 'User Documentation',
+                    autogenerate: { directory: 'user' },
                 },
                 {
-                    label: 'Level 2 (Track)',
-                    autogenerate: { directory: 'architecture/level-2/track' },
-                },
-                {
-                    label: 'Level 3 (Grid)',
-                    autogenerate: { directory: 'architecture/level-3/grid' },
-                },
-                ],
-            },
-
-            {
-                label: 'Technical Reference',
-                autogenerate: { directory: 'reference' },
-            },
+                    label: 'Technical Report',
+                    autogenerate: { directory: 'technical' },
+                }
             ]
         }),
     ],
