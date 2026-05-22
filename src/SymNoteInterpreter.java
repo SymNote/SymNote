@@ -93,8 +93,61 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         }
     }
 
-    // --- State & Variables ---
-public void checkType(String type, Object value, String name, int line) {
+    // --- Variables & Assignment & Casting ---
+    public Object visitCastExprStmt(SymNoteParser.CastExprStmtContext ctx) {
+        Object value = visit(ctx.expression());
+        String targetType = ctx.type().getText();
+        int line = ctx.getStart().getLine();
+
+        if (value == null) {
+            throw new RuntimeException("Cannot cast void value at line " + line);
+        }
+
+        try {
+            switch (targetType) {
+                case "int":
+                    if (value instanceof Number) {
+                        return ((Number) value).intValue();
+                    }
+                    if (value instanceof Boolean) {
+                        return ((Boolean) value) ? 1 : 0;
+                    }
+                    break;
+                case "float":
+                    if (value instanceof Number) {
+                        return ((Number) value).floatValue();
+                    }
+                    if (value instanceof Boolean) {
+                        return ((Boolean) value) ? 1.0f : 0.0f;
+                    }
+                    break;
+                case "string":
+                    return String.valueOf(value);
+                case "bool":
+                    if (value instanceof Boolean) {
+                        return value;
+                    }
+                    if (value instanceof String) {
+                        String strVal = ((String) value).toLowerCase();
+                        if (strVal.equals("true")) return true;
+                        if (strVal.equals("false")) return false;
+                    }
+                    if (value instanceof Number) {
+                        double numVal = ((Number) value).doubleValue();
+                        if (numVal == 0) return false;
+                        else return true;
+                    }
+                    break;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to cast value to '" + targetType + "' at line " + line);
+        }
+
+        throw new RuntimeException("Invalid cast to '" + targetType + "' at line " + line);
+    }
+
+
+    public void checkType(String type, Object value, String name, int line) {
         if (type.equals("int")) {
             if (!(value instanceof Integer))
                 throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
@@ -271,15 +324,27 @@ public void checkType(String type, Object value, String name, int line) {
     }
 
 
+
     // --- Control Flow ---
-    Object executeBlockIteration(ParserRuleContext ctx) {
-        for (var child : ctx.children) {
-            Object result = visit(child);
-            if (result != null && (result.equals("BREAK") || result.equals("CONTINUE"))) {
-                return result;
+    private Object executeBlockIteration(ParserRuleContext ctx) {
+        Environment previousEnv = env;
+
+        Object result = null;
+
+        try {
+            env = new Environment(previousEnv);
+
+            for (var child : ctx.children) {
+                result = visit(child);
+                if (result != null && (result.equals("BREAK") || result.equals("CONTINUE"))) {
+                    break;
+                }
             }
+        } finally {
+            env = previousEnv;
         }
-        return null;
+
+        return result;
     }
 
     @Override
@@ -299,7 +364,7 @@ public void checkType(String type, Object value, String name, int line) {
 
 
     // - If -
-    Object executeIfStmt(SymNoteParser.ExpressionContext expression, ParserRuleContext trueBranch,
+    private Object executeIfStmt(SymNoteParser.ExpressionContext expression, ParserRuleContext trueBranch,
                          ParserRuleContext falseBranch, Integer line) {
         Object condition = visit(expression);
 
