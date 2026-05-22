@@ -696,8 +696,7 @@ public class DocumentationTest {
 
         @Test
         @DisplayName("L2: use_synth inside track works")
-        void l2_use_synth_set_vol_allowed() {
-            // set_vol is documented but delegates to the audio renderer (no runtime side-effect in test mode)
+        void l2_use_synth_allowed() {
             // use_synth is the primary way to configure a track's instrument
             TestHelper.Result r = TestHelper.run(
                 "synth Piano = load_synth(\"piano\");\n" +
