@@ -2,7 +2,7 @@
 title: Deferred Rendering
 description: Why audio rendering is separated from AST evaluation.
 sidebar:
-  order: 5
+  order: 4
 ---
 
 ## The Two-Stage Approach

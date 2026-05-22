@@ -5,40 +5,67 @@ sidebar:
   order: 2
 ---
 
-SymNote is a custom interpreter built using Java and ANTLR.
+SymNote is a custom interpreted language built on Java and ANTLR v4.
 
 ## Requirements
 
-- **Java Development Kit (JDK) 11** or higher.
-- Bash terminal (Linux/macOS or WSL on Windows).
-- All necessary dependencies (like ANTLR) are already included in the `lib/` directory.
+- **Java Development Kit (JDK) 11** or higher
+- A Bash-compatible terminal (Linux, macOS, or WSL on Windows)
+- All ANTLR runtime dependencies are already included in the `lib/` directory
 
-## Compilation
+## Step 1 – Generate the Lexer and Parser
 
-Before running any script, you must generate the lexer and parser using the ANTLR grammar, and then compile the Java source files.
+Before anything else, run the `generate.sh` script. It compiles the ANTLR grammar (`grammar/SymNote.g4`) into Java source files, which are placed in `src/gen/`.
 
-1. **Generate the Lexer and Parser:**
-   Run the following script to generate the necessary Java files from `grammar/SymNote.g4`:
-   ```bash
-   ./generate.sh
-   ```
+```bash
+./generate.sh
+```
 
-2. **Compile and Run:**
-   The `run.sh` script automatically compiles all the Java code and executes the given script.
+You only need to do this once, or whenever the grammar file changes.
 
-## Running a Script
+## Step 2 – Run a Script
 
-To execute a `.symnote` script, use the `run.sh` bash script and provide the path to your script:
+Use the `run.sh` script to compile all Java sources and execute a `.symnote` file:
 
 ```bash
 ./run.sh examples/HelloWorld.symnote
 ```
 
+This compiles the Java sources (including generated ANTLR files) on the fly and passes the given `.symnote` file to the interpreter. The audio output is rendered via Java's built-in MIDI synthesizer.
+
 ## Running Tests
 
-To run the automated JUnit test suite for the interpreter:
+The project includes a JUnit test suite. To execute all tests:
 
 ```bash
 ./test.sh
 ```
-The test results will be printed to the console and saved in the `logs/test_results.log` file.
+
+Results are printed to the console and saved in `logs/test_results.log`.
+
+## Writing Your First Program
+
+Create a file with the `.symnote` extension. A minimal program that plays a C major arpeggio looks like this:
+
+```ts
+set_bpm(120);
+
+synth Piano = load_synth("piano");
+
+track Arpeggio(int bars) {
+    use_synth(Piano);
+    loop (int i from 1 to bars) {
+        grid(1/8) {
+            C4 E4 G4 C5 G4 E4 C4 -
+        }
+    }
+}
+
+Arpeggio(2);
+```
+
+Run it with:
+
+```bash
+./run.sh my_song.symnote
+```
