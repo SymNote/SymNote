@@ -304,12 +304,4 @@ public class InterpreterCastTest {
         assertFalse(r.isSuccess());
         assertNotNull(r.error);
     }
-
-    @Test
-    @DisplayName("error: cast sample token to string reference directly")
-    void error_cast_sample_to_string() {
-        TestHelper.Result r = TestHelper.run("sample smp; string s = (string) smp;;");
-        assertFalse(r.isSuccess());
-        assertNotNull(r.error);
-    }
 }

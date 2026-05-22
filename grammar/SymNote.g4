@@ -175,7 +175,6 @@ type:
 	| 'string'
 	| 'void'
 	| 'note'
-	| 'sample'
 	| 'synth';
 
 //Lexer
