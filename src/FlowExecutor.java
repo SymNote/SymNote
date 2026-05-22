@@ -1,6 +1,7 @@
 import environment.Environment;
 import environment.Variable;
 import gen.SymNoteParser;
+import environment.ActivationRecord;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +58,14 @@ public class FlowExecutor {
             default:
                 if (interpreter.routines.containsKey(functionName)) {
                     SymNoteParser.RoutineDeclContext routineCtx = interpreter.routines.get(functionName);
-                    Environment previousEnv = interpreter.env;
-                    interpreter.env = new Environment(previousEnv.getGlobal());
+                    
+                    Environment routineEnv = new Environment(interpreter.globalEnv);
+                    
+                    ActivationRecord frame = new ActivationRecord(functionName, routineEnv);
+                    interpreter.callStack.push(frame, ctx.getStart().getLine());
+                    
+                    Environment callerEnv = interpreter.env;
+                    interpreter.env = routineEnv;
 
                     try {
                         int expectedParams = routineCtx.parameters() == null ? 0
@@ -131,7 +138,8 @@ public class FlowExecutor {
 
                         return returnValue;
                     } finally {
-                        interpreter.env = previousEnv; // Restore scope
+                        interpreter.callStack.pop();
+                        interpreter.env = callerEnv;
                     }
                 }
 
@@ -143,9 +151,13 @@ public class FlowExecutor {
                             "Undefined function or track '" + functionName + "' at line " + ctx.getStart().getLine());
                 }
 
+                Environment trackEnv = new Environment(interpreter.globalEnv);
+                ActivationRecord trackFrame = new ActivationRecord(functionName, trackEnv);
+                interpreter.callStack.push(trackFrame, ctx.getStart().getLine());
+
                 Environment previousEnv = interpreter.env;
                 String previousSynth = interpreter.currentSynthName;
-                interpreter.env = new Environment(previousEnv.getGlobal());
+                interpreter.env = trackEnv;
 
                 try {
                     int expectedParams = trackCtx.parameters() == null ? 0 : trackCtx.parameters().param().size();
@@ -176,6 +188,7 @@ public class FlowExecutor {
 
                     interpreter.visit(trackCtx.blockTrack());
                 } finally {
+                    interpreter.callStack.pop();
                     interpreter.currentSynthName = previousSynth;
                     interpreter.env = previousEnv;
                 }

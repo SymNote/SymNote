@@ -14,11 +14,26 @@ import org.antlr.v4.runtime.ParserRuleContext;
 public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     private static final int TICKS_PER_BEAT = 480;
 
-    public Environment env = new Environment();
+    public final Environment globalEnv = new Environment();
+    public final environment.CallStack callStack = new environment.CallStack();
+    public Environment env = globalEnv;
+    
+    // Interpreter state fields
     public float bpm = 120;
     public String currentSynthName = "piano";
     public long currentTick = 0;
     public OutputCollector output;
+
+    // Scope management methods
+    public void enterScope() {
+        env = new Environment(env);
+    }
+
+    public void exitScope() {
+        if (env.getParent() != null) {
+            env = env.getParent();
+        }
+    }
 
     private final Set<String> declaredVariables;
     private final SymNoteTimeline timeline = new SymNoteTimeline(TICKS_PER_BEAT);
@@ -62,34 +77,31 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     // --- Block Scopes ---
     @Override
     public Object visitBlockLVL1(SymNoteParser.BlockLVL1Context ctx) {
-        Environment previousEnv = env;
+        enterScope();
         try {
-            env = new Environment(previousEnv);
             return super.visitBlockLVL1(ctx);
         } finally {
-            env = previousEnv;
+            exitScope();
         }
     }
 
     @Override
     public Object visitBlockTrack(SymNoteParser.BlockTrackContext ctx) {
-        Environment previousEnv = env;
+        enterScope();
         try {
-            env = new Environment(previousEnv);
             return super.visitBlockTrack(ctx);
         } finally {
-            env = previousEnv;
+            exitScope();
         }
     }
 
     @Override
     public Object visitBlockRoutine(SymNoteParser.BlockRoutineContext ctx) {
-        Environment previousEnv = env;
+        enterScope();
         try {
-            env = new Environment(previousEnv);
             return super.visitBlockRoutine(ctx);
         } finally {
-            env = previousEnv;
+            exitScope();
         }
     }
 
@@ -327,13 +339,11 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     // --- Control Flow ---
     private Object executeBlockIteration(ParserRuleContext ctx) {
-        Environment previousEnv = env;
+        enterScope();
 
         Object result = null;
 
         try {
-            env = new Environment(previousEnv);
-
             for (var child : ctx.children) {
                 result = visit(child);
                 if (result != null && (result.equals("BREAK") || result.equals("CONTINUE"))) {
@@ -341,7 +351,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
                 }
             }
         } finally {
-            env = previousEnv;
+            exitScope();
         }
 
         return result;
@@ -375,20 +385,18 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
         Object result = null;
         if ((Boolean) condition) {
-            Environment previousEnv = env;
+            enterScope();
             try {
-                env = new Environment(previousEnv);
                 result = visit(trueBranch);
             } finally {
-                env = previousEnv;
+                exitScope();
             }
         } else if (falseBranch != null) {
-            Environment previousEnv = env;
+            enterScope();
             try {
-                env = new Environment(previousEnv);
                 result = visit(falseBranch);
             } finally {
-                env = previousEnv;
+                exitScope();
             }
         }
         return (result != null && (result.equals("BREAK") || result.equals("CONTINUE"))) ? result : null;
@@ -433,17 +441,15 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
                 throw new RuntimeException("Condition must be boolean at line " + line);
             if (!(Boolean) condition) break;
 
-            Environment prev = env;
-
+            enterScope();
             try {
-                env = new Environment(prev);
                 Object result = visit(body);
 
                 if (result != null && result.toString().equals("BREAK")) {
                     break;
                 }
             } finally {
-                env = prev;
+                exitScope();
             }
         }
         return null;
@@ -481,7 +487,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     // - Loop -
     Object executeLoopStmt(String varName, ParserRuleContext e1, ParserRuleContext e2, ParserRuleContext body,  Integer line, String type){
-        if (!type.equals("int"))           {
+        if (!type.equals("int")) {
             throw new RuntimeException("Loop variable must be of type int at line " + line);
         }
 
@@ -495,10 +501,8 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         int toVal = (Integer) to;
 
         for (int i = fromVal; i <= toVal; i++) {
-            Environment previousEnv = env;
-
+            enterScope();
             try {
-                env = new Environment(previousEnv);
                 env.define(varName, new Variable("int", i));
 
                 Object result = visit(body);
@@ -516,7 +520,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
                     break;
                 }
             } finally {
-                env = previousEnv;
+                exitScope();
             }
         }
         return null;
