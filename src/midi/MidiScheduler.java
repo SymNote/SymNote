@@ -120,11 +120,8 @@ public class MidiScheduler {
             case "pluck":
                 return 45;
             default:
-                try {
-                    return Integer.parseInt(synthName);
-                } catch (NumberFormatException ignored) {
-                    return 0;
-                }
+                System.err.println("Unknown synth name: " + synthName + ", defaulting to Piano");
+                return 0;
         }
     }
 }

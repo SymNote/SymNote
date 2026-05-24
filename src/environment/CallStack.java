@@ -5,11 +5,12 @@ import java.util.Deque;
 
 public class CallStack {
     private final Deque<ActivationRecord> stack = new ArrayDeque<>();
-    private final int MAX_DEPTH = 400;
+    private final int MAX_DEPTH = 200;
 
     public void push(ActivationRecord record, int line) {
         if (stack.size() >= MAX_DEPTH) {
-            throw new RuntimeException("SymNote StackOverflow: Maximum recursion depth of " + MAX_DEPTH + " exceeded at line " + line);
+            throw new RuntimeException(
+                    "SymNote StackOverflow: Maximum recursion depth of " + MAX_DEPTH + " exceeded at line " + line);
         }
         stack.push(record);
     }
@@ -27,5 +28,16 @@ public class CallStack {
 
     public boolean isEmpty() {
         return stack.isEmpty();
+    }
+
+    /**
+     * Returns a list of frame labels (newest first) for call-stack formatting.
+     */
+    public java.util.List<String> frames() {
+        java.util.List<String> result = new java.util.ArrayList<>();
+        for (ActivationRecord r : stack) {
+            result.add("routine '" + r.getRoutineName() + "'");
+        }
+        return result;
     }
 }

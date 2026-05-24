@@ -21,7 +21,8 @@ public class FlowExecutor {
             for (SymNoteParser.ExpressionContext exprCtx : ctx.arguments().expression()) {
                 Object argVal = interpreter.visit(exprCtx);
                 if (argVal == null) {
-                    throw new RuntimeException("Cannot pass void value as argument at line " + ctx.getStart().getLine());
+                    throw new RuntimeException(
+                            "Cannot pass void value as argument at line " + ctx.getStart().getLine());
                 }
                 args.add(argVal);
             }
@@ -31,39 +32,81 @@ public class FlowExecutor {
             case "set_bpm":
                 if (args.isEmpty()) {
                     throw new RuntimeException(
-                            "set_bpm requires one argument at line " + ctx.getStart().getLine());
+                            "set_bpm() requires one numeric argument at line " + ctx.getStart().getLine());
                 }
-                interpreter.bpm = interpreter.toNumber(args.getFirst(), ctx.getStart().getLine()).floatValue();
+                Object bpmArg = args.getFirst();
+                if (!(bpmArg instanceof Number)) {
+                    throw new RuntimeException(
+                            "set_bpm() requires an int or float, but got "
+                                    + ErrorHelper.typeName(bpmArg) + " (value: '" + bpmArg + "') at line "
+                                    + ctx.getStart().getLine());
+                }
+                float bpmVal = ((Number) bpmArg).floatValue();
+                if (bpmVal <= 0) {
+                    throw new RuntimeException(
+                            "set_bpm() requires a positive tempo, but got " + bpmVal
+                                    + " at line " + ctx.getStart().getLine()
+                                    + ". Typical values are between 40 and 300.");
+                }
+                interpreter.bpm = bpmVal;
                 return null;
             case "load_synth":
                 if (args.isEmpty()) {
                     throw new RuntimeException(
-                            "load_synth requires one argument at line " + ctx.getStart().getLine());
+                            "load_synth() requires one string argument (the instrument name) at line "
+                                    + ctx.getStart().getLine());
                 }
-                return String.valueOf(args.getFirst());
+                if (!(args.getFirst() instanceof String)) {
+                    throw new RuntimeException(
+                            "load_synth() requires a string instrument name, but got "
+                                    + ErrorHelper.typeName(args.getFirst()) + " at line "
+                                    + ctx.getStart().getLine()
+                                    + ". Example: load_synth(\"piano\")");
+                }
+                String synthName = String.valueOf(args.getFirst());
+                String key = synthName.trim().toLowerCase().replace("-", "").replace("_", "").replace(" ", "");
+                java.util.List<String> validSynths = java.util.Arrays.asList(
+                    "piano", "organ", "bass", "sawtooth", "square", "guitar", "strings", 
+                    "pad", "choir", "trumpet", "sax", "flute", "bell", "pluck"
+                );
+                if (!validSynths.contains(key)) {
+                    throw new RuntimeException(
+                            "Unknown synth name '" + synthName + "' at line " 
+                            + ctx.getStart().getLine() 
+                            + ". See documentation for supported instruments.");
+                }
+                return new Synth(synthName);
             case "use_synth":
                 if (args.isEmpty()) {
                     throw new RuntimeException(
-                            "use_synth requires one argument at line " + ctx.getStart().getLine());
+                            "use_synth() requires one argument (a synth variable) at line "
+                                    + ctx.getStart().getLine());
                 }
-                interpreter.currentSynthName = String.valueOf(args.getFirst());
+                if (!(args.getFirst() instanceof Synth)) {
+                    throw new RuntimeException(
+                            "use_synth() requires a synth variable, but got "
+                                    + ErrorHelper.typeName(args.getFirst()) + " at line "
+                                    + ctx.getStart().getLine()
+                                    + ". Did you forget to assign the result of load_synth()?");
+                }
+                interpreter.currentSynthName = ((Synth) args.getFirst()).getName();
                 return null;
             case "print":
                 if (args.isEmpty()) {
                     throw new RuntimeException(
-                            "print requires one argument at line " + ctx.getStart().getLine());
+                            "print() requires one argument at line " + ctx.getStart().getLine());
                 }
                 interpreter.output.println(args.getFirst());
                 return null;
             default:
                 if (interpreter.routines.containsKey(functionName)) {
                     SymNoteParser.RoutineDeclContext routineCtx = interpreter.routines.get(functionName);
-                    
+
                     Environment routineEnv = new Environment(interpreter.globalEnv);
-                    
+
                     ActivationRecord frame = new ActivationRecord(functionName, routineEnv);
                     interpreter.callStack.push(frame, ctx.getStart().getLine());
-                    
+
                     Environment callerEnv = interpreter.env;
                     interpreter.env = routineEnv;
 
@@ -87,9 +130,11 @@ public class FlowExecutor {
                                         ctx.getStart().getLine());
 
                                 if (paramType.equals("int")) {
-                                    interpreter.env.define(paramName, new Variable(paramType, ((Integer) argValue).intValue()));
+                                    interpreter.env.define(paramName,
+                                            new Variable(paramType, ((Integer) argValue).intValue()));
                                 } else if (paramType.equals("float")) {
-                                    interpreter.env.define(paramName, new Variable(paramType, ((Number) argValue).floatValue()));
+                                    interpreter.env.define(paramName,
+                                            new Variable(paramType, ((Number) argValue).floatValue()));
                                 } else {
                                     interpreter.env.define(paramName, new Variable(paramType, argValue));
                                 }
@@ -97,39 +142,53 @@ public class FlowExecutor {
                         }
 
                         // Execute routine block
-                        interpreter.visit(routineCtx.blockRoutine());
+                        try {
+                            interpreter.visit(routineCtx.blockRoutine());
+                        } catch (ReturnException re) {
+                            throw re; // let the outer catch (ReturnException) handle it
+                        } catch (RuntimeException e) {
+                            // Attach call-stack trace if not already present
+                            String msg = e.getMessage();
+                            String trace = ErrorHelper.formatCallStack(interpreter.callStack);
+                            if (msg != null && !trace.isEmpty() && !msg.contains("Call stack:")) {
+                                throw new RuntimeException(msg + trace);
+                            }
+                            throw e;
+                        }
 
                         // If we get here, no return statement was hit
                         if (!routineCtx.type().getText().equals("void")) {
-                            throw new RuntimeException("Routine '" + functionName + "' missing return statement.");
+                            throw new RuntimeException(
+                                    "Routine '" + functionName + "' declared return type '"
+                                            + routineCtx.type().getText() + "' but has no return statement"
+                                            + " (defined at line " + routineCtx.getStart().getLine() + ")");
                         }
                         return null;
 
                     } catch (ReturnException e) {
-                        // Return statement was hit, catch the value
                         Object returnValue = e.getValue();
                         String expectedType = routineCtx.type().getText();
                         int line = ctx.getStart().getLine();
 
-                        // Check if void returns a value
                         if (expectedType.equals("void")) {
                             if (returnValue != null) {
                                 throw new RuntimeException(
-                                        "Void routine '" + functionName + "' cannot return a value at line " + line);
+                                        "Void routine '" + functionName
+                                                + "' cannot return a value — remove 'return <value>' at line " + line);
                             }
                             return null;
                         }
 
-                        // Check if a non-void routine returned nothing
                         if (returnValue == null) {
-                            throw new RuntimeException("Routine '" + functionName + "' must return a value of type '"
-                                    + expectedType + "' at line " + line);
+                            throw new RuntimeException(
+                                    "Routine '" + functionName + "' must return a value of type '"
+                                            + expectedType + "', but returned nothing at line " + line);
                         }
-
 
                         // Cast return value to the expected type
                         if (expectedType.equals("float")) {
-                            interpreter.checkType("float", returnValue, "return value of routine '" + functionName + "'", line);
+                            interpreter.checkType("float", returnValue,
+                                    "return value of routine '" + functionName + "'", line);
                             return ((Number) returnValue).floatValue();
                         }
 
@@ -137,6 +196,13 @@ public class FlowExecutor {
                         interpreter.checkTypeStrict(expectedType, returnValue, "return value of " + functionName, line);
 
                         return returnValue;
+                    } catch (RuntimeException e) {
+                        String msg = e.getMessage();
+                        String trace = ErrorHelper.formatCallStack(interpreter.callStack);
+                        if (msg != null && !trace.isEmpty() && !msg.contains("Call stack:")) {
+                            throw new RuntimeException(msg + trace);
+                        }
+                        throw e;
                     } finally {
                         interpreter.callStack.pop();
                         interpreter.env = callerEnv;
@@ -144,11 +210,15 @@ public class FlowExecutor {
                 }
 
                 // Otherwise, it must be a Track
-                SymNoteParser.TrackDeclContext trackCtx = (SymNoteParser.TrackDeclContext) interpreter.env
-                        .getTrack(functionName);
-                if (trackCtx == null) {
+                SymNoteParser.TrackDeclContext trackCtx;
+                try {
+                    trackCtx = (SymNoteParser.TrackDeclContext) interpreter.env.getTrack(functionName);
+                } catch (RuntimeException e) {
+                    // Neither a routine nor a track, give a suggestion
+                    String hint = ErrorHelper.suggest(functionName, interpreter.env, interpreter.routines);
                     throw new RuntimeException(
-                            "Undefined function or track '" + functionName + "' at line " + ctx.getStart().getLine());
+                            "Undefined routine or track '" + functionName + "' at line "
+                                    + ctx.getStart().getLine() + hint);
                 }
 
                 Environment trackEnv = new Environment(interpreter.globalEnv);
@@ -177,9 +247,11 @@ public class FlowExecutor {
                                     ctx.getStart().getLine());
 
                             if (paramType.equals("int")) {
-                                interpreter.env.define(paramName, new Variable(paramType, ((Integer) argValue).intValue()));
+                                interpreter.env.define(paramName,
+                                        new Variable(paramType, ((Integer) argValue).intValue()));
                             } else if (paramType.equals("float")) {
-                                interpreter.env.define(paramName, new Variable(paramType, ((Number) argValue).floatValue()));
+                                interpreter.env.define(paramName,
+                                        new Variable(paramType, ((Number) argValue).floatValue()));
                             } else {
                                 interpreter.env.define(paramName, new Variable(paramType, argValue));
                             }

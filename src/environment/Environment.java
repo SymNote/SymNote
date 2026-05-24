@@ -42,7 +42,7 @@ public class Environment {
             parent.assign(name, value);
             return;
         }
-        throw new RuntimeException("Undefined variable '" + name + "'.");
+        throw new RuntimeException("Cannot assign to undeclared variable '" + name + "'.");
     }
 
     public Variable get(String name) {
@@ -52,7 +52,12 @@ public class Environment {
         if (parent != null) {
             return parent.get(name);
         }
-        throw new RuntimeException("Undefined variable '" + name + "'.");
+        throw new RuntimeException("Variable '" + name + "' is not defined in this scope.");
+    }
+
+    /** Returns the names of all variables defined directly in this frame (not parent frames). */
+    public java.util.Set<String> variableNames() {
+        return variables.keySet();
     }
 
     public void defineTrack(String name, ParseTree ctx) {
