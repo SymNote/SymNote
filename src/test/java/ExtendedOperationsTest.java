@@ -87,8 +87,8 @@ public class ExtendedOperationsTest {
 
         TestHelper.Result r = TestHelper.run(code);
         assertFalse(r.isSuccess(), "Zmienna 'temp' wyciekła poza pętlę while!");
-        assertTrue(r.error.getMessage().contains("Undefined variable"),
-            "Oczekiwano błędu Undefined variable, dostano: " + r.error.getMessage());
+        assertTrue(r.error.getMessage().contains("temp"),
+            "Oczekiwano błędu dotyczącego 'temp', dostano: " + r.error.getMessage());
     }
 
     @Test

@@ -112,7 +112,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         int line = ctx.getStart().getLine();
 
         if (value == null) {
-            throw new RuntimeException("Cannot cast void value at line " + line);
+            throw new RuntimeException("Cannot cast a void (null) value to '" + targetType + "' at line " + line);
         }
 
         try {
@@ -152,42 +152,82 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
                     break;
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to cast value to '" + targetType + "' at line " + line);
+            throw new RuntimeException(
+                "Cannot cast value '" + value + "' (type: " + ErrorHelper.typeName(value)
+                + ") to '" + targetType + "' at line " + line);
         }
 
-        throw new RuntimeException("Invalid cast to '" + targetType + "' at line " + line);
+        throw new RuntimeException(
+            "Cannot cast value '" + value + "' (type: " + ErrorHelper.typeName(value)
+            + ") to '" + targetType + "' at line " + line);
     }
 
 
     public void checkType(String type, Object value, String name, int line) {
         if (type.equals("int")) {
             if (!(value instanceof Integer))
-                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+                throw new RuntimeException(
+                    "Type mismatch: '" + name + "' is declared as 'int' but got "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
         } else if (type.equals("float")) {
             if (!(value instanceof Integer || value instanceof Float || value instanceof Double))
-                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+                throw new RuntimeException(
+                    "Type mismatch: '" + name + "' is declared as 'float' but got "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
         } else if (type.equals("string")) {
             if (!(value instanceof String))
-                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+                throw new RuntimeException(
+                    "Type mismatch: '" + name + "' is declared as 'string' but got "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
         } else if (type.equals("bool")) {
             if (!(value instanceof Boolean))
-                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+                throw new RuntimeException(
+                    "Type mismatch: '" + name + "' is declared as 'bool' but got "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
+        } else if (type.equals("synth")) {
+            if (!(value instanceof Synth))
+                throw new RuntimeException(
+                    "Type mismatch: '" + name + "' is declared as 'synth' but got "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
+        } else if (type.equals("note")) {
+            if (!(value instanceof Note))
+                throw new RuntimeException(
+                    "Type mismatch: '" + name + "' is declared as 'note' but got "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
         }
     }
 
     public void checkTypeStrict(String type, Object value, String name, int line) {
         if (type.equals("int")) {
             if (!(value instanceof Integer))
-                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+                throw new RuntimeException(
+                    "Return type mismatch: '" + name + "' must return 'int' but returned "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
         } else if (type.equals("float")) {
             if (!(value instanceof Float || value instanceof Double))
-                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+                throw new RuntimeException(
+                    "Return type mismatch: '" + name + "' must return 'float' but returned "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
         } else if (type.equals("string")) {
             if (!(value instanceof String))
-                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+                throw new RuntimeException(
+                    "Return type mismatch: '" + name + "' must return 'string' but returned "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
         } else if (type.equals("bool")) {
             if (!(value instanceof Boolean))
-                throw new RuntimeException("Type mismatch for '" + name + "' at line " + line);
+                throw new RuntimeException(
+                    "Return type mismatch: '" + name + "' must return 'bool' but returned "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
+        } else if (type.equals("synth")) {
+            if (!(value instanceof Synth))
+                throw new RuntimeException(
+                    "Return type mismatch: '" + name + "' must return 'synth' but returned "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
+        } else if (type.equals("note")) {
+            if (!(value instanceof Note))
+                throw new RuntimeException(
+                    "Return type mismatch: '" + name + "' must return 'note' but returned "
+                    + ErrorHelper.typeName(value) + " (value: " + value + ") at line " + line);
         }
     }
 
@@ -246,6 +286,11 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitAtomFloat(SymNoteParser.AtomFloatContext ctx) {
         return Float.parseFloat(ctx.FLOAT().getText());
+    }
+
+    @Override
+    public Object visitAtomNote(SymNoteParser.AtomNoteContext ctx) {
+        return new Note(ctx.NOTE().getText());
     }
 
     @Override
@@ -380,7 +425,8 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
         if (!(condition instanceof Boolean)) {
             throw new RuntimeException(
-                    "Condition in 'if' statement must evaluate to a boolean at line " + line);
+                "Condition in 'if' must be a bool, but got "
+                + ErrorHelper.typeName(condition) + " (value: " + condition + ") at line " + line);
         }
 
         Object result = null;
@@ -438,7 +484,9 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         while (true) {
             Object condition = visit(expression);
             if (!(condition instanceof Boolean))
-                throw new RuntimeException("Condition must be boolean at line " + line);
+                throw new RuntimeException(
+                    "Condition in 'while' must be a bool, but got "
+                    + ErrorHelper.typeName(condition) + " (value: " + condition + ") at line " + line);
             if (!(Boolean) condition) break;
 
             enterScope();
@@ -488,14 +536,16 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     // - Loop -
     Object executeLoopStmt(String varName, ParserRuleContext e1, ParserRuleContext e2, ParserRuleContext body,  Integer line, String type){
         if (!type.equals("int")) {
-            throw new RuntimeException("Loop variable must be of type int at line " + line);
+            throw new RuntimeException("Loop variable '" + varName + "' must be declared as 'int', got '" + type + "' at line " + line);
         }
 
         Object from = visit(e1);
         Object to = visit(e2);
 
-        if (!(from instanceof Integer)) throw new RuntimeException("Loop start value must be an integer at line " + line);
-        if (!(to instanceof Integer)) throw new RuntimeException("Loop end value must be an integer at line " + line);
+        if (!(from instanceof Integer)) throw new RuntimeException(
+            "Loop 'from' value must be an integer, got " + ErrorHelper.typeName(from) + " (value: " + from + ") at line " + line);
+        if (!(to instanceof Integer)) throw new RuntimeException(
+            "Loop 'to' value must be an integer, got " + ErrorHelper.typeName(to) + " (value: " + to + ") at line " + line);
 
         int fromVal = (Integer) from;
         int toVal = (Integer) to;
@@ -595,7 +645,9 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     void validateVariableDeclared(String variableName, int line) {
         if (!declaredVariables.contains(variableName)) {
-            throw new RuntimeException("Undefined variable '" + variableName + "' at line " + line);
+            String hint = ErrorHelper.suggest(variableName, env, routines);
+            throw new RuntimeException(
+                "Undefined variable '" + variableName + "' at line " + line + hint);
         }
     }
 
@@ -610,40 +662,52 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitOpOr(SymNoteParser.OpOrContext ctx) {
         Object expr1 = visit(ctx.expression(0));
-        
+
         if (!(expr1 instanceof Boolean)) {
-            throw new RuntimeException("Invalid operands for logical OR at line " + ctx.getStart().getLine());
+            throw new RuntimeException(
+                "Operator 'or' requires bool operands, but left side is "
+                + ErrorHelper.typeName(expr1) + " (value: " + expr1 + ") at line "
+                + ctx.getStart().getLine());
         }
-        
+
         if ((Boolean) expr1) {
             return true;
         }
 
         Object expr2 = visit(ctx.expression(1));
         if (!(expr2 instanceof Boolean)) {
-            throw new RuntimeException("Invalid operands for logical OR at line " + ctx.getStart().getLine());
+            throw new RuntimeException(
+                "Operator 'or' requires bool operands, but right side is "
+                + ErrorHelper.typeName(expr2) + " (value: " + expr2 + ") at line "
+                + ctx.getStart().getLine());
         }
-        
+
         return expr2;
     }
 
     @Override
     public Object visitOpAnd(SymNoteParser.OpAndContext ctx) {
         Object expr1 = visit(ctx.expression(0));
-        
+
         if (!(expr1 instanceof Boolean)) {
-            throw new RuntimeException("Invalid operands for logical AND at line " + ctx.getStart().getLine());
+            throw new RuntimeException(
+                "Operator 'and' requires bool operands, but left side is "
+                + ErrorHelper.typeName(expr1) + " (value: " + expr1 + ") at line "
+                + ctx.getStart().getLine());
         }
-        
+
         if (!(Boolean) expr1) {
             return false;
         }
 
         Object expr2 = visit(ctx.expression(1));
         if (!(expr2 instanceof Boolean)) {
-            throw new RuntimeException("Invalid operands for logical AND at line " + ctx.getStart().getLine());
+            throw new RuntimeException(
+                "Operator 'and' requires bool operands, but right side is "
+                + ErrorHelper.typeName(expr2) + " (value: " + expr2 + ") at line "
+                + ctx.getStart().getLine());
         }
-        
+
         return expr2;
     }
 
@@ -653,7 +717,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         if (expr instanceof Boolean)
             return !(Boolean) expr;
 
-        throw new RuntimeException("Invalid operand for logical NOT at line " + ctx.getStart().getLine());
+        throw new RuntimeException(
+            "Operator 'not' requires a bool operand, but got "
+            + ErrorHelper.typeName(expr) + " (value: " + expr + ") at line "
+            + ctx.getStart().getLine());
     }
 
     // Numer operations
@@ -689,16 +756,20 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         Object expr1 = visit(ctx.expression(0));
         Object expr2 = visit(ctx.expression(1));
 
-        // Modulus operation
+        // Modulus operation — only integers allowed
         if (ctx.MOD() != null) {
-            if (expr1 instanceof Integer && expr2 instanceof Integer) {
-                int val1 = (Integer) expr1;
-                int val2 = (Integer) expr2;
-                if (val2 == 0)
-                    throw new ArithmeticException("Division by zero in modulus operation at line " + ctx.getStart().getLine());
-                return val1 % val2;
+            if (!(expr1 instanceof Integer) || !(expr2 instanceof Integer)) {
+                throw new RuntimeException(
+                    "Operator '%' requires integer operands, but got "
+                    + ErrorHelper.typeName(expr1) + " and " + ErrorHelper.typeName(expr2)
+                    + " at line " + ctx.getStart().getLine()
+                    + ". Tip: cast to int first, e.g. (int)x % (int)y");
             }
-            throw new RuntimeException("Invalid operands for modulus at line " + ctx.getStart().getLine());
+            int val1 = (Integer) expr1;
+            int val2 = (Integer) expr2;
+            if (val2 == 0)
+                throw new ArithmeticException("Division by zero in '%' (modulus) at line " + ctx.getStart().getLine());
+            return val1 % val2;
         }
 
         // Integer multiplication/division
@@ -741,7 +812,10 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             return sb.toString();
         }
 
-        throw new RuntimeException("Invalid operands for multiplication/division at line " + ctx.getStart().getLine());
+        throw new RuntimeException(
+            "Operator '" + (ctx.MUL() != null ? "*" : "/") + "' cannot be applied to "
+            + ErrorHelper.typeName(expr1) + " and " + ErrorHelper.typeName(expr2)
+            + " at line " + ctx.getStart().getLine());
     }
 
     @Override
@@ -749,19 +823,18 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         Object expr = visit(ctx.expression());
         if (expr instanceof Integer) {
             int val = (Integer) expr;
-            if (ctx.SUB() != null)
-                return -val;
-            if (ctx.ADD() != null)
-                return val;
+            if (ctx.SUB() != null) return -val;
+            if (ctx.ADD() != null) return val;
         }
         if (expr instanceof Number) {
             float val = ((Number) expr).floatValue();
-            if (ctx.SUB() != null)
-                return -val;
-            if (ctx.ADD() != null)
-                return val;
+            if (ctx.SUB() != null) return -val;
+            if (ctx.ADD() != null) return val;
         }
-        throw new RuntimeException("Invalid operand for unary minus at line " + ctx.getStart().getLine());
+        throw new RuntimeException(
+            "Unary '" + (ctx.SUB() != null ? "-" : "+") + "' requires a numeric operand, but got "
+            + ErrorHelper.typeName(expr) + " (value: " + expr + ") at line "
+            + ctx.getStart().getLine());
     }
 
     @Override
@@ -805,13 +878,18 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         if (expr1 instanceof Boolean && expr2 instanceof Boolean) {
             boolean val1 = (Boolean) expr1;
             boolean val2 = (Boolean) expr2;
-            if (ctx.EQ() != null)
-                return val1 == val2;
-            else if (ctx.NE() != null)
-                return val1 != val2;
+            if (ctx.EQ() != null) return val1 == val2;
+            else if (ctx.NE() != null) return val1 != val2;
+            // bool values can only be compared with == and !=
+            String op = ctx.LT() != null ? "<" : ctx.LE() != null ? "<=" : ctx.GT() != null ? ">" : ">=";
+            throw new RuntimeException(
+                "Cannot compare bool values with '" + op + "' — use '==' or '!=' for booleans at line "
+                + ctx.getStart().getLine());
         }
 
-        throw new RuntimeException("Invalid operands for comparison at line " + ctx.getStart().getLine());
+        throw new RuntimeException(
+            "Cannot compare " + ErrorHelper.typeName(expr1) + " and " + ErrorHelper.typeName(expr2)
+            + " at line " + ctx.getStart().getLine());
     }
 
     // increment and decrement

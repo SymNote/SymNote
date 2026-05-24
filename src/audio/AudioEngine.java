@@ -32,20 +32,26 @@ public class AudioEngine {
             nextChannel++;
         }
 
+        String key = name.trim().toLowerCase().replace("-", "").replace("_", "").replace(" ", "");
         int program = 0;
-        switch (name.toLowerCase()) {
+        switch (key) {
             case "piano": program = 0; break;
+            case "organ": program = 18; break;
             case "bass": program = 32; break;
             case "sawtooth": program = 81; break;
             case "square": program = 80; break;
             case "guitar": program = 24; break;
             case "strings": program = 48; break;
+            case "pad": program = 89; break;
+            case "choir": program = 52; break;
+            case "trumpet": program = 56; break;
+            case "sax": program = 65; break;
+            case "flute": program = 73; break;
+            case "bell": program = 14; break;
+            case "pluck": program = 45; break;
             default:
-                try {
-                    program = Integer.parseInt(name);
-                } catch (NumberFormatException e) {
-                    System.err.println("Unknown synth name: " + name + ", defaulting to Piano");
-                }
+                System.err.println("Unknown synth name: " + name + ", defaulting to Piano");
+                program = 0;
         }
 
         MidiChannel chan = channels[nextChannel++];

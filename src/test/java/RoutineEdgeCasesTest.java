@@ -782,7 +782,8 @@ public class RoutineEdgeCasesTest {
     @DisplayName("Error: Routine returning note where int expected")
     void errorTypeNoteInt() {
         TestHelper.Result r = TestHelper.run(
-            "routine get() returns int { return C4; }"
+            "routine get() returns int { return C4; }\n" +
+            "get();"
         );
         assertFalse(r.isSuccess());
     }

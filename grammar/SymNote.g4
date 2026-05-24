@@ -166,7 +166,8 @@ expression:
 	| INT													# atomInt
 	| FLOAT													# atomFloat
 	| BOOL													# atomBool
-	| STRING												# atomString;
+	| STRING												# atomString
+	| NOTE													# atomNote;
 
 type:
 	'int'

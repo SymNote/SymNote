@@ -201,7 +201,22 @@ public class GridExecutor {
             String variableName = noteCtx.ID().getText();
             interpreter.validateVariableDeclared(variableName, line);
             Object value = interpreter.env.get(variableName).value;
-            noteText = String.valueOf(value);
+            if (value == null) {
+                throw new RuntimeException(
+                    "Variable '" + variableName + "' is uninitialized and cannot be used as a note at line " + line);
+            }
+            if (!(value instanceof Note)) {
+                throw new RuntimeException(
+                    "Variable '" + variableName + "' is of type '" + ErrorHelper.typeName(value) + 
+                    "' but grid requires a 'note' type at line " + line);
+            }
+            noteText = ((Note) value).getValue();
+            // Validate early so the error mentions the variable name
+            if (noteText.length() < 2 || !"CDEFGAB".contains(String.valueOf(noteText.toUpperCase().charAt(0)))) {
+                throw new RuntimeException(
+                    "Variable '" + variableName + "' has value '" + noteText
+                    + "' which is not a valid note (expected e.g. C4, F#3, Bb2) at line " + line);
+            }
         }
 
         return noteToMidi(noteText, line);

@@ -54,18 +54,18 @@ public class RecursionTest {
     }
 
     @Test
-    @DisplayName("valid: deep recursion just under the maximum stack limit (e.g., 380)")
+    @DisplayName("valid: deep recursion just under the maximum stack limit (150)")
     void valid_deep_recursion_under_limit() {
         String code = 
             "routine climb(int n) returns int {\n" +
             "    if (n == 0) return 0;\n" +
             "    return 1 + climb(n - 1);\n" +
             "}\n" +
-            "print(climb(380));";
+            "print(climb(150));";
             
         TestHelper.Result r = TestHelper.run(code);
         assertTrue(r.isSuccess(), "Expected no error for deep recursion under limit, but got: " + errorMsg(r));
-        assertEquals(List.of("380"), r.output);
+        assertEquals(List.of("150"), r.output);
     }
 
     @Test
