@@ -25,7 +25,7 @@ SymNote is a **statically typed, imperative language** designed for rendering MI
 | Type     | Description                                                    | Example                              |
 |----------|----------------------------------------------------------------|--------------------------------------|
 | `synth`  | A MIDI instrument loaded by name                               | `synth Piano = load_synth("piano");` |
-| `note`   | A musical pitch. Not declared manually — used as note literals | `C4`, `F#3`, `Bb2`                  |
+| `note`   | A musical pitch. Used as literals (`C4`) or variables.           | `note n = C4;`                      |
 
 ### Declaring Variables
 
