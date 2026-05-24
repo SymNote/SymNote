@@ -17,6 +17,10 @@ public class Environment {
         this.parent = parent;
     }
 
+    public Environment getParent() {
+        return this.parent;
+    }
+
     public Environment getGlobal() {
         Environment current = this;
         while (current.parent != null) {
