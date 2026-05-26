@@ -257,24 +257,39 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitAssignStmt(SymNoteParser.AssignStmtContext ctx) {
-        validateVariableDeclared(ctx.ID().getText(), ctx.getStart().getLine());
+        String name = ctx.ID().getText();
+        validateVariableDeclared(name, ctx.getStart().getLine());
         Object value = visit(ctx.expression());
         if (value == null) {
-            throw new RuntimeException("Cannot assign void value to variable '" + ctx.ID().getText() + "' at line " + ctx.getStart().getLine());
+            throw new RuntimeException("Cannot assign void value to variable '" + name + "' at line " + ctx.getStart().getLine());
         }
-        String type = env.get(ctx.ID().getText()).type;
-        String name = ctx.ID().getText();
+
+        int depth = 0;
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            if (ctx.getChild(i).getText().equals("parent")) {
+                depth++;
+            }
+        }
+
+        Variable var = (depth > 0) ? env.getParentVariable(name, depth) : env.get(name);
+        String type = var.type;
+        
         checkType(type, value, name, ctx.getStart().getLine());
 
         if (type.equals("int")) {
-            env.assign(name, ((Number) value).intValue());
+            int intVal = ((Number) value).intValue();
+            if (depth > 0) env.assignParentVariable(name, intVal, depth);
+            else env.assign(name, intVal);
             return null;
         }
         if (type.equals("float")) {
-            env.assign(name, ((Number) value).floatValue());
+            float floatVal = ((Number) value).floatValue();
+            if (depth > 0) env.assignParentVariable(name, floatVal, depth);
+            else env.assign(name, floatVal);
             return null;
         }
-        env.assign(name, value);
+        if (depth > 0) env.assignParentVariable(name, value, depth);
+        else env.assign(name, value);
         return null;
     }
 
@@ -378,6 +393,26 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     @Override
     public Object visitCallExpr(SymNoteParser.CallExprContext ctx) {
         return flowExecutor.executeCall(ctx);
+    }
+
+    @Override
+    public Object visitParentAtomId(SymNoteParser.ParentAtomIdContext ctx) {
+        String name = ctx.ID().getText();
+        validateVariableDeclared(name, ctx.getStart().getLine());
+        
+        // Count how many times 'parent' keyword appears in the expression
+        int depth = 0;
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            if (ctx.getChild(i).getText().equals("parent")) {
+                depth++;
+            }
+        }
+        
+        Object val = env.getParentVariable(name, depth).value;
+        if (val == null) {
+            throw new RuntimeException("Variable '" + name + "' is used before being initialized at line " + ctx.getStart().getLine());
+        }
+        return val;
     }
 
 
