@@ -24,3 +24,19 @@ The most distinctive architectural feature of SymNote is its **3-Level Constrain
 3. **Level 3 (Grid)**: The lowest level. A pure time-domain environment mapping musical symbols to specific ticks. No logical constructs or variable assignments are permitted here.
 
 This architecture ensures that time moves predictably. By forcing all logic into Level 2 and all time-advancement into Level 3, the interpreter can map complex, concurrent (`parallel`) instructions to a linear timeline without race conditions or complex runtime threading.
+
+## Memory Management and Scope Resolution
+
+A standard Tree-Walk interpreter in Java often suffers from a critical architectural flaw: it relies heavily on the JVM's call stack to manage target-language recursion. This can quickly lead to unhandled `java.lang.StackOverflowError` crashes during deep recursion tests. 
+
+To resolve this and ensure system stability, SymNote implements its own decoupled memory management architecture:
+
+### Independent Call Stack (`CallStack` & `ActivationRecord`)
+Routine and track calls do not use Java's local variables to track state. Instead, every function call generates an `ActivationRecord` placed on a custom `CallStack` that lives safely on the JVM Heap. 
+- We enforce a strict, safe recursion limit (`MAX_DEPTH = 400`).
+- If a script encounters infinite recursion, the interpreter securely catches it and throws a domain-specific `SymNote StackOverflow` error with the exact line number, gracefully preventing a JVM crash.
+
+### Lexical Scoping and Environment Chaining
+Block-level scopes (used in `if`, `while`, `loop`, and nested `{}`) are managed via an `Environment` chain. Each new scope holds a pointer (`parent`) to its enclosing scope.
+- **Entering/Exiting Scopes:** Handled explicitly by `enterScope()` and `exitScope()` to prevent memory leaks and ensure tight lifecycle control.
+- **Parent Keyword Resolution:** The `parent::` keyword traverses this pointer chain iteratively ($O(N)$ depth). This allows precise variable shadowing resolution and assignments without any recursive overhead on the Java stack.
