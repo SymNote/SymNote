@@ -17,7 +17,7 @@ param: type ID;
 
 commonStatement:
      type ID ( '=' expression)? ';'													    # declAssignStmt
-	| ID '=' expression ';'																# assignStmt
+	| ('parent' '::')* ID '=' expression ';'											# assignStmt
 	| callStmt																			# exprStmt
 	| expression ';'																	# standaloneExpr
 	| ';'																				# emptyStmt;
@@ -162,6 +162,7 @@ expression:
 	| expression (GT | LT | GE | LE | EQ | NE) expression	# opCompare
 	| expression 'and' expression							# opAnd
 	| expression 'or' expression							# opOr
+	| ('parent' '::')+ ID                                   # parentAtomId
 	| ID													# atomId
 	| INT													# atomInt
 	| FLOAT													# atomFloat

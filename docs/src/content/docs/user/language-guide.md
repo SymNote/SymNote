@@ -207,9 +207,24 @@ print(x);         // prints: 10  (original restored)
 // print(y);      // ERROR — y is out of scope
 ```
 
-### Shadowing
+### Shadowing and Parent Scope
 
 A nested scope may declare a variable with the same name as an outer scope. The inner variable temporarily shadows the outer one. The outer value is untouched.
+
+To access or modify the hidden variable from the parent scope, SymNote provides the `parent::` keyword. You can chain this keyword (e.g., `parent::parent::`) to access scopes further up the hierarchy.
+
+```ts
+int a = 1;
+{
+    int a = 5;
+    int x = a; // x is 5 (from current scope)
+    int y = parent::a; // y is 1 (from the outer scope)
+    
+    // You can also assign to parent variables:
+    parent::a = 10; 
+}
+print(a); // prints: 10
+```
 
 ---
 

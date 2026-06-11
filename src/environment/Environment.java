@@ -83,4 +83,30 @@ public class Environment {
         }
         throw new RuntimeException("Undefined track '" + name + "'.");
     }
+
+    // Resolves a variable from a parent scope at a specific shadowing depth.
+   
+    public Variable getParentVariable(String name, int depth) {
+        Environment current = this;
+        for (int i = 0; i < depth; i++) {
+            if (current.parent == null) {
+                throw new RuntimeException("No parent scope available at depth " + depth + ".");
+            }
+            current = current.parent;
+        }
+        return current.get(name);
+    }
+
+    //Assigns a value to a variable in a parent scope at a specific shadowing depth
+
+    public void assignParentVariable(String name, Object value, int depth) {
+        Environment current = this;
+        for (int i = 0; i < depth; i++) {
+            if (current.parent == null) {
+                throw new RuntimeException("No parent scope available at depth " + depth + ".");
+            }
+            current = current.parent;
+        }
+        current.assign(name, value);
+    }
 }
