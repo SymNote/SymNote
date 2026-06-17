@@ -1,0 +1,115 @@
+// =======================
+// Settings and variables
+// =======================
+
+set_bpm(110);
+
+// Load instruments
+synth Piano = load_synth("piano");
+synth Bass = load_synth("bass");
+synth Strings = load_synth("strings");
+
+// Types, variables, and casting
+int main_section_bars = 6;
+float volume_base = 0.8;
+string section_name = "Intro";
+bool is_active = true;
+
+// Control Flow and Math
+float current_vol = volume_base;
+if (is_active and not (main_section_bars < 2)) {
+    current_vol = volume_base + 0.1;
+}
+
+// Scoping and 'parent::' keyword
+{
+    int main_section_bars = 2; // Local shadow variable
+    parent::main_section_bars = parent::main_section_bars - main_section_bars;
+}
+print("Total bars updated to:");
+print(main_section_bars); // Should be 4
+
+
+// Recursive routine to lower volume step-by-step
+routine lower_volume(int steps, float v) returns float {
+    if (steps <= 0) { return v; }
+    return lower_volume(steps - 1, v - 0.15);
+}
+
+// =======================
+// Tracks and Grid
+// =======================
+
+track Melody(int bars, float base_vol) {
+    use_synth(Piano);
+    
+    loop (int i from 1 to bars) {
+        grid(1/16) {
+            C5 D5 E5 C5 E5 F5 G5 -
+            C5.vol(base_vol) ~ ~ - G4 F4 E4 D4
+        }
+    }
+}
+
+track MelodyEcho(int bars, float base_vol) {
+    use_synth(Piano);
+    loop (int i from 1 to bars) {
+        // Drop the volume of the echo recursively for each bar
+        float echo_vol = lower_volume(i, base_vol);
+        
+        grid(1/16) {
+            C5.vol(echo_vol) D5.vol(echo_vol) E5.vol(echo_vol) C5.vol(echo_vol) E5.vol(echo_vol) F5.vol(echo_vol) G5.vol(echo_vol) -
+            C5.vol(echo_vol) ~ ~ - G4.vol(echo_vol) F4.vol(echo_vol) E4.vol(echo_vol) D4.vol(echo_vol)
+        }
+    }
+}
+
+track Bassline(int bars) {
+    use_synth(Bass);
+    
+    int current_bar = 0;
+    while (current_bar < bars) {
+        if (current_bar % 2 == 0) {
+            // Even bars
+            grid(1/8) {
+                C2 - C2 - G2 - G2 -
+            }
+        } else {
+            // Odd bars
+            grid(1/8) {
+                F1 - F1 - A1 - A1 -
+            }
+        }
+        current_bar++;
+    }
+}
+
+track Chords(int bars, float v) {
+    use_synth(Strings);
+    
+    loop (int i from 1 to bars) {
+        grid(1/2) {
+            // Chords with volume modifiers and sustain
+            [C3, E3, G3].vol(v) ~ 
+            [F3, A3, C4].vol(v) ~
+        }
+    }
+}
+
+// =======================
+// Track Execution
+// =======================
+
+Melody(2, current_vol);
+
+// Parallel Execution
+parallel {
+    Bassline(main_section_bars);
+    Melody(main_section_bars, current_vol);
+    Chords(2, current_vol - 0.35);
+}
+
+parallel {
+    Bassline(4);
+    MelodyEcho(4, current_vol);
+}

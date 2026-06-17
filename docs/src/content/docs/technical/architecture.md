@@ -33,7 +33,7 @@ To resolve this and ensure system stability, SymNote implements its own decouple
 
 ### Independent Call Stack (`CallStack` & `ActivationRecord`)
 Routine and track calls do not use Java's local variables to track state. Instead, every function call generates an `ActivationRecord` placed on a custom `CallStack` that lives safely on the JVM Heap. 
-- We enforce a strict, safe recursion limit (`MAX_DEPTH = 400`).
+- We enforce a strict, safe recursion limit (`MAX_DEPTH = 200`).
 - If a script encounters infinite recursion, the interpreter securely catches it and throws a domain-specific `SymNote StackOverflow` error with the exact line number, gracefully preventing a JVM crash.
 
 ### Lexical Scoping and Environment Chaining
