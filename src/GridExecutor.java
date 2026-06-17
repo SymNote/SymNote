@@ -26,17 +26,6 @@ public class GridExecutor {
         this.interpreter = interpreter;
     }
 
-    public Object executeGridStmt(SymNoteParser.GridStmtContext ctx) {
-        long stepTicks = resolutionToTicks(ctx.RESOLUTION().getText());
-        List<PendingNote> activeNotes = new ArrayList<>();
-
-        if (ctx.gridSequence() != null) {
-            processGridSequence(ctx.gridSequence(), stepTicks, activeNotes);
-        }
-
-        closeActiveNotes(activeNotes, interpreter.currentTick);
-        return null;
-    }
 
     private long resolutionToTicks(String resolutionText) {
         String[] parts = resolutionText.split("/");
@@ -47,58 +36,32 @@ public class GridExecutor {
         return Math.max(1, ticks);
     }
 
-    private void processGridSequence(ParseTree node, long stepTicks, List<PendingNote> activeNotes) {
-        if (node instanceof SymNoteParser.GridSequenceContext) {
-            SymNoteParser.GridSequenceContext seqCtx = (SymNoteParser.GridSequenceContext) node;
-            if (seqCtx.gridPlayable() != null) {
-                processPlayable(seqCtx.gridPlayable(), stepTicks, activeNotes);
-                if (seqCtx.gridTailPlayable() != null) {
-                    processGridSequence(seqCtx.gridTailPlayable(), stepTicks, activeNotes);
-                }
-            } else {
-                processRest(stepTicks, activeNotes);
-                if (seqCtx.gridTailNoHold() != null) {
-                    processGridSequence(seqCtx.gridTailNoHold(), stepTicks, activeNotes);
+    public Object executeGridStmt(SymNoteParser.GridStmtContext ctx) {
+        long stepTicks = resolutionToTicks(ctx.RESOLUTION().getText());
+        List<PendingNote> activeNotes = new ArrayList<>();
+
+        if (ctx.gridSequence() != null) {
+            boolean lastWasPlayableOrHold = false;
+            
+            for (SymNoteParser.GridSymbolContext symbolCtx : ctx.gridSequence().gridSymbol()) {
+                if (symbolCtx.gridPlayable() != null) {
+                    processPlayable(symbolCtx.gridPlayable(), stepTicks, activeNotes);
+                    lastWasPlayableOrHold = true;
+                } else if (symbolCtx.getText().equals("-")) {
+                    processRest(stepTicks, activeNotes);
+                    lastWasPlayableOrHold = false;
+                } else if (symbolCtx.getText().equals("~")) {
+                    if (!lastWasPlayableOrHold) {
+                        throw new RuntimeException("Cannot sustain ('~') a rest or empty grid at line " + symbolCtx.getStart().getLine());
+                    }
+                    processSustain(stepTicks);
+                    lastWasPlayableOrHold = true;
                 }
             }
-            return;
         }
 
-        if (node instanceof SymNoteParser.GridTailPlayableContext) {
-            SymNoteParser.GridTailPlayableContext tailPlayableCtx = (SymNoteParser.GridTailPlayableContext) node;
-            if (tailPlayableCtx.gridPlayable() != null) {
-                processPlayable(tailPlayableCtx.gridPlayable(), stepTicks, activeNotes);
-                if (tailPlayableCtx.gridTailPlayable() != null) {
-                    processGridSequence(tailPlayableCtx.gridTailPlayable(), stepTicks, activeNotes);
-                }
-            } else if (tailPlayableCtx.getText().startsWith("~")) {
-                processSustain(stepTicks);
-                if (tailPlayableCtx.gridTailPlayable() != null) {
-                    processGridSequence(tailPlayableCtx.gridTailPlayable(), stepTicks, activeNotes);
-                }
-            } else {
-                processRest(stepTicks, activeNotes);
-                if (tailPlayableCtx.gridTailNoHold() != null) {
-                    processGridSequence(tailPlayableCtx.gridTailNoHold(), stepTicks, activeNotes);
-                }
-            }
-            return;
-        }
-
-        if (node instanceof SymNoteParser.GridTailNoHoldContext) {
-            SymNoteParser.GridTailNoHoldContext tailNoHoldCtx = (SymNoteParser.GridTailNoHoldContext) node;
-            if (tailNoHoldCtx.gridPlayable() != null) {
-                processPlayable(tailNoHoldCtx.gridPlayable(), stepTicks, activeNotes);
-                if (tailNoHoldCtx.gridTailPlayable() != null) {
-                    processGridSequence(tailNoHoldCtx.gridTailPlayable(), stepTicks, activeNotes);
-                }
-            } else {
-                processRest(stepTicks, activeNotes);
-                if (tailNoHoldCtx.gridTailNoHold() != null) {
-                    processGridSequence(tailNoHoldCtx.gridTailNoHold(), stepTicks, activeNotes);
-                }
-            }
-        }
+        closeActiveNotes(activeNotes, interpreter.currentTick);
+        return null;
     }
 
     private void processPlayable(SymNoteParser.GridPlayableContext playableCtx, long stepTicks,

@@ -109,20 +109,14 @@ blockIterationTrack: '{' iterationStatementTrack* '}'; //layer 2 - iteration sta
 
 // Grid statements - LEVEL 3
 gridStmt:
-	'grid' '(' RESOLUTION ')' '{' gridSequence? '}'; //layer 3 - grid
+	'grid' '(' RESOLUTION ')' '{' gridSequence? '}';
 
-gridSequence:
-	gridPlayable gridTailPlayable?
-	| '-' gridTailNoHold?;
+gridSequence: gridSymbol+;
 
-gridTailPlayable:
-	gridPlayable gridTailPlayable?
-	| '~' gridTailPlayable?
-	| '-' gridTailNoHold?;
-
-gridTailNoHold:
-	gridPlayable gridTailPlayable?
-	| '-' gridTailNoHold?;
+gridSymbol:
+	gridPlayable
+	| '-'
+	| '~';
 
 gridPlayable:
 	noteElement gridVolModifier?

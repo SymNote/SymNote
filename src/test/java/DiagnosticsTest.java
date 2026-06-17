@@ -684,6 +684,29 @@ public class DiagnosticsTest {
             assertTrue(msg(r).contains("Unary '-' requires a numeric operand"), "Should mention unary numeric requirement");
             assertTrue(msg(r).contains("note"), "Should mention note type");
         }
+
+        @Test
+        @DisplayName("error: undefined variable in routine shows line number and call stack")
+        void error_undefined_var_routine_diagnostic() {
+            String code = 
+                "routine funkcja_a() returns void {\n" +
+                "    int tajna_zmienna = 5;\n" +
+                "}\n" +
+                "routine funkcja_b() returns void {\n" +
+                "    print(tajna_zmienna);\n" +
+                "}\n" +
+                "funkcja_a();\n" +
+                "funkcja_b();\n";
+                
+            TestHelper.Result r = TestHelper.run(code);
+            
+            assertFalse(r.isSuccess(), "Script should have failed due to undefined variable");
+            assertNotNull(r.error, "Expected an error");
+            
+            String msg = r.error.getMessage();
+            assertTrue(msg.contains("Undefined variable 'tajna_zmienna' at line 5"), "Missing line number in error: " + msg);
+            assertTrue(msg.contains("at routine 'funkcja_b'"), "Missing call stack trace: " + msg);
+        }
     }
 }
 }

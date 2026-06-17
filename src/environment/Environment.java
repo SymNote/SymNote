@@ -109,4 +109,14 @@ public class Environment {
         }
         current.assign(name, value);
     }
+
+    public boolean isDefined(String name) {
+        if (variables.containsKey(name)) {
+            return true;
+        }
+        if (parent != null) {
+            return parent.isDefined(name);
+        }
+        return false;
+    }
 }

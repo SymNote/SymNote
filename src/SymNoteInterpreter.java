@@ -420,21 +420,14 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     // --- Control Flow ---
     private Object executeBlockIteration(ParserRuleContext ctx) {
         enterScope();
-
-        Object result = null;
-
         try {
             for (var child : ctx.children) {
-                result = visit(child);
-                if (result != null && (result.equals("BREAK") || result.equals("CONTINUE"))) {
-                    break;
-                }
+                visit(child);
             }
         } finally {
             exitScope();
         }
-
-        return result;
+        return null;
     }
 
     @Override
@@ -480,7 +473,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
                 exitScope();
             }
         }
-        return (result != null && (result.equals("BREAK") || result.equals("CONTINUE"))) ? result : null;
+        return null;
     }
 
     @Override
@@ -526,11 +519,11 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
             enterScope();
             try {
-                Object result = visit(body);
-
-                if (result != null && result.toString().equals("BREAK")) {
-                    break;
-                }
+                visit(body);
+            } catch (ContinueException e) {
+                // pętla Javy naturalnie przechodzi do następnej iteracji
+            } catch (BreakException e) {
+                break;
             } finally {
                 exitScope();
             }
@@ -570,17 +563,13 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     // - Loop -
     Object executeLoopStmt(String varName, ParserRuleContext e1, ParserRuleContext e2, ParserRuleContext body,  Integer line, String type){
-        if (!type.equals("int")) {
-            throw new RuntimeException("Loop variable '" + varName + "' must be declared as 'int', got '" + type + "' at line " + line);
-        }
+        if (!type.equals("int")) throw new RuntimeException("Loop variable must be 'int' at line " + line);
 
         Object from = visit(e1);
         Object to = visit(e2);
 
-        if (!(from instanceof Integer)) throw new RuntimeException(
-            "Loop 'from' value must be an integer, got " + ErrorHelper.typeName(from) + " (value: " + from + ") at line " + line);
-        if (!(to instanceof Integer)) throw new RuntimeException(
-            "Loop 'to' value must be an integer, got " + ErrorHelper.typeName(to) + " (value: " + to + ") at line " + line);
+        if (!(from instanceof Integer)) throw new RuntimeException("Loop 'from' must be int at line " + line);
+        if (!(to instanceof Integer)) throw new RuntimeException("Loop 'to' must be int at line " + line);
 
         int fromVal = (Integer) from;
         int toVal = (Integer) to;
@@ -589,21 +578,18 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
             enterScope();
             try {
                 env.define(varName, new Variable("int", i));
-
-                Object result = visit(body);
-
-                // Update loop variable in case it was modified inside the loop
-                i = (Integer) env.get(varName).value;
-
-                // Re-evaluate loop end condition in case it was modified inside the loop
-                to = visit(e2);
-                if (!(to instanceof Integer))
-                    throw new RuntimeException("Loop end value must be an integer at line " + line);
-                toVal = (Integer) to;
-
-                if (result != null && result.toString().equals("BREAK")) {
+                
+                try {
+                    visit(body);
+                } catch (ContinueException e) {
+                    // Przechwycone continue
+                } catch (BreakException e) {
                     break;
                 }
+
+                i = (Integer) env.get(varName).value;
+                to = visit(e2);
+                toVal = (Integer) to;
             } finally {
                 exitScope();
             }
@@ -644,12 +630,12 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     // --- Break & Continue ---
     @Override
     public Object visitBreakStmt(SymNoteParser.BreakStmtContext ctx) {
-        return "BREAK";
+        throw new BreakException();
     }
 
     @Override
     public Object visitContinueStmt(SymNoteParser.ContinueStmtContext ctx) {
-        return "CONTINUE";
+        throw new ContinueException();
     }
 
     // --- Parallel ---
@@ -679,7 +665,7 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
     }
 
     void validateVariableDeclared(String variableName, int line) {
-        if (!declaredVariables.contains(variableName)) {
+        if (!env.isDefined(variableName)) {
             String hint = ErrorHelper.suggest(variableName, env, routines);
             throw new RuntimeException(
                 "Undefined variable '" + variableName + "' at line " + line + hint);
