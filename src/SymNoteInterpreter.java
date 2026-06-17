@@ -574,7 +574,15 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
         int fromVal = (Integer) from;
         int toVal = (Integer) to;
 
+        int totalIterations = 0;
+        int MAX_ITERATIONS = 1000000;
+
         for (int i = fromVal; i <= toVal; i++) {
+            if(totalIterations > MAX_ITERATIONS){
+                throw new RuntimeException("Runtime Error: Infinite loop detected! " + line);
+            }
+            totalIterations++;
+
             enterScope();
             try {
                 env.define(varName, new Variable("int", i));
