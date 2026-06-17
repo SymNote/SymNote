@@ -52,14 +52,13 @@ interpreter.env = new Environment(previousEnv.getGlobal()); // Skip local caller
 
 This guarantees that a routine cannot accidentally (or intentionally) read or mutate the caller's local variables, enforcing clean data flow via parameters and return values.
 
-### Control Flow & Loop Unwinding
+### Control Flow
 
-To manage loop interruption statements (`break` and `continue`) safely without polluting the standard expression evaluation pipeline, SymNote utilizes a custom exception-driven approach:
+SymNote handles `break` and `continue` statements using custom Java exceptions (`BreakException` and `ContinueException`). 
 
-- **`BreakException` and `ContinueException`**: Lightweight Java runtime exceptions configured to bypass expensive Java stack-trace generation (stackless exceptions).
-- **Execution Unwinding**: When a `break` or `continue` statement is visited, the interpreter immediately throws the corresponding exception. This natively unwinds the Java evaluation stack back to the nearest loop block boundary (`while` or `loop`), where the exception is caught, the current scope frame is cleanly destroyed via a `finally` block, and the iteration state updates accordingly. 
+When the interpreter sees a `break` or `continue` keyword, it throws this exception. The nearest loop catches the exception and changes the program flow (either stops the loop or goes to the next iteration). 
 
-This architectural design prevents data-to-signal confusion (e.g., standalone string literals being mistaken for execution signals) and guarantees deterministic control flow.
+This method is very safe. It stops the interpreter from mixing normal data values (like strings) with control signals.
 
 ## Runtime Type Checking
 

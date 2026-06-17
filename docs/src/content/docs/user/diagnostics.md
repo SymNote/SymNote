@@ -107,3 +107,17 @@ Error: Variable 'myNote' is of type 'string' but grid requires a 'note' type at 
 ## 6. Infinite Recursion Protection
 
 If you create an infinite recursive loop, SymNote's internal call stack catches the depth limit, throwing SymNote StackOverflow error pointing out where the recursion got stuck.
+
+
+## 7. Duplicate Variable and Parameter Errors
+
+SymNote stops you from defining the same variable name twice in the same scope. This rule also protects function parameters from being overwritten by local variables.
+
+```ts
+int x = 100;
+
+routine foo(int x) returns void {
+    int x = 1; // Error! 'x' is already a parameter.
+    print(x);
+}
+```

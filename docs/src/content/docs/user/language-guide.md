@@ -226,6 +226,13 @@ int a = 1;
 print(a); // prints: 10
 ```
 
+### Routine Scope and Parameters
+
+When you create a routine or a track, the parameters and the main block `{}` share the same scope. This means:
+
+1. **No Parameter Shadowing**: You cannot create a new variable inside the routine with the same name as a parameter. If you try, the compiler will show an error: `Variable 'x' is already defined in this scope`.
+2. **How parent:: Works Inside Routines**: Because the main block and parameters share the same scope, using `parent::x` inside a routine skips the local parameters. It goes directly to the outer (global) scope where the routine was defined.
+
 ---
 
 ## Routines (Functions)
