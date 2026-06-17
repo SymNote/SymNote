@@ -246,10 +246,4 @@ public class GridExecutor {
         }
         return midiPitch;
     }
-
-    public String noteToMidiString(String noteText, int transpose) {
-        int midi = noteToMidi(noteText, 0);
-        midi += transpose;
-        return noteText;
-    }
 }
