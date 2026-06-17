@@ -123,6 +123,18 @@ public class MathLibraryTest {
     }
 
     @Test
+    @DisplayName("valid: transpose output values")
+    void valid_transpose_assertions() {
+        String code = 
+            "print(transpose(C4, 2));\n" +
+            "print(transpose(A4, -12));";
+            
+        TestHelper.Result r = TestHelper.run(code);
+        assertTrue(r.isSuccess(), "Expected no error but got: " + errorMsg(r));
+        assertEquals(List.of("note(D4)", "note(A3)"), r.output);
+    }
+
+    @Test
     @DisplayName("valid: algorithmic mapping (scale, clamp, avg)")
     void valid_mapping_functions() {
         String code = 
