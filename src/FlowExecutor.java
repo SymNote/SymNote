@@ -98,6 +98,184 @@ public class FlowExecutor {
                 }
                 interpreter.output.println(args.getFirst());
                 return null;
+
+            case "sin":
+                requireArgs(functionName, args, 1, ctx.getStart().getLine());
+                return (float) Math.sin(toNumber(args.getFirst(), functionName, ctx.getStart().getLine()).doubleValue());
+            
+            case "cos":
+                requireArgs(functionName, args, 1, ctx.getStart().getLine());
+                return (float) Math.cos(toNumber(args.getFirst(), functionName, ctx.getStart().getLine()).doubleValue());
+            
+            case "pow":
+                requireArgs(functionName, args, 2, ctx.getStart().getLine());
+                float base = toNumber(args.get(0), functionName, ctx.getStart().getLine()).floatValue();
+                float exp = toNumber(args.get(1), functionName, ctx.getStart().getLine()).floatValue();
+                return (float) Math.pow(base, exp);
+                
+            case "sqrt":
+                requireArgs(functionName, args, 1, ctx.getStart().getLine());
+                float sqrtVal = toNumber(args.getFirst(), functionName, ctx.getStart().getLine()).floatValue();
+                if (sqrtVal < 0) {
+                    throw new RuntimeException("Math Domain Error: sqrt() cannot take negative numbers at line " + ctx.getStart().getLine());
+                }
+                return (float) Math.sqrt(sqrtVal);
+
+            case "abs":
+                requireArgs(functionName, args, 1, ctx.getStart().getLine());
+                Object absArg = args.getFirst();
+                if (absArg instanceof Integer) return Math.abs((Integer) absArg);
+                return Math.abs(toNumber(absArg, functionName, ctx.getStart().getLine()).floatValue());
+                
+            case "min":
+                requireArgs(functionName, args, 2, ctx.getStart().getLine());
+                Object min1 = args.get(0);
+                Object min2 = args.get(1);
+                if (min1 instanceof Integer && min2 instanceof Integer) {
+                    return Math.min((Integer) min1, (Integer) min2);
+                }
+                return Math.min(toNumber(min1, functionName, ctx.getStart().getLine()).floatValue(), 
+                                toNumber(min2, functionName, ctx.getStart().getLine()).floatValue());
+
+            case "max":
+                requireArgs(functionName, args, 2, ctx.getStart().getLine());
+                Object max1 = args.get(0);
+                Object max2 = args.get(1);
+                if (max1 instanceof Integer && max2 instanceof Integer) {
+                    return Math.max((Integer) max1, (Integer) max2);
+                }
+                return Math.max(toNumber(max1, functionName, ctx.getStart().getLine()).floatValue(), 
+                                toNumber(max2, functionName, ctx.getStart().getLine()).floatValue());
+
+            case "round":
+                requireArgs(functionName, args, 1, ctx.getStart().getLine());
+                return Math.round(toNumber(args.getFirst(), functionName, ctx.getStart().getLine()).floatValue());
+
+            case "rand":
+                requireArgs(functionName, args, 2, ctx.getStart().getLine());
+                if (!(args.get(0) instanceof Integer) || !(args.get(1) instanceof Integer)) {
+                    throw new RuntimeException("rand() requires two 'int' arguments at line " + ctx.getStart().getLine());
+                }
+                int min = (Integer) args.get(0);
+                int max = (Integer) args.get(1);
+                if (min > max) throw new RuntimeException("rand() min cannot be greater than max at line " + ctx.getStart().getLine());
+                return min + (int)(Math.random() * ((max - min) + 1));
+
+            case "gcd":
+                requireArgs(functionName, args, 2, ctx.getStart().getLine());
+                if (!(args.get(0) instanceof Integer) || !(args.get(1) instanceof Integer)) {
+                    throw new RuntimeException("gcd() requires two 'int' arguments at line " + ctx.getStart().getLine());
+                }
+                return gcdHelper((Integer) args.get(0), (Integer) args.get(1));
+
+            case "lcm":
+                requireArgs(functionName, args, 2, ctx.getStart().getLine());
+                if (!(args.get(0) instanceof Integer) || !(args.get(1) instanceof Integer)) {
+                    throw new RuntimeException("lcm() requires two 'int' arguments at line " + ctx.getStart().getLine());
+                }
+                int lcmA = (Integer) args.get(0);
+                int lcmB = (Integer) args.get(1);
+                if (lcmA == 0 || lcmB == 0) return 0;
+                return Math.abs(lcmA * lcmB) / gcdHelper(lcmA, lcmB);
+
+            case "is_prime":
+                requireArgs(functionName, args, 1, ctx.getStart().getLine());
+                if (!(args.getFirst() instanceof Integer)) {
+                    throw new RuntimeException("is_prime() requires an 'int' argument at line " + ctx.getStart().getLine());
+                }
+                int n = (Integer) args.getFirst();
+                if (n <= 1) return false;
+                if (n == 2 || n == 3) return true;
+                if (n % 2 == 0 || n % 3 == 0) return false;
+                for (int i = 5; i * i <= n; i += 6) {
+                    if (n % i == 0 || n % (i + 2) == 0) return false;
+                }
+                return true;
+
+            case "fib":
+                requireArgs(functionName, args, 1, ctx.getStart().getLine());
+                if (!(args.getFirst() instanceof Integer)) {
+                    throw new RuntimeException("fib() requires an 'int' argument at line " + ctx.getStart().getLine());
+                }
+                int fibN = (Integer) args.getFirst();
+                if (fibN < 0) throw new RuntimeException("fib() requires a non-negative integer at line " + ctx.getStart().getLine());
+                if (fibN <= 1) return fibN;
+                int fibA = 0, fibB = 1, fibC;
+                for (int i = 2; i <= fibN; i++) {
+                    fibC = fibA + fibB;
+                    fibA = fibB;
+                    fibB = fibC;
+                }
+                return fibB;
+
+            case "transpose": {
+                requireArgs(functionName, args, 2, ctx.getStart().getLine());
+                if (!(args.get(0) instanceof Note) || !(args.get(1) instanceof Integer)) {
+                    throw new RuntimeException("transpose() requires (note, int) at line " + ctx.getStart().getLine());
+                }
+                Note nNote = (Note) args.get(0);
+                int semi = (Integer) args.get(1);
+                String transposedVal = transposeNoteHelper(nNote.getValue(), semi, ctx.getStart().getLine());
+                return new Note(transposedVal);
+            }
+
+            case "clamp": {
+                requireArgs(functionName, args, 3, ctx.getStart().getLine());
+                float val = toNumber(args.get(0), functionName, ctx.getStart().getLine()).floatValue();
+                float minV = toNumber(args.get(1), functionName, ctx.getStart().getLine()).floatValue();
+                float maxV = toNumber(args.get(2), functionName, ctx.getStart().getLine()).floatValue();
+                return Math.max(minV, Math.min(maxV, val));
+            }
+
+            case "avg": {
+                requireArgs(functionName, args, 2, ctx.getStart().getLine());
+                float avg1 = toNumber(args.get(0), functionName, ctx.getStart().getLine()).floatValue();
+                float avg2 = toNumber(args.get(1), functionName, ctx.getStart().getLine()).floatValue();
+                return (avg1 + avg2) / 2.0f;
+            }
+
+            case "scale": {
+                requireArgs(functionName, args, 5, ctx.getStart().getLine());
+                float val = toNumber(args.get(0), functionName, ctx.getStart().getLine()).floatValue();
+                float inMin = toNumber(args.get(1), functionName, ctx.getStart().getLine()).floatValue();
+                float inMax = toNumber(args.get(2), functionName, ctx.getStart().getLine()).floatValue();
+                float outMin = toNumber(args.get(3), functionName, ctx.getStart().getLine()).floatValue();
+                float outMax = toNumber(args.get(4), functionName, ctx.getStart().getLine()).floatValue();
+                return outMin + (val - inMin) * (outMax - outMin) / (inMax - inMin);
+            }
+
+            case "is_power_of_two":
+                requireArgs(functionName, args, 1, ctx.getStart().getLine());
+                int n2 = (Integer) args.getFirst();
+                return (n2 > 0) && ((n2 & (n2 - 1)) == 0);
+
+            case "sum_digits":
+                requireArgs(functionName, args, 1, ctx.getStart().getLine());
+                int num = Math.abs((Integer) args.getFirst());
+                int sum = 0;
+                while (num > 0) {
+                    sum += num % 10;
+                    num /= 10;
+                }
+                return sum;
+
+            case "fourier_wave": {
+                requireArgs(functionName, args, 2, ctx.getStart().getLine());
+                float tVal = toNumber(args.get(0), functionName, ctx.getStart().getLine()).floatValue();
+                int nHarm = (Integer) args.get(1);
+                float wave = 0;
+                for (int i = 1; i <= nHarm; i++) {
+                    wave += (float) (Math.sin(2 * Math.PI * i * tVal) / i);
+                }
+                return wave;
+            }
+
+            case "pitch_to_freq":
+                requireArgs(functionName, args, 1, ctx.getStart().getLine());
+                Note noteArg = (Note) args.getFirst();
+                int midi = new GridExecutor(interpreter).noteToMidi(noteArg.getValue(), ctx.getStart().getLine());
+                return (float) (440.0 * Math.pow(2.0, (midi - 69.0) / 12.0));
+            
             default:
                 if (interpreter.routines.containsKey(functionName)) {
                     SymNoteParser.RoutineDeclContext routineCtx = interpreter.routines.get(functionName);
@@ -316,5 +494,44 @@ public class FlowExecutor {
         interpreter.bpm = baseBpm;
         interpreter.currentTick = maxTick;
         return null;
+    }
+
+    private void requireArgs(String func, List<Object> args, int count, int line) {
+        if (args.size() != count) {
+            throw new RuntimeException("Function '" + func + "()' requires exactly " + count 
+                + " argument(s), but got " + args.size() + " at line " + line);
+        }
+    }
+
+    private Number toNumber(Object obj, String func, int line) {
+        if (obj instanceof Number) return (Number) obj;
+        throw new RuntimeException("Function '" + func + "()' requires a numeric argument, but got " 
+            + ErrorHelper.typeName(obj) + " at line " + line);
+    }
+
+    private int gcdHelper(int a, int b) {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+
+    private String transposeNoteHelper(String noteText, int semi, int line) {
+        int midi = new GridExecutor(interpreter).noteToMidi(noteText, line);
+        midi += semi;
+        
+        if (midi < 0 || midi > 127) {
+            throw new RuntimeException("Transposed note out of MIDI range (0-127) at line " + line);
+        }
+        
+        String[] notes = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+        String noteName = notes[midi % 12];
+        int octave = (midi / 12) - 1;
+        
+        return noteName + octave;
     }
 }

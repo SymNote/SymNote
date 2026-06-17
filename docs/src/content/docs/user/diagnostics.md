@@ -64,6 +64,10 @@ SymNote functions have strict internal validation to prevent unexpected behavior
 - **`set_bpm()`**: Requires a positive integer or float. Passing zero, a negative number, or a string will explain exactly why the value was rejected.
 - **`load_synth()`**: Demands a string representing the instrument name.
 - **`use_synth()`**: Enforces that you pass `synth` variable.
+- **Math & Standard Library Validation**: SymNote protects the runtime from invalid mathematical operations. 
+  - **Arity Checks**: If you provide the wrong number of arguments (e.g., `sin(1.0, 2.0)`), the interpreter will throw an error: `Function 'sin()' requires exactly 1 argument(s)`.
+  - **Type Protection**: If you pass a string to a math function (e.g., `gcd("10", 5)`), you will receive: `gcd() requires two 'int' arguments`.
+  - **Domain Safety**: Operations like `sqrt(-1)` or `rand(10, 5)` (where min is greater than max) are blocked before they crash the host environment.
 
 ```c
 track PianoTrack() {

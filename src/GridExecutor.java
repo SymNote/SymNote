@@ -185,7 +185,7 @@ public class GridExecutor {
         return noteToMidi(noteText, line);
     }
 
-    private int noteToMidi(String noteText, int line) {
+    public int noteToMidi(String noteText, int line) {
         if (noteText == null || noteText.length() < 2) {
             throw new RuntimeException("Invalid note '" + noteText + "' at line " + line);
         }
@@ -245,5 +245,11 @@ public class GridExecutor {
             throw new RuntimeException("MIDI pitch out of range for note '" + noteText + "' at line " + line);
         }
         return midiPitch;
+    }
+
+    public String noteToMidiString(String noteText, int transpose) {
+        int midi = noteToMidi(noteText, 0);
+        midi += transpose;
+        return noteText;
     }
 }

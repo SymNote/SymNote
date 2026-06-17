@@ -397,12 +397,48 @@ parallel {
 
 ## Built-in Functions
 
+SymNote includes a rich standard library for mathematical operations and advanced algorithmic composition.
+
+### Core Functions
 | Function                     | Description                                     |
 |------------------------------|-------------------------------------------------|
 | `set_bpm(int)`               | Set the global tempo (Level 1 only)             |
 | `use_synth(synth)`           | Assign an instrument to the current track       |
 | `load_synth(string)`         | Load a named MIDI instrument                    |
-| `print(value)`               | Print a value to stdout                         |
+| `print(value)`               | Print a value to the standard output            |
+
+### Math Module
+| Function | Description |
+| :--- | :--- |
+| `sin(float)` | Calculates the sine of an angle (useful for LFOs) |
+| `cos(float)` | Calculates the cosine of an angle |
+| `pow(float, float)` | Calculates the power of a number |
+| `sqrt(float)` | Calculates the square root of a number |
+| `abs(float/int)` | Returns the absolute (positive) value |
+| `min(a, b)` | Returns the smaller of two numbers (int or float) |
+| `max(a, b)` | Returns the larger of two numbers (int or float) |
+| `round(float)` | Rounds a float to the nearest whole number |
+| `rand(int min, int max)` | Generates a random integer between min and max (inclusive) |
+
+### Algorithmic & Sequence Module
+| Function | Description |
+| :--- | :--- |
+| `gcd(int, int)` | Greatest Common Divisor (Euclidean algorithm) |
+| `lcm(int, int)` | Least Common Multiple (useful for polyrhythms) |
+| `is_prime(int)` | Returns `true` if the number is prime, otherwise `false` |
+| `fib(int n)` | Returns the *n*-th Fibonacci number |
+| `sum_digits(int)` | Sums the individual digits of a number |
+| `is_power_of_two(int)` | Returns `true` if the number is a power of 2 |
+
+### Advanced Audio-Math Functions
+| Function | Description |
+| :--- | :--- |
+| `transpose(note, int)` | Shifts a note up or down by *x* semitones (e.g., `transpose(C4, 2)` becomes D4) |
+| `pitch_to_freq(note)` | Converts a musical note to its frequency in Hertz (Hz) |
+| `scale(val, inMin, inMax, outMin, outMax)` | Maps a number from one range to another (normalization) |
+| `clamp(val, min, max)` | Restricts a number to stay between a minimum and maximum value |
+| `avg(float/int, float/int)` | Returns the mathematical average of two numbers |
+| `fourier_wave(float t, int n)` | Generates a complex wave value at time `t` using `n` harmonics |
 
 ### Supported synth names for `load_synth`:
 
