@@ -87,21 +87,25 @@ public class SymNoteInterpreter extends SymNoteBaseVisitor<Object> {
 
     @Override
     public Object visitBlockTrack(SymNoteParser.BlockTrackContext ctx) {
-        enterScope();
+        boolean isTopLevel = ctx.getParent() instanceof SymNoteParser.TrackDeclContext;
+        if (!isTopLevel) enterScope();
+        
         try {
             return super.visitBlockTrack(ctx);
         } finally {
-            exitScope();
+            if (!isTopLevel) exitScope();
         }
     }
 
     @Override
     public Object visitBlockRoutine(SymNoteParser.BlockRoutineContext ctx) {
-        enterScope();
+        boolean isTopLevel = ctx.getParent() instanceof SymNoteParser.RoutineDeclContext;
+        if (!isTopLevel) enterScope();
+        
         try {
             return super.visitBlockRoutine(ctx);
         } finally {
-            exitScope();
+            if (!isTopLevel) exitScope();
         }
     }
 

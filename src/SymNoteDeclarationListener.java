@@ -141,9 +141,16 @@ public class SymNoteDeclarationListener extends SymNoteBaseListener {
 
     // Routine
     @Override
-    public void enterBlockRoutine(SymNoteParser.BlockRoutineContext ctx) { pushScope(); }
+    public void enterBlockRoutine(SymNoteParser.BlockRoutineContext ctx) {
+        boolean isTopLevel = ctx.getParent() instanceof SymNoteParser.RoutineDeclContext;
+        if (!isTopLevel) pushScope(); 
+    }
+
     @Override
-    public void exitBlockRoutine(SymNoteParser.BlockRoutineContext ctx) { popScope(); }
+    public void exitBlockRoutine(SymNoteParser.BlockRoutineContext ctx) {
+        boolean isTopLevel = ctx.getParent() instanceof SymNoteParser.RoutineDeclContext;
+        if (!isTopLevel) popScope(); 
+    }
 
     @Override
     public void enterIfRoutineStmt(SymNoteParser.IfRoutineStmtContext ctx) { pushScope(); }
@@ -191,9 +198,16 @@ public class SymNoteDeclarationListener extends SymNoteBaseListener {
 
     // Track
     @Override
-    public void enterBlockTrack(SymNoteParser.BlockTrackContext ctx) { pushScope(); }
+    public void enterBlockTrack(SymNoteParser.BlockTrackContext ctx) {
+        boolean isTopLevel = ctx.getParent() instanceof SymNoteParser.TrackDeclContext;
+        if (!isTopLevel) pushScope(); 
+    }
+
     @Override
-    public void exitBlockTrack(SymNoteParser.BlockTrackContext ctx) { popScope();}
+    public void exitBlockTrack(SymNoteParser.BlockTrackContext ctx) {
+        boolean isTopLevel = ctx.getParent() instanceof SymNoteParser.TrackDeclContext;
+        if (!isTopLevel) popScope(); 
+    }
 
     @Override
     public void enterIfTrackStmt(SymNoteParser.IfTrackStmtContext ctx) { pushScope(); }
