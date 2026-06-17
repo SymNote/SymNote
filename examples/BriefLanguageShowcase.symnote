@@ -84,14 +84,18 @@ track Bassline(int bars) {
     }
 }
 
-track Chords(int bars, float v) {
+track Chords(int bars, float v, note root_note) {
     use_synth(Strings);
+    
+    // Build a major chord algorithmically from the root note variable
+    note major_third = transpose(root_note, 4);
+    note perfect_fifth = transpose(root_note, 7);
     
     loop (int i from 1 to bars) {
         grid(1/2) {
             // Chords with volume modifiers and sustain
-            [C3, E3, G3].vol(v) ~ 
-            [F3, A3, C4].vol(v) ~
+            [root_note, major_third, perfect_fifth].vol(v) ~ 
+            [root_note, major_third, perfect_fifth].vol(v) ~
         }
     }
 }
@@ -106,7 +110,7 @@ Melody(2, current_vol);
 parallel {
     Bassline(main_section_bars);
     Melody(main_section_bars, current_vol);
-    Chords(2, current_vol - 0.35);
+    Chords(2, current_vol - 0.35, C3);
 }
 
 parallel {

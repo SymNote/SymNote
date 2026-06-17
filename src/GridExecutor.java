@@ -185,7 +185,7 @@ public class GridExecutor {
         return noteToMidi(noteText, line);
     }
 
-    private int noteToMidi(String noteText, int line) {
+    public int noteToMidi(String noteText, int line) {
         if (noteText == null || noteText.length() < 2) {
             throw new RuntimeException("Invalid note '" + noteText + "' at line " + line);
         }
