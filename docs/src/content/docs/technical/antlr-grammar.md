@@ -48,10 +48,12 @@ Notice that `parallel` is absent from `statementTrack`. It is only present in `s
 The grid block does not use standard programming statements (like variables, conditionals, or loops). Instead, it uses a specialized syntax dedicated entirely to placing musical events in time:
 
 ```antlr
-gridSequence
-    : gridPlayable gridTailPlayable?
-    | '-' gridTailNoHold?
-    ;
+gridSequence: gridSymbol+;
+
+gridSymbol:
+    gridPlayable
+    | '-'
+    | '~';
 ```
 
 A grid can only contain notes, rests (`-`), sustain symbols (`~`), and chords. No `int x = 5` or `if (true)` can exist inside a `grid{}` block, ensuring the grid remains pure data mapped to time.
