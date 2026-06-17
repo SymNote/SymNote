@@ -40,3 +40,9 @@ Routine and track calls do not use Java's local variables to track state. Instea
 Block-level scopes (used in `if`, `while`, `loop`, and nested `{}`) are managed via an `Environment` chain. Each new scope holds a pointer (`parent`) to its enclosing scope.
 - **Entering/Exiting Scopes:** Handled explicitly by `enterScope()` and `exitScope()` to prevent memory leaks and ensure tight lifecycle control.
 - **Parent Keyword Resolution:** The `parent::` keyword traverses this pointer chain iteratively ($O(N)$ depth). This allows precise variable shadowing resolution and assignments without any recursive overhead on the Java stack.
+
+### Grid Memory Safety
+
+The Grid block syntax uses a flat list (`gridSymbol+`) instead of recursion. Because of this, very long songs with thousands of musical notes or rests will not crash the Java memory. 
+
+The interpreter processes the grid symbols using a standard `for` loop. This completely removes the risk of a native `java.lang.StackOverflowError` when reading large musical files.

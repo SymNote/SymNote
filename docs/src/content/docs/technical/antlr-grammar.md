@@ -58,6 +58,8 @@ gridSymbol:
 
 A grid can only contain notes, rests (`-`), sustain symbols (`~`), and chords. No `int x = 5` or `if (true)` can exist inside a `grid{}` block, ensuring the grid remains pure data mapped to time.
 
+The grid sequence uses a flat list operator (`+`) instead of recursion. This makes sure that parsing very long musical grids does not cause a StackOverflow Error.
+
 ## Type Enforcement
 
 The grammar separates primitive types from identifiers early on:
