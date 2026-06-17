@@ -419,6 +419,9 @@ SymNote includes a rich standard library for mathematical operations and advance
 | `max(a, b)` | Returns the larger of two numbers (int or float) |
 | `round(float)` | Rounds a float to the nearest whole number |
 | `rand(int min, int max)` | Generates a random integer between min and max (inclusive) |
+| `scale(val, inMin, inMax, outMin, outMax)` | Maps a number from one range to another (normalization) |
+| `clamp(val, min, max)` | Restricts a number to stay between a minimum and maximum value |
+| `avg(float/int, float/int)` | Returns the mathematical average of two numbers |
 
 ### Algorithmic & Sequence Module
 | Function | Description |
@@ -435,9 +438,6 @@ SymNote includes a rich standard library for mathematical operations and advance
 | :--- | :--- |
 | `transpose(note, int)` | Shifts a note up or down by *x* semitones (e.g., `transpose(C4, 2)` becomes D4) |
 | `pitch_to_freq(note)` | Converts a musical note to its frequency in Hertz (Hz) |
-| `scale(val, inMin, inMax, outMin, outMax)` | Maps a number from one range to another (normalization) |
-| `clamp(val, min, max)` | Restricts a number to stay between a minimum and maximum value |
-| `avg(float/int, float/int)` | Returns the mathematical average of two numbers |
 | `fourier_wave(float t, int n)` | Generates a complex wave value at time `t` using `n` harmonics |
 
 ### Supported synth names for `load_synth`:
