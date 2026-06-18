@@ -117,16 +117,21 @@ Three sequential jobs:
 - Runs `./generate.sh` and `./package.sh`
 - Uploads `symnote.jar` as a workflow artifact
 
-#### Job 2 — `package-linux` (needs: `build-jar`)
+#### Job 2a — `package-deb` (needs: `build-jar`)
 - Runs on `ubuntu-22.04` — ensures the `.deb` depends on `libasound2` rather than `libasound2t64`, making it installable on Ubuntu 22.04 and later
-- Installs `rpm` and `fakeroot`
-- Strips the `v` prefix and replaces hyphens with tildes to produce a version string valid for both deb and rpm (e.g. `v1.0.0-rc.1` → `1.0.0~rc.1`)
-- Runs `jpackage --type deb` → produces `.deb`
-- Runs `jpackage --type rpm` → produces `.rpm`
-- Both use `--resource-dir packaging/linux/` for lifecycle scriptlets
-- Uploads both packages as a workflow artifact
+- Installs `fakeroot`
+- Strips the `v` prefix and replaces hyphens with tildes to produce a version string valid for deb (e.g. `v1.0.0-rc.1` → `1.0.0~rc.1`)
+- Runs `jpackage --type deb` with `--resource-dir packaging/linux/deb` → produces `.deb`
+- Uploads the `.deb` package as a workflow artifact
 
-#### Job 3 — `publish-release` (needs: `package-linux`)
+#### Job 2b — `package-rpm` (needs: `build-jar`)
+- Runs on `ubuntu-latest` inside a `fedora:38` container
+- Installs JDK and RPM tools
+- Strips the `v` prefix and replaces hyphens with tildes to produce a version string valid for rpm
+- Runs `jpackage --type rpm` with `--resource-dir packaging/linux/rpm` → produces `.rpm`
+- Uploads the `.rpm` package as a workflow artifact
+
+#### Job 3 — `publish-release` (needs: [package-deb, package-rpm])
 - Downloads all artifacts
 - Creates a GitHub Release on the tag via `softprops/action-gh-release`
 - Attaches `symnote.jar`, `.deb`, and `.rpm` to the release
@@ -148,15 +153,15 @@ Three sequential jobs:
 
 Full flag: `--add-modules java.base,java.desktop,java.logging,java.xml`
 
-### Resource directory: `packaging/linux/`
+### Resource directories: `packaging/linux/deb/` and `packaging/linux/rpm/`
 
-Both `.deb` and `.rpm` packages are built with `--resource-dir packaging/linux/`. jpackage picks up different files per format based on exact filenames (no extensions):
+The `.deb` and `.rpm` packages are built with `--resource-dir packaging/linux/deb` and `--resource-dir packaging/linux/rpm` respectively. `jpackage` picks up different files per format based on exact filenames (no extensions):
 
 | File | Format | Hook | What it does |
 |---|---|---|---|
-| `postinst` | deb | post-install | `ln -sf /opt/symnote/bin/symnote /usr/local/bin/symnote` |
-| `prerm` | deb | pre-remove | `rm -f /usr/local/bin/symnote` |
-| `post-install` | rpm | `%post` | `ln -sf /opt/symnote/bin/symnote /usr/local/bin/symnote` |
-| `pre-uninstall` | rpm | `%preun` | `rm -f /usr/local/bin/symnote` (on full removal only) |
+| `packaging/linux/deb/postinst` | deb | post-install | `ln -sf /opt/symnote/bin/symnote /usr/local/bin/symnote` |
+| `packaging/linux/deb/prerm` | deb | pre-remove | `rm -f /usr/local/bin/symnote` |
+| `packaging/linux/rpm/post-install` | rpm | `%post` | `ln -sf /opt/symnote/bin/symnote /usr/local/bin/symnote` |
+| `packaging/linux/rpm/pre-uninstall` | rpm | `%preun` | `rm -f /usr/local/bin/symnote` (on full removal only) |
 
 After installation on either format, `symnote` is available system-wide without specifying a full path.

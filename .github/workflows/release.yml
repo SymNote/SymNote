@@ -109,7 +109,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install JDK and RPM tools
-        run: dnf install -y java-21-openjdk-devel rpm-build
+        run: dnf install -y java-21-openjdk-devel java-21-openjdk java-21-openjdk-jmods rpm-build
 
       - name: Download jar artifact
         uses: actions/download-artifact@v4

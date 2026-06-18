@@ -18,7 +18,7 @@ Go to the [GitHub Releases](https://github.com/trojancoding/SymNote/releases) pa
 | Distribution | File |
 |---|---|
 | Debian / Ubuntu | `symnote_<version>_amd64.deb` |
-| Fedora / RHEL / openSUSE | `symnote-<version>.x86_64.rpm` |
+| Fedora / RHEL / openSUSE | `symnote-<version>-1.x86_64.rpm` |
 
 ### Install
 
@@ -27,7 +27,7 @@ Go to the [GitHub Releases](https://github.com/trojancoding/SymNote/releases) pa
 sudo apt install ./symnote_<version>_amd64.deb
 
 # Fedora / RHEL
-sudo rpm -i symnote-<version>.x86_64.rpm
+sudo rpm -i symnote-<version>-1.x86_64.rpm
 ```
 
 ### Run
