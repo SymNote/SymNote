@@ -1,17 +1,17 @@
 # SymNote
 
-📚 **[Documentation](https://trojancoding.github.io/SymNote/)**
+SymNote is a custom music scripting language built on Java and ANTLR v4.
+## Documentation
 
-## Quick Start
+📚 **[Official Documentation](https://trojancoding.github.io/SymNote/)**
 
-### Generating the Parser
-If you modify `grammar/SymNote.g4`, regenerate the ANTLR code:
-```bash
-./generate.sh
-```
+Our documentation site contains everything you need to know about SymNote, split into two main sections:
 
-### Running Scripts
-To compile the Java engine and execute a `.symnote` script:
-```bash
-./run.sh examples/HelloWorld.symnote
-```
+- **[User Documentation](https://trojancoding.github.io/SymNote/user/intro/)**: Installation instructions, language guide, examples, and diagnostics.
+- **[Technical Report](https://trojancoding.github.io/SymNote/technical/intro/)**: Details about the internal architecture, interpreter mechanics, and build/packaging pipeline (for contributors).
+
+## Quick Links
+
+- [Installation Guide](https://trojancoding.github.io/SymNote/user/installation/)
+- [Language Guide](https://trojancoding.github.io/SymNote/user/language-guide/)
+- [Examples](https://trojancoding.github.io/SymNote/user/examples/)

@@ -86,7 +86,7 @@ jobs:
             --add-modules java.base,java.desktop,java.logging,java.xml \
             --app-version ${{ steps.version.outputs.SAFE_VERSION }} \
             --linux-shortcut \
-            --resource-dir packaging/linux \
+            --resource-dir packaging/linux/deb \
             --dest packages/
 
       - name: Package .rpm
@@ -100,7 +100,7 @@ jobs:
             --add-modules java.base,java.desktop,java.logging,java.xml \
             --app-version ${{ steps.version.outputs.SAFE_VERSION }} \
             --linux-shortcut \
-            --resource-dir packaging/linux \
+            --resource-dir packaging/linux/rpm \
             --dest packages/
 
       - name: Upload Linux packages
