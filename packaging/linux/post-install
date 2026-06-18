@@ -1,0 +1,4 @@
+#!/bin/sh
+# post-install — injected by jpackage into the RPM %post section.
+
+ln -sf /opt/symnote/bin/symnote /usr/local/bin/symnote

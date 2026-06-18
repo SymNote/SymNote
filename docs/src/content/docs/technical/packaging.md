@@ -14,10 +14,10 @@ This page covers the full build pipeline, developer scripts, CI/CD workflows, an
 | JDK | 21+ | Compiling Java sources and running `jpackage` |
 | Bash | any | Running developer scripts |
 | ANTLR | 4.13.2 | Grammar-to-Java code generation (bundled in `lib/`) |
-| `rpm-build` | any | Building `.rpm` packages (Linux only) |
-| `fakeroot` | any | Building `.deb` packages (Linux only) |
+| `rpm` | any | Building `.rpm` packages — `sudo apt install rpm` |
+| `fakeroot` | any | Building `.deb` packages — `sudo apt install fakeroot` |
 
-> ANTLR does not need to be installed separately - `lib/antlr-4.13.2-complete.jar` is committed to the repository.
+> ANTLR does not need to be installed separately — `lib/antlr-4.13.2-complete.jar` is committed to the repository.
 
 ---
 
@@ -76,19 +76,19 @@ Steps performed:
 
 **Trigger:** every push or pull request to `main`
 
-Runs on `ubuntu-latest`:
+Runs on `ubuntu-22.04`:
 1. Checkout
 2. Set up JDK 21 (Temurin)
 3. `./generate.sh`
 4. `./test.sh`
 
-Purpose: fast signal on every commit, no packaging involved.
+Purpose: fast signal on every commit — no packaging involved.
 
 ### `ci-docs.yml` — Documentation Build Check
 
 **Trigger:** pull requests to `main` that touch `docs/**`
 
-Runs on `ubuntu-latest`:
+Runs on `ubuntu-22.04`:
 1. Checkout
 2. Set up Node 20
 3. `npm ci` in `docs/`
@@ -104,7 +104,12 @@ Builds and deploys the Astro documentation site to GitHub Pages.
 
 ### `release.yml` — Release Pipeline
 
-**Trigger:** push of a tag matching `v*.*.*` (e.g. `git tag v1.0.0 && git push --tags`)
+**Trigger:** push of a tag matching `v*.*.*`
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
 
 Three sequential jobs:
 
@@ -113,9 +118,12 @@ Three sequential jobs:
 - Uploads `symnote.jar` as a workflow artifact
 
 #### Job 2 — `package-linux` (needs: `build-jar`)
+- Runs on `ubuntu-22.04` — ensures the `.deb` depends on `libasound2` rather than `libasound2t64`, making it installable on Ubuntu 22.04 and later
 - Installs `rpm` and `fakeroot`
+- Strips the `v` prefix and replaces hyphens with tildes to produce a version string valid for both deb and rpm (e.g. `v1.0.0-rc.1` → `1.0.0~rc.1`)
 - Runs `jpackage --type deb` → produces `.deb`
 - Runs `jpackage --type rpm` → produces `.rpm`
+- Both use `--resource-dir packaging/linux/` for lifecycle scriptlets
 - Uploads both packages as a workflow artifact
 
 #### Job 3 — `publish-release` (needs: `package-linux`)
@@ -127,17 +135,28 @@ Three sequential jobs:
 
 ## jpackage Configuration
 
-`jpackage` wraps `symnote.jar` with a bundled JRE 21, producing a self-contained native installer. End users do not need Java installed.
+`jpackage` bundles a full JRE 21 into each package — end users do not need Java installed.
+
+### Java modules bundled
+
+| Module | Reason |
+|---|---|
+| `java.base` | Core Java classes |
+| `java.desktop` | `javax.sound.midi.*` — MIDI synthesizer |
+| `java.logging` | `java.util.logging` — used internally by ANTLR |
+| `java.xml` | XML parsing — used internally by ANTLR |
+
+Full flag: `--add-modules java.base,java.desktop,java.logging,java.xml`
 
 ### Resource directory: `packaging/linux/`
 
-`jpackage` reads custom lifecycle scripts from `--resource-dir packaging/linux/`.
+Both `.deb` and `.rpm` packages are built with `--resource-dir packaging/linux/`. jpackage picks up different files per format based on exact filenames (no extensions):
 
-| File | When it runs | What it does |
-|---|---|---|
-| `postinst` | After `.deb` install | Creates `ln -sf /opt/symnote/bin/symnote /usr/local/bin/symnote` |
-| `prerm` | Before `.deb` removal | Removes `/usr/local/bin/symnote` |
+| File | Format | Hook | What it does |
+|---|---|---|---|
+| `postinst` | deb | post-install | `ln -sf /opt/symnote/bin/symnote /usr/local/bin/symnote` |
+| `prerm` | deb | pre-remove | `rm -f /usr/local/bin/symnote` |
+| `post-install` | rpm | `%post` | `ln -sf /opt/symnote/bin/symnote /usr/local/bin/symnote` |
+| `pre-uninstall` | rpm | `%preun` | `rm -f /usr/local/bin/symnote` (on full removal only) |
 
-For RPM, the same symlink logic is embedded as `%post` / `%preun` scriptlets via the same `--resource-dir`.
-
-After installation, the user can run `symnote` from any directory without specifying a full path.
+After installation on either format, `symnote` is available system-wide without specifying a full path.

@@ -8,7 +8,7 @@ on:
 jobs:
 
   # ─────────────────────────────────────────────────────────────────────────
-  # Build the fat jar from source
+  # Job 1: Build the fat jar from source
   # ─────────────────────────────────────────────────────────────────────────
   build-jar:
     name: Build fat jar
@@ -41,11 +41,11 @@ jobs:
           retention-days: 1
 
   # ─────────────────────────────────────────────────────────────────────────
-  # Package Linux installers (deb + rpm)
+  # Job 2: Package Linux installers (deb + rpm)
   # ─────────────────────────────────────────────────────────────────────────
   package-linux:
     name: Package Linux installers
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-jar
 
     steps:
@@ -67,13 +67,12 @@ jobs:
           name: symnote-jar
           path: dist/
 
-      - name: Extract release version from tag
+      - name: Resolve package version
         id: version
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
-          # Replace hyphens with tildes
-          SAFE_VERSION=${VERSION//-/\~}
-          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          RAW="${GITHUB_REF_NAME#v}"
+          # RPM forbids hyphens in version strings — replace with tilde (pre-release marker)
+          SAFE_VERSION="${RAW//-/\~}"
           echo "SAFE_VERSION=$SAFE_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Package .deb
@@ -112,16 +111,22 @@ jobs:
           retention-days: 1
 
   # ─────────────────────────────────────────────────────────────────────────
-  # Create GitHub Release and attach all artifacts
+  # Job 3: Create GitHub Release
   # ─────────────────────────────────────────────────────────────────────────
   publish-release:
     name: Publish GitHub Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: package-linux
     permissions:
       contents: write
 
     steps:
+      - name: Resolve version for release notes
+        id: version
+        run: |
+          RAW="${GITHUB_REF_NAME#v}"
+          echo "SAFE_VERSION=${RAW//-/\~}" >> "$GITHUB_OUTPUT"
+
       - name: Download jar artifact
         uses: actions/download-artifact@v4
         with:
