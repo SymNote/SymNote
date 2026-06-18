@@ -69,7 +69,12 @@ jobs:
 
       - name: Extract release version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          # Replace hyphens with tildes
+          SAFE_VERSION=${VERSION//-/\~}
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "SAFE_VERSION=$SAFE_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Package .deb
         run: |
@@ -80,7 +85,7 @@ jobs:
             --main-jar symnote.jar \
             --main-class Main \
             --add-modules java.base,java.desktop,java.logging,java.xml \
-            --app-version ${{ steps.version.outputs.VERSION }} \
+            --app-version ${{ steps.version.outputs.SAFE_VERSION }} \
             --linux-shortcut \
             --resource-dir packaging/linux \
             --dest packages/
@@ -94,7 +99,7 @@ jobs:
             --main-jar symnote.jar \
             --main-class Main \
             --add-modules java.base,java.desktop,java.logging,java.xml \
-            --app-version ${{ steps.version.outputs.VERSION }} \
+            --app-version ${{ steps.version.outputs.SAFE_VERSION }} \
             --linux-shortcut \
             --resource-dir packaging/linux \
             --dest packages/
@@ -137,16 +142,16 @@ jobs:
           body: |
             ## Installation
 
-            ### Linux Native Installer
+            ### Linux — Native Installer (recommended, no Java required)
 
             **Debian / Ubuntu:**
             ```bash
-            sudo apt install ./symnote_${{ github.ref_name }}_amd64.deb
+            sudo apt install ./symnote_${{ steps.version.outputs.SAFE_VERSION }}_amd64.deb
             ```
 
             **Fedora / RHEL:**
             ```bash
-            sudo rpm -i symnote-${{ github.ref_name }}.x86_64.rpm
+            sudo rpm -i symnote-${{ steps.version.outputs.SAFE_VERSION }}-1.x86_64.rpm
             ```
 
             After installation, run:
@@ -154,7 +159,7 @@ jobs:
             symnote my_song.symnote
             ```
 
-            ### All platforms JAR (requires JRE 17+)
+            ### All platforms — JAR (requires JRE 17+)
             ```bash
             java -jar symnote.jar my_song.symnote
             ```
