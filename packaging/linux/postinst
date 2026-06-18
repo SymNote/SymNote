@@ -1,0 +1,25 @@
+#!/bin/sh
+# postinst - run by dpkg after installing the SymNote .deb package
+# Creates a symlink so that `symnote` is available system-wide in PATH.
+
+set -e
+
+INSTALL_BIN="/opt/symnote/bin/symnote"
+LINK_TARGET="/usr/local/bin/symnote"
+
+case "$1" in
+    configure)
+        if [ -f "$INSTALL_BIN" ]; then
+            ln -sf "$INSTALL_BIN" "$LINK_TARGET"
+            echo "SymNote installed. Run: symnote <path/to/script.symnote>"
+        fi
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+    *)
+        echo "postinst called with unknown argument '$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

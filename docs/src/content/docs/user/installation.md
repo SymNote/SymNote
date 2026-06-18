@@ -1,51 +1,80 @@
 ---
 title: Installation & Usage
-description: How to install, build, and run SymNote programs.
+description: How to install and run SymNote programs.
 sidebar:
   order: 2
 ---
 
-SymNote is a custom interpreted language built on Java and ANTLR v4.
+SymNote is a music scripting language that compiles and plays audio using a built-in MIDI synthesizer.
 
-## Requirements
+## Option A — Native Installer (Recommended)
 
-- **Java Development Kit (JDK) 11** or higher
-- A Bash-compatible terminal (Linux, macOS, or WSL on Windows)
-- All ANTLR runtime dependencies are already included in the `lib/` directory
+The easiest way to install SymNote.
 
-## Step 1 – Generate the Lexer and Parser
+### Download
 
-Before anything else, run the `generate.sh` script. It compiles the ANTLR grammar (`grammar/SymNote.g4`) into Java source files, which are placed in `src/gen/`.
+Go to the [GitHub Releases](https://github.com/trojancoding/SymNote/releases) page and download the package for your Linux distribution:
 
-```bash
-./generate.sh
-```
+| Distribution | File |
+|---|---|
+| Debian / Ubuntu | `symnote_<version>_amd64.deb` |
+| Fedora / RHEL / openSUSE | `symnote-<version>.x86_64.rpm` |
 
-You only need to do this once, or whenever the grammar file changes.
-
-## Step 2 – Run a Script
-
-Use the `run.sh` script to compile all Java sources and execute a `.symnote` file:
+### Install
 
 ```bash
-./run.sh examples/HelloWorld.symnote
+# Debian / Ubuntu
+sudo apt install ./symnote_<version>_amd64.deb
+
+# Fedora / RHEL
+sudo rpm -i symnote-<version>.x86_64.rpm
 ```
 
-This compiles the Java sources (including generated ANTLR files) on the fly and passes the given `.symnote` file to the interpreter. The audio output is rendered via Java's built-in MIDI synthesizer.
+### Run
 
-## Running Tests
-
-The project includes a JUnit test suite. To execute all tests:
+After installation, `symnote` is available system-wide:
 
 ```bash
-./test.sh
+symnote my_song.symnote
 ```
 
-Results are printed to the console and saved in `logs/test_results.log`.
+### Uninstall
+
+```bash
+# Debian / Ubuntu
+sudo apt remove symnote
+
+# Fedora / RHEL
+sudo rpm -e symnote
+```
+
+The `symnote` command is removed from PATH automatically on uninstall.
+
+---
+
+## Option B — Running from JAR
+
+If you prefer not to use a system package, you can run SymNote directly from the JAR file.
+
+### Requirements
+
+- **Java Runtime Environment (JRE) 17** or higher  
+
+### Download
+
+Go to the [GitHub Releases](https://github.com/trojancoding/SymNote/releases) page and download `symnote.jar`.
+
+### Run
+
+```bash
+java -jar symnote.jar my_song.symnote
+```
+
+---
 
 ## Writing Your First Program
 
-Create a file with the `.symnote` extension. A minimal program that plays a C major arpeggio looks like this:
+Create a file with the `.symnote` extension. A minimal program that plays a C major arpeggio:
 
 ```ts
 set_bpm(120);
@@ -64,8 +93,12 @@ track Arpeggio(int bars) {
 Arpeggio(2);
 ```
 
-Run it with:
+Save it as `my_song.symnote` and run:
 
 ```bash
-./run.sh my_song.symnote
+# If installed via package:
+symnote my_song.symnote
+
+# If running from JAR:
+java -jar symnote.jar my_song.symnote
 ```
