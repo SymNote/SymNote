@@ -1,0 +1,23 @@
+#!/bin/sh
+# prerm - run by dpkg before removing the SymNote .deb package
+# Removes the symlink from PATH before the package files are deleted.
+
+set -e
+
+LINK_TARGET="/usr/local/bin/symnote"
+
+case "$1" in
+    remove|upgrade|deconfigure)
+        if [ -L "$LINK_TARGET" ]; then
+            rm -f "$LINK_TARGET"
+        fi
+        ;;
+    failed-upgrade)
+        ;;
+    *)
+        echo "prerm called with unknown argument '$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
