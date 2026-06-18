@@ -155,13 +155,12 @@ Full flag: `--add-modules java.base,java.desktop,java.logging,java.xml`
 
 ### Resource directories: `packaging/linux/deb/` and `packaging/linux/rpm/`
 
-The `.deb` and `.rpm` packages are built with `--resource-dir packaging/linux/deb` and `--resource-dir packaging/linux/rpm` respectively. `jpackage` picks up different files per format based on exact filenames (no extensions):
+The `.deb` and `.rpm` packages are built with `--resource-dir packaging/linux/deb` and `--resource-dir packaging/linux/rpm` respectively. `jpackage` picks up specific override files per format:
 
 | File | Format | Hook | What it does |
 |---|---|---|---|
 | `packaging/linux/deb/postinst` | deb | post-install | `ln -sf /opt/symnote/bin/symnote /usr/local/bin/symnote` |
 | `packaging/linux/deb/prerm` | deb | pre-remove | `rm -f /usr/local/bin/symnote` |
-| `packaging/linux/rpm/post-install` | rpm | `%post` | `ln -sf /opt/symnote/bin/symnote /usr/local/bin/symnote` |
-| `packaging/linux/rpm/pre-uninstall` | rpm | `%preun` | `rm -f /usr/local/bin/symnote` (on full removal only) |
+| `packaging/linux/rpm/symnote.spec` | rpm | Spec template | Replaces the default `jpackage` generated RPM spec file. Contains the `%post` and `%preun` lifecycle hooks for managing the `/usr/local/bin/symnote` symlink. |
 
 After installation on either format, `symnote` is available system-wide without specifying a full path.
