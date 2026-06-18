@@ -76,6 +76,7 @@ jobs:
       - name: Package .deb
         run: |
           jpackage \
+            --verbose \
             --type deb \
             --input dist/ \
             --name symnote \
@@ -126,6 +127,7 @@ jobs:
       - name: Package .rpm
         run: |
           jpackage \
+            --verbose \
             --type rpm \
             --input dist/ \
             --name symnote \

@@ -1,6 +1,0 @@
-#!/bin/sh
-# pre-uninstall — injected by jpackage into the RPM %preun section.
-
-if [ "$1" -eq 0 ]; then
-    rm -f /usr/local/bin/symnote
-fi
