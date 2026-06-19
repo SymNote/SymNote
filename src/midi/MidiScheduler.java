@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MidiScheduler {
-    private static final double STARTUP_PREROLL_BEATS = 1.0;
+    private static final double STARTUP_PREROLL_BEATS = 0.0;
 
     private final SymNoteTimeline timeline;
     private final float bpm;
@@ -23,7 +23,7 @@ public class MidiScheduler {
         List<MusicalEvent> events = timeline.getSortedEvents();
         List<MidiAction> actions = new ArrayList<>();
 
-        long preRollTicks = Math.max(1L, Math.round(timeline.getTicksPerBeat() * STARTUP_PREROLL_BEATS));
+        long preRollTicks = Math.max(0L, Math.round(timeline.getTicksPerBeat() * STARTUP_PREROLL_BEATS));
 
         System.out.println("[MIDI] BPM=" + bpm + ", events=" + events.size() + ", preRollTicks=" + preRollTicks);
 

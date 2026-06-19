@@ -206,7 +206,7 @@ jobs:
                         symnote my_song.symnote
             ```
 
-                        ### All platforms — JAR (requires JRE 17+)
+                        ### All platforms — JAR (requires JRE 21+)
             ```bash
                         java -jar symnote.jar my_song.symnote
             ```

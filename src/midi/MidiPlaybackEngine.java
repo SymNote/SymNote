@@ -1,17 +1,21 @@
 package midi;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.sound.midi.Instrument;
 import javax.sound.midi.MidiSystem;
+import javax.sound.midi.Patch;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Soundbank;
 import javax.sound.midi.Synthesizer;
 
 public class MidiPlaybackEngine {
-    private static final long SYNTH_WARMUP_MS = 600L;
-    private static final long STARTUP_BUFFER_MS = 500L;
+
+    private static final long TAIL_SILENCE_MS = 2500L;
 
     private Synthesizer synthesizer;
     private Receiver receiver;
@@ -30,53 +34,122 @@ public class MidiPlaybackEngine {
             System.out.println("[MIDI] synth='" + synthName + "' on channel=" + channel + ", program=" + program);
         }
 
-        warmUpSynth(channelBySynth);
-
-        if (STARTUP_BUFFER_MS > 0) {
-            Thread.sleep(STARTUP_BUFFER_MS);
-        }
+        warmUpSynth(channelBySynth, programBySynth);
     }
 
-    private void warmUpSynth(Map<String, Integer> channelBySynth) throws Exception {
-        Set<Integer> channels = new HashSet<>(channelBySynth.values());
-        if (channels.isEmpty()) {
-            channels.add(0);
+    private void warmUpSynth(Map<String, Integer> channelBySynth, Map<String, Integer> programBySynth)
+            throws Exception {
+        Soundbank sb = synthesizer.getDefaultSoundbank();
+        if (sb != null) {
+            Set<Integer> programs = new HashSet<>(programBySynth.values());
+            if (programs.isEmpty()) programs.add(0);
+            for (int program : programs) {
+                Instrument instr = sb.getInstrument(new Patch(0, program));
+                if (instr != null) {
+                    synthesizer.loadInstrument(instr);
+                    System.out.println("[MIDI] Loaded instrument program=" + program + " (" + instr.getName() + ")");
+                } else {
+                    System.out.println("[MIDI] Instrument not found for program=" + program);
+                }
+            }
+        } else {
+            System.out.println("[MIDI] No default soundbank — instrument preload skipped.");
         }
 
-        for (int channel : channels) {
-            receiver.send(shortMessage(ShortMessage.NOTE_ON, channel, 60, 1), -1);
-            Thread.sleep(15L);
-            receiver.send(shortMessage(ShortMessage.NOTE_OFF, channel, 60, 0), -1);
+        Set<Integer> channels = new HashSet<>(channelBySynth.values());
+        if (channels.isEmpty()) channels.add(0);
+        for (int ch : channels) {
+            receiver.send(shortMessage(ShortMessage.NOTE_ON, ch, 60, 1), -1);
         }
-        Thread.sleep(SYNTH_WARMUP_MS);
+
+        System.out.print("[MIDI] Waiting for audio pipeline to start");
+        long posA = synthesizer.getMicrosecondPosition();
+        boolean audioStarted = false;
+        for (int i = 0; i < 150; i++) { // 3 s max
+            Thread.sleep(20);
+            long posB = synthesizer.getMicrosecondPosition();
+            if (posB > posA) {
+                audioStarted = true;
+                System.out.println(" ready (" + (i + 1) * 20 + "ms)");
+                break;
+            }
+            if (i % 5 == 4) System.out.print(".");
+        }
+        if (!audioStarted) {
+            System.out.println(" timeout — proceeding anyway");
+        }
+
+        long latencyMs = Math.max(100L, synthesizer.getLatency() / 1000L);
+        long settleMs = Math.max(1000L, latencyMs * 3);
+        System.out.println("[MIDI] Buffer latency=" + latencyMs + "ms, letting pipeline settle for " + settleMs + "ms...");
+        Thread.sleep(settleMs);
+
+        for (int ch : channels) {
+            receiver.send(shortMessage(ShortMessage.NOTE_OFF, ch, 60, 0), -1);
+        }
+        Thread.sleep(60L);
     }
 
     public void play(List<MidiAction> actions, float bpm, int ticksPerBeat) throws Exception {
-        long previousTick = 0L;
-        long currentClockNs = System.nanoTime();
-
-        for (MidiAction action : actions) {
-            long deltaTicks = Math.max(0L, action.tick - previousTick);
-            long waitNs = ticksToNanos(deltaTicks, ticksPerBeat, bpm);
-            currentClockNs = sleepUntil(currentClockNs + waitNs);
-
-            if (action.actionType == MidiAction.Type.NOTE_ON) {
-                receiver.send(shortMessage(ShortMessage.NOTE_ON, action.channel, action.pitch, action.velocity), -1);
-                System.out.println("[NOW PLAYING] tick=" + action.tick
-                        + " beat=" + formatBeat(action.tick, ticksPerBeat)
-                        + " synth='" + action.synthName + "'"
-                        + " note=" + midiToNoteName(action.pitch)
-                        + " velocity=" + action.velocity
-                        + " durationTicks=" + action.durationTicks);
-            } else {
-                receiver.send(shortMessage(ShortMessage.NOTE_OFF, action.channel, action.pitch, 0), -1);
-            }
-
-            previousTick = action.tick;
-            currentClockNs = System.nanoTime();
+        if (actions.isEmpty()) {
+            System.out.println("[MIDI] No actions to play.");
+            return;
         }
 
-        System.out.println("[MIDI] playback finished");
+        long startUs = synthesizer.getMicrosecondPosition();
+        long lastOffsetUs = 0L;
+
+        List<long[]>     displayOffsetMs  = new ArrayList<>();
+        List<MidiAction> displayActions   = new ArrayList<>();
+
+        for (MidiAction action : actions) {
+            long offsetUs   = ticksToMicros(action.tick, ticksPerBeat, bpm);
+            long timestampUs = startUs + offsetUs;
+
+            if (action.actionType == MidiAction.Type.NOTE_ON) {
+                receiver.send(
+                        shortMessage(ShortMessage.NOTE_ON, action.channel, action.pitch, action.velocity),
+                        timestampUs);
+                displayOffsetMs.add(new long[]{ offsetUs / 1000L });
+                displayActions.add(action);
+            } else {
+                receiver.send(
+                        shortMessage(ShortMessage.NOTE_OFF, action.channel, action.pitch, 0),
+                        timestampUs);
+            }
+
+            if (offsetUs > lastOffsetUs) lastOffsetUs = offsetUs;
+        }
+
+        long totalMs = lastOffsetUs / 1000L;
+        System.out.println("[MIDI] Playing " + displayActions.size() + " notes over ~" + totalMs + "ms");
+
+        long displayStartNs = System.nanoTime();
+        Thread displayThread = new Thread(() -> {
+            for (int i = 0; i < displayActions.size(); i++) {
+                long targetMs = displayOffsetMs.get(i)[0];
+                long elapsedMs = (System.nanoTime() - displayStartNs) / 1_000_000L;
+                long sleepMs = targetMs - elapsedMs;
+                if (sleepMs > 0) {
+                    try { Thread.sleep(sleepMs); }
+                    catch (InterruptedException e) { return; }
+                }
+                MidiAction a = displayActions.get(i);
+                System.out.println("[NOW PLAYING] tick=" + a.tick
+                        + " beat=" + formatBeat(a.tick, ticksPerBeat)
+                        + " synth='" + a.synthName + "'"
+                        + " note=" + midiToNoteName(a.pitch)
+                        + " velocity=" + a.velocity
+                        + " durationTicks=" + a.durationTicks);
+            }
+        });
+        displayThread.setDaemon(true);
+        displayThread.setName("symnote-display");
+        displayThread.start();
+
+        Thread.sleep(totalMs + TAIL_SILENCE_MS);
+        displayThread.interrupt();
+        System.out.println("[MIDI] Playback finished.");
     }
 
     public void shutdown() {
@@ -96,25 +169,11 @@ public class MidiPlaybackEngine {
         return message;
     }
 
-    private long sleepUntil(long targetNs) throws Exception {
-        while (true) {
-            long remainingNs = targetNs - System.nanoTime();
-            if (remainingNs <= 0) {
-                return System.nanoTime();
-            }
-            long sleepMs = remainingNs / 1_000_000L;
-            int sleepNanos = (int) (remainingNs % 1_000_000L);
-            Thread.sleep(sleepMs, sleepNanos);
-        }
-    }
-
-    private long ticksToNanos(long ticks, int ticksPerBeat, float bpm) {
-        if (ticks <= 0) {
-            return 0L;
-        }
-        double nanosPerBeat = 60_000_000_000.0 / Math.max(1, bpm);
+    private long ticksToMicros(long ticks, int ticksPerBeat, float bpm) {
+        if (ticks <= 0) return 0L;
+        double microsPerBeat = 60_000_000.0 / Math.max(1, bpm);
         double beats = (double) ticks / Math.max(1, ticksPerBeat);
-        return Math.max(0L, Math.round(beats * nanosPerBeat));
+        return Math.max(0L, Math.round(beats * microsPerBeat));
     }
 
     private String formatBeat(long tick, int ticksPerBeat) {
@@ -126,7 +185,6 @@ public class MidiPlaybackEngine {
         String[] names = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
         int clamped = Math.max(0, Math.min(127, midiPitch));
         int octave = (clamped / 12) - 1;
-        String note = names[clamped % 12];
-        return note + octave + "(" + clamped + ")";
+        return names[clamped % 12] + octave + "(" + clamped + ")";
     }
 }

@@ -58,7 +58,7 @@ If you prefer not to use a system package, you can run SymNote directly from the
 
 ### Requirements
 
-- **Java Runtime Environment (JRE) 17** or higher  
+- **Java Runtime Environment (JRE) 21** or higher  
 
 ### Download
 

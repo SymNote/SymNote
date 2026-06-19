@@ -24,7 +24,7 @@ fi
 
 echo "=== Compiling Java sources ==="
 mkdir -p "$BUILD_DIR"
-javac -cp "$ANTLR_JAR:src:src/gen" \
+javac --release 21 -cp "$ANTLR_JAR:src:src/gen" \
     src/gen/*.java \
     src/audio/*.java \
     src/environment/*.java \
