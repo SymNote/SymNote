@@ -369,7 +369,7 @@ grid(1/16) {
 }
 ```
 
-**Resolution** (`1/1`, `1/2`, `1/4`, `1/8`, `1/16`, `1/32`) sets the duration of each symbol.
+#### Grid Symbols
 
 | Symbol         | Meaning                                             |
 |----------------|-----------------------------------------------------|
@@ -380,6 +380,42 @@ grid(1/16) {
 | `.vol(x)`      | Volume override for a note, variable, or chord      |
 
 **What is NOT allowed inside a grid:** `if`, `else`, `while`, `loop`, variable declarations or assignments, arithmetic expressions.
+
+---
+
+#### Resolution — How Long Each Symbol Lasts
+
+The argument to `grid(...)` is the **resolution**: the duration of a **single symbol** (one "cell") expressed as a fraction of a whole note. There is **no limit on how many symbols a grid can contain** — you can put as many as you like at any resolution.
+
+| Resolution | Name              | Duration per symbol | Symbols needed to fill 1 bar (4/4) |
+|------------|-------------------|---------------------|-------------------------------------|
+| `1/1`      | Whole note         | 4 beats             | 1                                   |
+| `1/2`      | Half note          | 2 beats             | 2                                   |
+| `1/4`      | Quarter note       | 1 beat              | 4                                   |
+| `1/8`      | Eighth note        | ½ beat              | 8                                   |
+| `1/16`     | Sixteenth note     | ¼ beat              | 16                                  |
+| `1/32`     | Thirty-second note | ⅛ beat              | 32                                  |
+
+
+A coarser resolution (like `1/4`) means each symbol lasts longer; a finer resolution (like `1/32`) gives you more precision at the cost of more symbols per bar.
+
+---
+
+#### BPM & Actual Playback Duration
+
+The global tempo set by `set_bpm()` determines exactly how long each grid symbol plays.
+
+**Formula:**
+```
+duration of one symbol (ms) = (60_000 / BPM) * (4 * resolution)
+```
+
+For example, at **120 BPM** with resolution **`1/8`**:
+```
+(60_000 / 120) * (4 * 1/8) = 500 * 0.5 = 250 ms per symbol
+```
+
+---
 
 ### parallel
 
