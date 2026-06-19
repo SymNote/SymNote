@@ -13,7 +13,7 @@ The easiest way to install SymNote.
 
 ### Download
 
-Go to the [GitHub Releases](https://github.com/trojancoding/SymNote/releases) page and download the package for your Linux distribution:
+Go to the [GitHub Releases](https://github.com/SymNote/SymNote/releases) page and download the package for your Linux distribution:
 
 | Distribution | File |
 |---|---|
@@ -62,7 +62,7 @@ If you prefer not to use a system package, you can run SymNote directly from the
 
 ### Download
 
-Go to the [GitHub Releases](https://github.com/trojancoding/SymNote/releases) page and download `symnote.jar`.
+Go to the [GitHub Releases](https://github.com/SymNote/SymNote/releases) page and download `symnote.jar`.
 
 ### Run
 

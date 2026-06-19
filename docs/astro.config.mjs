@@ -5,14 +5,14 @@ import starlightThemeNext from 'starlight-theme-next'
 
 // https://astro.build/config
 export default defineConfig({
-    site: 'https://trojancoding.github.io',
+    site: 'https://symnote.github.io',
     base: '/SymNote',
     integrations: [
         starlight({
             plugins: [starlightThemeNext()],
             title: 'SymNote Docs',
             customCss: ['./src/styles/custom.css'],
-            social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/trojancoding/SymNote' }],
+            social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/SymNote/SymNote' }],
             sidebar: [
                 { label: 'Introduction', link: '/' },
                 {
