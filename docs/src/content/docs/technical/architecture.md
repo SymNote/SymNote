@@ -32,9 +32,54 @@ A standard Tree-Walk interpreter in Java often suffers from a critical architect
 To resolve this and ensure system stability, SymNote implements its own decoupled memory management architecture:
 
 ### Independent Call Stack (`CallStack` & `ActivationRecord`)
-Routine and track calls do not use Java's local variables to track state. Instead, every function call generates an `ActivationRecord` placed on a custom `CallStack` that lives safely on the JVM Heap. 
-- We enforce a strict, safe recursion limit (`MAX_DEPTH = 200`).
-- If a script encounters infinite recursion, the interpreter securely catches it and throws a domain-specific `SymNote StackOverflow` error with the exact line number, gracefully preventing a JVM crash.
+
+SymNote uses its own custom call stack stored in memory (the heap) rather than relying on Java's built-in call stack. This design provides safe, precise control over execution flow and prevents severe crashes.
+
+The mechanism relies on two main components:
+1. **`ActivationRecord`**: Represents a single function call (an execution frame). It holds the routine's name and its local variables (`Environment`).
+2. **`CallStack`**: Manages these records using a double-ended queue (`ArrayDeque`).
+
+#### 1. Recursion Limit Protection
+The custom `CallStack` enforces a strict maximum depth (`MAX_DEPTH = 200`). If a user writes an infinite loop using recursion, Java will not crash with a native `java.lang.StackOverflowError`. Instead, SymNote safely catches it and throws a clear runtime error.
+
+**Example (SymNote Code):**
+```ts
+routine infiniteLoop() returns void {
+    infiniteLoop();
+}
+infiniteLoop();
+```
+**Resulting Error:**
+SymNote StackOverflow: Maximum recursion depth of 200 exceeded at line 2
+
+#### 2. Detailed Error Tracing
+Because every ActivationRecord tracks its context, the interpreter can generate a clear stack trace if a runtime error occurs deep inside nested routines. This makes debugging much easier for the user.
+
+#### 3. Execution Lifecycle (Under the Hood)
+In the Java backend, the interpreter safely manages the lifecycle of each frame using try-finally blocks. This guarantees the stack remains perfectly consistent, even if a routine uses an early return or throws an exception.
+
+Example (Java Implementation):
+```java
+// 1. Create a new environment for the routine
+Environment routineEnv = new Environment(interpreter.globalEnv);
+
+// 2. Create and push the activation record onto the custom stack
+ActivationRecord frame = new ActivationRecord(functionName, routineEnv);
+interpreter.callStack.push(frame, ctx.getStart().getLine());
+
+// Switch to the routine's context
+Environment callerEnv = interpreter.env;
+interpreter.env = routineEnv;
+
+try {
+    // 3. Execute the routine block
+    interpreter.visit(routineCtx.blockRoutine());
+} finally {
+    // 4. Safely pop the frame and restore the caller's environment
+    interpreter.callStack.pop();
+    interpreter.env = callerEnv;
+}
+```
 
 ### Lexical Scoping and Environment Chaining
 Block-level scopes (used in `if`, `while`, `loop`, and nested `{}`) are managed via an `Environment` chain. Each new scope holds a pointer (`parent`) to its enclosing scope.

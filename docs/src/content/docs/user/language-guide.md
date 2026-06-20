@@ -446,7 +446,7 @@ SymNote includes a rich standard library for mathematical operations and advance
 ### Math Module
 | Function | Description |
 | :--- | :--- |
-| `sin(float)` | Calculates the sine of an angle (useful for LFOs) |
+| `sin(float)` | Calculates the sine of an angle |
 | `cos(float)` | Calculates the cosine of an angle |
 | `pow(float, float)` | Calculates the power of a number |
 | `sqrt(float)` | Calculates the square root of a number |
