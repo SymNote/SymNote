@@ -60,6 +60,13 @@ When the interpreter sees a `break` or `continue` keyword, it throws this except
 
 This method is very safe. It stops the interpreter from mixing normal data values (like strings) with control signals.
 
+### Shared Parameter Scope for Routines and Tracks
+
+To prevent parameter shadowing bugs, the top-level block (`blockRoutine` or `blockTrack`) shares the exact same `Environment` frame with its parameters.
+
+- If a user tries to declare a variable with the same name as a parameter inside the main block, the `SymNoteDeclarationListener` throws a `VariableAlreadyDefinedException`.
+- The `parent::` keyword inside the top-level block resolves directly to the parent environment of the routine (usually the Global Scope), skipping any artificial block layers.
+
 ## Runtime Type Checking
 
 Because SymNote is statically typed, variables lock in their type upon declaration.
