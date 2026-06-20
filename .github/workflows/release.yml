@@ -193,20 +193,20 @@ jobs:
 
             **Debian / Ubuntu:**
             ```bash
-                        sudo apt install ./symnote_${{ steps.version.outputs.SAFE_VERSION }}_amd64.deb
+            sudo apt install ./symnote_${{ steps.version.outputs.SAFE_VERSION }}_amd64.deb
             ```
 
-                        **Fedora / RHEL:**
+            **Fedora / RHEL:**
             ```bash
-                        sudo rpm -i symnote-${{ steps.version.outputs.SAFE_VERSION }}-1.x86_64.rpm
+            sudo rpm -i symnote-${{ steps.version.outputs.SAFE_VERSION }}-1.x86_64.rpm
             ```
 
-                        After installation, run:
+            After installation, run:
             ```bash
-                        symnote my_song.symnote
+            symnote my_song.symnote
             ```
 
-                        ### All platforms — JAR (requires JRE 21+)
+            ### All platforms — JAR (requires JRE 21+)
             ```bash
-                        java -jar symnote.jar my_song.symnote
+            java -jar symnote.jar my_song.symnote
             ```
